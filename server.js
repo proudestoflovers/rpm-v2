@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 3000;
 const USERNAME = process.env.AUTH_USER || 'admin';
 const PASSWORD = process.env.AUTH_PASS || 'password';
 
+app.get('/health', (req, res) => res.send('ok'));
+
 app.use((req, res, next) => {
   const auth = req.headers['authorization'];
   if (auth) {
