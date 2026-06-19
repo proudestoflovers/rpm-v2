@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html data-eds-theme="light" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Student Profile — Everway</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="eds.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; overflow: hidden; }
+  body { font-family: 'Figtree', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; background: #f4f4f6; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d0d0d2; border-radius: 99px; }
+</style>
+</head>
+<body style="font-size: 10px">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+
+
+
+
+
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "density": "compact",
+  "colorMood": "cool",
+  "borderStyle": "sharp"
+} /*EDITMODE-END*/;
+
+
+
+
+
+
+
+
+
+
+
+
+/* ── URL params ─────────────────────────────────────────────────────── */
+const _p = new URLSearchParams(window.location.search);
+const PROFILE_STUDENT = {
+  name: _p.get('name') || 'Mia Brown',
+  emoji: _p.get('emoji') || '👩🏾',
+  grade: _p.get('grade') || 'Grade 1'
+};
+
+/* ── Data (matches wireframe exactly) ───────────────────────────────── */
+const ROWS = [
+{ id: 1, subj: 'Math', unit: 'K. Unit 2.', name: 'Counting to 100', lv: 1, date: 'Due Today', st: 'ip', sc: null, band: null },
+{ id: 2, subj: 'ELA', unit: 'K. Unit 1.', name: 'Sight Words: Set A', lv: 1, date: 'Due Today', st: 'ns', sc: null, band: null },
+{ id: 3, subj: 'ELA', unit: 'K. Unit 2.', name: 'Short Vowel Sounds', lv: 2, date: 'Due Feb 18', st: 'ip', sc: null, band: null },
+{ id: 4, subj: 'Math', unit: 'K. Unit 2.', name: 'Adding Within 10', lv: 1, date: 'Due Feb 19', st: 'ns', sc: null, band: null },
+{ id: 5, subj: 'Math', unit: 'K. Unit 2.', name: 'Skip Counting by 2s', lv: 2, date: 'Due Jan 10', st: 'ip', sc: null, band: null },
+{ id: 6, subj: 'Math', unit: 'K. Unit 2.', name: 'Comparing Numbers 1–20', lv: 1, date: 'Due Jun 30', st: 'ip', sc: null, band: null },
+{ id: 7, subj: 'Math', unit: 'K. Unit 1.', name: 'Counting & Numbers to 10', lv: 1, date: 'Jan 5, 2026', st: 'done', sc: 50, band: 'e' },
+{ id: 8, subj: 'Math', unit: 'K. Unit 1.', name: 'Addition to 5', lv: 1, date: 'Nov 1, 2025', st: 'done', sc: 100, band: 'prof' },
+{ id: 9, subj: 'ELA', unit: 'K. Unit 1.', name: 'Phonics & Word Study', lv: 2, date: 'Oct 15, 2025', st: 'done', sc: 72, band: 'i' },
+{ id: 10, subj: 'Math', unit: 'K. Unit 1.', name: 'Number Sense', lv: 1, date: 'Sep 20, 2025', st: 'done', sc: 28, band: 'p' },
+{ id: 11, subj: 'Math', unit: 'K. Unit 1.', name: 'Shapes & Patterns', lv: 1, date: 'Aug 10, 2025', st: 'done', sc: 88, band: 'prof' },
+{ id: 12, subj: 'ELA', unit: 'K. Unit 1.', name: 'Letter Formation Practice', lv: 1, date: 'Jul 22, 2025', st: 'done', sc: 61, band: 'i' },
+{ id: 13, subj: 'Math', unit: 'K. Unit 1.', name: 'Number Bonds to 10', lv: 2, date: 'Jul 5, 2025', st: 'done', sc: 38, band: 'e' },
+// Dummy completed assignments for K. Unit 2
+{ id: 14, subj: 'Math', unit: 'K. Unit 2.', name: 'Doubles & Doubles Plus One', lv: 1, date: 'Feb 10, 2026', st: 'done', sc: 92, band: 'prof' },
+{ id: 15, subj: 'Math', unit: 'K. Unit 2.', name: 'Fact Families to 10', lv: 2, date: 'Jan 28, 2026', st: 'done', sc: 65, band: 'i' },
+{ id: 16, subj: 'Math', unit: 'K. Unit 2.', name: 'Subtraction Within 10', lv: 1, date: 'Jan 15, 2026', st: 'done', sc: 76, band: 'i' },
+// Dummy completed assignments for K. Unit 2 ELA
+{ id: 17, subj: 'ELA', unit: 'K. Unit 2.', name: 'Consonant Blends', lv: 2, date: 'Feb 5, 2026', st: 'done', sc: 81, band: 'prof' },
+{ id: 18, subj: 'ELA', unit: 'K. Unit 2.', name: 'Digraphs & Word Patterns', lv: 1, date: 'Jan 22, 2026', st: 'done', sc: 58, band: 'i' }];
+
+
+/* ── Band config ─────────────────────────────────────────────────────── */
+const BAND = {
+  prof: { label: 'Proficient', bg: '#e8fef0', fg: '#016a36', bar: '#018143', border: '#b7f5cc', zone: 'rgba(1,129,67,0.07)' },
+  i: { label: 'Instructional', bg: '#e8f4fd', fg: '#00547f', bar: '#0375a0', border: '#b3d9f0', zone: 'rgba(3,117,160,0.07)' },
+  e: { label: 'Emerging', bg: '#fff7ed', fg: '#9a3412', bar: '#d15e00', border: '#fed7aa', zone: 'rgba(209,94,0,0.07)' },
+  p: { label: 'Pre-emerging', bg: '#fff1f0', fg: '#b20203', bar: '#dc2626', border: '#fecaca', zone: 'rgba(220,38,38,0.08)' }
+};
+
+const BAND_NEXT = {
+  prof: (lv) => lv >= 3 ? 'Move to next skill' : 'Move to next skill or advance level',
+  i: () => 'Continue at current level with routine instruction and practice',
+  e: () => 'Use lesson reteach ideas; consider moving to a more supported level',
+  p: () => 'Teach prerequisite skills before continuing this skill'
+};
+
+const THRESHOLDS = {
+  prof: { Math: '80–100%', ELA: '85–100%' },
+  i: { Math: '55–79%', ELA: '55–84%' },
+  e: { Math: '33–54%', ELA: '33–54%' },
+  p: { Math: '0–32%', ELA: '0–32%' }
+};
+
+const STS_CFG = {
+  done: { color: '#016a36', label: 'Complete' },
+  ip: { color: '#0053a0', label: 'In progress' },
+  ns: { color: '#c05a00', label: 'Not started' }
+};
+
+/* ── ATOMIC COMPONENTS ───────────────────────────────────────────────── */
+
+function StatusIcon({ type }) {
+  const sty = { flexShrink: 0, display: 'block' };
+  if (type === 'done') return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={sty}>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" />
+    </svg>);
+
+  if (type === 'ip') return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={sty}>
+      <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+      <path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+    </svg>);
+
+  return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={sty}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>);
+
+}
+
+/* SubjectUnitLabel — atomic component reused in table rows and sidebar
+   Renders: [SubjBadge] [colored unit text] [optional level]
+   The caller decides what goes after (assignment name inline, or a heading below) */
+function SubjectUnitLabel({ subj, unit, level, showLevel = false }) {
+  const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <SubjBadge subj={subj} size={28} />
+      <span style={{ fontSize: 14, fontWeight: 700, color: cfg.color, whiteSpace: 'nowrap' }}>
+        {unit.replace(/^[A-Z]\./, '1.')}
+      </span>
+      {showLevel &&
+      <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap' }}>
+          Level {level}
+        </span>
+      }
+    </div>);
+
+}
+
+/* ── Icon helper ─────────────────────────────────────────────────────── */
+const ICO = {
+  chevLeft: ['M15 18l-6-6 6-6'],
+  chevDown: ['M6 9l6 6 6-6'],
+  check: ['M20 6 9 17l-5-5'],
+  x: ['M18 6 6 18', 'M6 6l12 12'],
+  arrowR: ['M5 12h14', 'M12 5l7 7-7 7'],
+  arrowUp: ['M12 19V5', 'M5 12l7-7 7 7'],
+  arrowDown: ['M12 5v14', 'M19 12l-7 7-7-7'],
+  pencil: ['M12 20h9', 'M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'],
+  bars: ['M18 20V10', 'M12 20V4', 'M6 20v-6'],
+  book: ['M4 19.5A2.5 2.5 0 0 1 6.5 17H20', 'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'],
+  users: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M13 7a4 4 0 1 0-8 0a4 4 0 1 0 8 0', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'],
+  bulb: ['M9 18h6', 'M10 22h4', 'M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14']
+};
+function Ico({ n, size = 16, stroke = 'currentColor', sw = 2 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={stroke}
+    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
+    style={{ flexShrink: 0, display: 'block' }}>
+      {(ICO[n] || []).map((d, i) => <path key={i} d={d} />)}
+    </svg>);
+
+}
+
+/* ── Nav rail ────────────────────────────────────────────────────────── */
+function NavRail() {
+  return (
+    <nav style={{ width: 64, background: '#1a1a1c', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ height: 60, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <button style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {[0, 1, 2].map((i) => <div key={i} style={{ width: 18, height: 2, background: '#808088', borderRadius: 1 }} />)}
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', padding: '8px 0' }}>
+        {[{ n: 'book', active: false }, { n: 'users', active: true }].map((it, i) =>
+        <div key={i} style={{ width: 44, height: 44, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: 'pointer', background: it.active ? 'rgba(255,255,255,0.1)' : 'transparent' }}>
+            {it.active && <span style={{ position: 'absolute', left: -10, top: '50%', transform: 'translateY(-50%)', width: 3, height: 22, borderRadius: '0 99px 99px 0', background: 'linear-gradient(180deg,#ffd970 0%,#5a58ff 100%)' }} />}
+            <Ico n={it.n} size={20} stroke={it.active ? '#fff' : '#6d6d6f'} sw={it.active ? 2 : 1.8} />
+          </div>
+        )}
+      </div>
+      <div style={{ flex: 1 }} />
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', padding: 2, background: 'linear-gradient(135deg,#ff6b6b 0%,#ffd970 25%,#3c9962 60%,#5a58ff 100%)' }}>
+          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#2e2e32', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>P</div>
+        </div>
+      </div>
+    </nav>);
+
+}
+
+/* ── ScatterTooltip ─────────────────────────────────────────────────── */
+function ScatterTooltip({ row, xPct }) {
+  const b = BAND[row.band];
+  const nearRight = xPct > 65;
+  const nearLeft = xPct < 20;
+  const hPos = nearRight ?
+  { right: 0, left: 'auto', transform: 'none' } :
+  nearLeft ?
+  { left: 0, transform: 'none' } :
+  { left: '50%', transform: 'translateX(-50%)' };
+  const caretLeft = nearRight ? 'auto' : nearLeft ? '14px' : '50%';
+  const caretRight = nearRight ? '14px' : 'auto';
+  return (
+    <>
+      <style>{`@keyframes tooltipIn { from { opacity:0; translate:0 6px; scale:0.96; } to { opacity:1; translate:0 0; scale:1; } }`}</style>
+      <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', width: 220, background: '#fff', borderRadius: 12, boxShadow: '0 4px 24px rgba(29,29,31,.14)', border: '1px solid #e8e8ea', padding: '12px 14px', zIndex: 999, pointerEvents: 'none', animation: 'tooltipIn 130ms cubic-bezier(0.2,0,0,1.15) both', ...hPos }}>
+        <div style={{ marginBottom: 8 }}><SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} /></div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#1d1d1f', marginBottom: 8, lineHeight: 1.3 }}>{row.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <BandPill band={row.band} sm={true} />
+          <span style={{ fontSize: 22, fontWeight: 800, color: b.fg, letterSpacing: '-.02em' }}>{row.sc}%</span>
+        </div>
+        <div style={{ position: 'absolute', bottom: -6, left: caretLeft, right: caretRight, transform: nearRight || nearLeft ? 'none' : 'translateX(-50%)', width: 10, height: 10, background: '#fff', border: '1px solid #e8e8ea', borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />
+      </div>
+    </>);
+
+}
+
+/* ── Scatter strip ───────────────────────────────────────────────────── */
+function ScatterStrip({ rows, onView }) {
+  const BAND_ORDER = ['prof', 'i', 'e', 'p'];
+  const YLABELS = { prof: 'Proficient', i: 'Instructional', e: 'Emerging', p: 'Pre-emerging' };
+  const wrapperRef = React.useRef(null);
+  const [chartH, setChartH] = React.useState(104);
+  const [hoverId, setHoverId] = React.useState(null);
+
+  React.useLayoutEffect(() => {
+    if (!wrapperRef.current) return;
+    const obs = new ResizeObserver((entries) => {
+      const h = entries[0].contentRect.height;
+      if (h > 0) setChartH(h);
+    });
+    obs.observe(wrapperRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const rowH = Math.max(16, Math.floor(chartH / BAND_ORDER.length));
+  const done = rows.filter((r) => r.st === 'done').slice().reverse();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        {/* Y-axis labels */}
+        <div style={{ width: 84, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {BAND_ORDER.map((b) =>
+          <div key={b} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8 }}>
+              <span style={{ fontSize: 12, color: '#9a9a9c', fontWeight: 600, whiteSpace: 'nowrap' }}>{YLABELS[b]}</span>
+            </div>
+          )}
+        </div>
+        {/* Wrapper — observed for height, chart sized to match */}
+        <div ref={wrapperRef} style={{ flex: 1, minHeight: 0, overflow: 'visible' }}>
+          <div style={{ position: 'relative', height: chartH, borderRadius: 7, borderTop: '1px solid #e8e8ea', borderBottom: '1px solid #e8e8ea', overflow: 'visible' }}>
+            {BAND_ORDER.map((b, i) =>
+            <div key={b} style={{ position: 'absolute', left: 0, right: 0, top: i * rowH, height: rowH, borderBottom: i < 3 ? '1px solid #e8e8ea' : 'none' }} />
+            )}
+            {done.map((row, i) => {
+              const xPct = done.length <= 1 ? 50 : i / (done.length - 1) * 84 + 8;
+              const yi = BAND_ORDER.indexOf(row.band);
+              const yCtr = yi * rowH + rowH / 2;
+              return (
+                <div key={row.id}
+                onMouseEnter={() => setHoverId(row.id)}
+                onMouseLeave={() => setHoverId(null)}
+                onClick={() => onView && onView(row)}
+                style={{ position: 'absolute', left: `${xPct}%`, top: yCtr, transform: 'translate(-50%,-50%)', zIndex: hoverId === row.id ? 10 : 2, cursor: 'pointer' }}>
+                  <SubjBadge subj={row.subj} size={28} />
+                  {hoverId === row.id && <ScatterTooltip row={row} xPct={xPct} />}
+                </div>);
+            })}
+          </div>
+        </div>
+      </div>
+      {/* X-axis */}
+      {done.length > 0 &&
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginLeft: 84, marginTop: 3, margin: "6px 0px 0px 84px" }}>
+          <span style={{ fontSize: 12, color: '#9a9a9c' }}>{done[0]?.date}</span>
+          {done.length > 1 && <span style={{ fontSize: 12, color: '#9a9a9c' }}>{done[done.length - 1]?.date}</span>}
+        </div>
+      }
+    </div>);
+
+}
+
+/* ── Atoms ───────────────────────────────────────────────────────────── */
+function FilterPill({ label }) {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', fontSize: 13.5, fontWeight: 500, color: '#49494b', cursor: 'pointer', userSelect: 'none' }}>
+      {label} <Ico n="chevDown" size={12} stroke="#9a9a9c" sw={2.5} />
+    </div>);
+
+}
+
+function StatusPill({ st }) {
+  const s = STS_CFG[st] || STS_CFG.ns;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F9F9FA', color: s.color, borderRadius: 100, padding: '5px 12px', fontSize: 13.5, fontWeight: 400, whiteSpace: 'nowrap' }}>
+      <StatusIcon type={st} />
+      {s.label}
+    </span>);
+
+}
+
+function BandPill({ band, sm = true }) {
+  if (!band) return null;
+  const b = BAND[band];
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, color: b.fg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', fontSize: sm ? 12.5 : 14, fontWeight: 600, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
+      {b.label}
+    </span>);
+
+}
+
+function ScoreBar({ sc, band }) {
+  const fill = band ? BAND[band].bar : '#d1d5db';
+  const track = band && sc ? BAND[band].bg : '#e8e8ea';
+  const color = band ? BAND[band].fg : '#9ca3af';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 150 }}>
+      <div style={{ flex: 1, height: 10, background: track, borderRadius: 2, overflow: 'hidden' }}>
+        {sc !== null && sc > 0 &&
+        <div style={{ width: `${sc}%`, height: '100%', background: fill }} />
+        }
+      </div>
+      <span style={{ fontSize: 13.5, fontWeight: 700, color: sc ? color : '#9ca3af', width: 40, textAlign: 'right' }}>
+        {sc !== null ? `${sc}%` : '0%'}
+      </span>
+    </div>);
+
+}
+
+/* ── Annotated bar for side panel ───────────────────────────────────── */
+function AnnotatedBar({ sc, band, subj }) {
+  const fill = band ? BAND[band].bar : '#d1d5db';
+  const track = band && sc ? BAND[band].bg : '#e8e8ea';
+  return (
+    <div style={{ position: 'relative', height: 15, borderRadius: 4, overflow: 'hidden', background: track }}>
+      {sc !== null && sc > 0 &&
+      <div style={{ width: `${sc}%`, height: '100%', background: fill, borderRadius: 4 }} />
+      }
+    </div>);
+
+}
+
+const CALC_PATH = "M 1.638 17.673 L 1.184 18.564 L 1.638 17.673 Z M 0.327 16.362 L -0.564 16.816 L 0.327 16.362 Z M 17.673 16.362 L 18.564 16.816 L 17.673 16.362 Z M 16.362 17.673 L 16.816 18.564 L 16.362 17.673 Z M 16.362 0.327 L 16.816 -0.564 L 16.362 0.327 Z M 17.673 1.638 L 18.564 1.184 L 17.673 1.638 Z M 1.638 0.327 L 1.184 -0.564 L 1.638 0.327 Z M 0.327 1.638 L -0.564 1.184 L 0.327 1.638 Z M 15.207 4.207 C 15.598 3.817 15.598 3.183 15.207 2.793 C 14.817 2.402 14.183 2.402 13.793 2.793 L 14.5 3.5 L 15.207 4.207 Z M 2.793 13.793 C 2.402 14.183 2.402 14.817 2.793 15.207 C 3.183 15.598 3.817 15.598 4.207 15.207 L 3.5 14.5 L 2.793 13.793 Z M 4.5 7.5 C 4.5 8.052 4.948 8.5 5.5 8.5 C 6.052 8.5 6.5 8.052 6.5 7.5 L 5.5 7.5 L 4.5 7.5 Z M 6.5 3.5 C 6.5 2.948 6.052 2.5 5.5 2.5 C 4.948 2.5 4.5 2.948 4.5 3.5 L 5.5 3.5 L 6.5 3.5 Z M 3.5 4.5 C 2.948 4.5 2.5 4.948 2.5 5.5 C 2.5 6.052 2.948 6.5 3.5 6.5 L 3.5 5.5 L 3.5 4.5 Z M 7.5 6.5 C 8.052 6.5 8.5 6.052 8.5 5.5 C 8.5 4.948 8.052 4.5 7.5 4.5 L 7.5 5.5 L 7.5 6.5 Z M 10.5 11.5 C 9.948 11.5 9.5 11.948 9.5 12.5 C 9.5 13.052 9.948 13.5 10.5 13.5 L 10.5 12.5 L 10.5 11.5 Z M 14.5 13.5 C 15.052 13.5 15.5 13.052 15.5 12.5 C 15.5 11.948 15.052 11.5 14.5 11.5 L 14.5 12.5 L 14.5 13.5 Z M 4.8 0 L 4.8 1 L 13.2 1 L 13.2 0 L 13.2 -1 L 4.8 -1 L 4.8 0 Z M 18 4.8 L 17 4.8 L 17 13.2 L 18 13.2 L 19 13.2 L 19 4.8 L 18 4.8 Z M 13.2 18 L 13.2 17 L 4.8 17 L 4.8 18 L 4.8 19 L 13.2 19 L 13.2 18 Z M 0 13.2 L 1 13.2 L 1 4.8 L 0 4.8 L -1 4.8 L -1 13.2 L 0 13.2 Z M 4.8 18 L 4.8 17 C 3.943 17 3.361 16.999 2.911 16.962 C 2.473 16.927 2.248 16.862 2.092 16.782 L 1.638 17.673 L 1.184 18.564 C 1.669 18.811 2.186 18.91 2.748 18.956 C 3.299 19.001 3.976 19 4.8 19 L 4.8 18 Z M 0 13.2 L -1 13.2 C -1 14.024 -1.001 14.701 -0.956 15.252 C -0.91 15.814 -0.811 16.331 -0.564 16.816 L 0.327 16.362 L 1.218 15.908 C 1.138 15.752 1.073 15.527 1.038 15.089 C 1.001 14.639 1 14.057 1 13.2 L 0 13.2 Z M 1.638 17.673 L 2.092 16.782 C 1.716 16.59 1.41 16.284 1.218 15.908 L 0.327 16.362 L -0.564 16.816 C -0.181 17.569 0.431 18.181 1.184 18.564 L 1.638 17.673 Z M 18 13.2 L 17 13.2 C 17 14.057 16.999 14.639 16.962 15.089 C 16.927 15.527 16.862 15.752 16.782 15.908 L 17.673 16.362 L 18.564 16.816 C 18.811 16.331 18.91 15.814 18.956 15.252 C 19.001 14.701 19 14.024 19 13.2 L 18 13.2 Z M 13.2 18 L 13.2 19 C 14.024 19 14.701 19.001 15.252 18.956 C 15.814 18.91 16.331 18.811 16.816 18.564 L 16.362 17.673 L 15.908 16.782 C 15.752 16.862 15.527 16.927 15.089 16.962 C 14.639 16.999 14.057 17 13.2 17 L 13.2 18 Z M 17.673 16.362 L 16.782 15.908 C 16.59 16.284 16.284 16.59 15.908 16.782 L 16.362 17.673 L 16.816 18.564 C 17.569 18.181 18.181 17.569 18.564 16.816 L 17.673 16.362 Z M 13.2 0 L 13.2 1 C 14.057 1 14.639 1.001 15.089 1.038 C 15.527 1.073 15.752 1.138 15.908 1.218 L 16.362 0.327 L 16.816 -0.564 C 16.331 -0.811 15.814 -0.91 15.252 -0.956 C 14.701 -1.001 14.024 -1 13.2 -1 L 13.2 0 Z M 18 4.8 L 19 4.8 C 19 3.976 19.001 3.299 18.956 2.748 C 18.91 2.186 18.811 1.669 18.564 1.184 L 17.673 1.638 L 16.782 2.092 C 16.862 2.248 16.927 2.473 16.962 2.911 C 16.999 3.361 17 3.943 17 4.8 L 18 4.8 Z M 16.362 0.327 L 15.908 1.218 C 16.284 1.41 16.59 1.716 16.782 2.092 L 17.673 1.638 L 18.564 1.184 C 18.181 0.431 17.569 -0.181 16.816 -0.564 L 16.362 0.327 Z M 4.8 0 L 4.8 -1 C 3.976 -1 3.299 -1.001 2.748 -0.956 C 2.186 -0.91 1.669 -0.811 1.184 -0.564 L 1.638 0.327 L 2.092 1.218 C 2.248 1.138 2.473 1.073 2.911 1.038 C 3.361 1.001 3.943 1 4.8 1 L 4.8 0 Z M 0 4.8 L 1 4.8 C 1 3.943 1.001 3.361 1.038 2.911 C 1.073 2.473 1.138 2.248 1.218 2.092 L 0.327 1.638 L -0.564 1.184 C -0.811 1.669 -0.91 2.186 -0.956 2.748 C -1.001 3.299 -1 3.976 -1 4.8 L 0 4.8 Z M 1.638 0.327 L 1.184 -0.564 C 0.431 -0.181 -0.181 0.431 -0.564 1.184 L 0.327 1.638 L 1.218 2.092 C 1.41 1.716 1.716 1.41 2.092 1.218 L 1.638 0.327 Z M 14.5 3.5 L 13.793 2.793 L 2.793 13.793 L 3.5 14.5 L 4.207 15.207 L 15.207 4.207 L 14.5 3.5 Z M 5.5 7.5 L 6.5 7.5 L 6.5 3.5 L 5.5 3.5 L 4.5 3.5 L 4.5 7.5 L 5.5 7.5 Z M 3.5 5.5 L 3.5 6.5 L 7.5 6.5 L 7.5 5.5 L 7.5 4.5 L 3.5 4.5 L 3.5 5.5 Z M 10.5 12.5 L 10.5 13.5 L 14.5 13.5 L 14.5 12.5 L 14.5 11.5 L 10.5 11.5 L 10.5 12.5 Z";
+const BOOK_PATH = "M 10 18 L 9.168 18.555 C 9.353 18.833 9.666 19 10 19 C 10.334 19 10.647 18.833 10.832 18.555 L 10 18 Z M 9.9 17.85 L 9.068 18.405 L 9.068 18.405 L 9.9 17.85 Z M 8.399 15.91 L 7.764 16.682 L 7.764 16.682 L 8.399 15.91 Z M 7.022 15.173 L 6.731 16.129 L 7.022 15.173 Z M 0.218 13.908 L 1.109 13.454 L 0.218 13.908 Z M 1.092 14.782 L 1.546 13.891 L 1.092 14.782 Z M 7.816 0.436 L 7.362 1.327 L 7.816 0.436 Z M 9.564 2.184 L 8.673 2.638 L 9.564 2.184 Z M 1.092 0.218 L 1.546 1.109 L 1.092 0.218 Z M 0.218 1.092 L 1.109 1.546 L 0.218 1.092 Z M 10.1 17.85 L 10.932 18.405 L 10.932 18.405 L 10.1 17.85 Z M 11.601 15.91 L 12.236 16.682 L 12.236 16.682 L 11.601 15.91 Z M 12.978 15.173 L 13.269 16.129 L 12.978 15.173 Z M 19.782 13.908 L 18.891 13.454 L 19.782 13.908 Z M 18.908 14.782 L 18.454 13.891 L 18.908 14.782 Z M 12.184 0.436 L 12.638 1.327 L 12.184 0.436 Z M 10.436 2.184 L 11.327 2.638 L 10.436 2.184 Z M 18.908 0.218 L 18.454 1.109 L 18.908 0.218 Z M 19.782 1.092 L 18.891 1.546 L 19.782 1.092 Z M 3.2 0 L 3.2 1 L 3.6 1 L 3.6 0 L 3.6 -1 L 3.2 -1 L 3.2 0 Z M 0 11.8 L 1 11.8 L 1 3.2 L 0 3.2 L -1 3.2 L -1 11.8 L 0 11.8 Z M 10 18 L 10.832 17.445 L 10.732 17.295 L 9.9 17.85 L 9.068 18.405 L 9.168 18.555 L 10 18 Z M 4.575 15 L 4.575 14 L 3.2 14 L 3.2 15 L 3.2 16 L 4.575 16 L 4.575 15 Z M 9.9 17.85 L 10.732 17.295 C 10.072 16.305 9.635 15.631 9.034 15.137 L 8.399 15.91 L 7.764 16.682 C 8.081 16.943 8.339 17.311 9.068 18.405 L 9.9 17.85 Z M 4.575 15 L 4.575 16 C 5.889 16 6.338 16.01 6.731 16.129 L 7.022 15.173 L 7.312 14.216 C 6.568 13.99 5.765 14 4.575 14 L 4.575 15 Z M 8.399 15.91 L 9.034 15.137 C 8.526 14.72 7.941 14.407 7.312 14.216 L 7.022 15.173 L 6.731 16.129 C 7.108 16.244 7.459 16.432 7.764 16.682 L 8.399 15.91 Z M 0 11.8 L -1 11.8 C -1 12.344 -1.001 12.811 -0.969 13.195 C -0.937 13.59 -0.866 13.984 -0.673 14.362 L 0.218 13.908 L 1.109 13.454 C 1.084 13.405 1.046 13.304 1.024 13.032 C 1.001 12.749 1 12.377 1 11.8 L 0 11.8 Z M 3.2 15 L 3.2 14 C 2.623 14 2.251 13.999 1.968 13.976 C 1.696 13.954 1.595 13.916 1.546 13.891 L 1.092 14.782 L 0.638 15.673 C 1.016 15.866 1.41 15.937 1.805 15.969 C 2.189 16.001 2.656 16 3.2 16 L 3.2 15 Z M 0.218 13.908 L -0.673 14.362 C -0.385 14.926 0.074 15.385 0.638 15.673 L 1.092 14.782 L 1.546 13.891 C 1.358 13.795 1.205 13.642 1.109 13.454 L 0.218 13.908 Z M 3.6 0 L 3.6 1 C 4.737 1 5.529 1.001 6.146 1.051 C 6.751 1.101 7.099 1.193 7.362 1.327 L 7.816 0.436 L 8.27 -0.455 C 7.678 -0.757 7.037 -0.883 6.309 -0.942 C 5.591 -1.001 4.704 -1 3.6 -1 L 3.6 0 Z M 10 6.4 L 11 6.4 C 11 5.296 11.001 4.409 10.942 3.691 C 10.883 2.963 10.757 2.322 10.455 1.73 L 9.564 2.184 L 8.673 2.638 C 8.807 2.901 8.899 3.249 8.949 3.854 C 8.999 4.471 9 5.263 9 6.4 L 10 6.4 Z M 7.816 0.436 L 7.362 1.327 C 7.926 1.615 8.385 2.074 8.673 2.638 L 9.564 2.184 L 10.455 1.73 C 9.976 0.789 9.211 0.024 8.27 -0.455 L 7.816 0.436 Z M 3.2 0 L 3.2 -1 C 2.656 -1 2.189 -1.001 1.805 -0.969 C 1.41 -0.937 1.016 -0.866 0.638 -0.673 L 1.092 0.218 L 1.546 1.109 C 1.595 1.084 1.696 1.046 1.968 1.024 C 2.251 1.001 2.623 1 3.2 1 L 3.2 0 Z M 0 3.2 L 1 3.2 C 1 2.623 1.001 2.251 1.024 1.968 C 1.046 1.696 1.084 1.595 1.109 1.546 L 0.218 1.092 L -0.673 0.638 C -0.866 1.016 -0.937 1.41 -0.969 1.805 C -1.001 2.189 -1 2.656 -1 3.2 L 0 3.2 Z M 1.092 0.218 L 0.638 -0.673 C 0.074 -0.385 -0.385 0.074 -0.673 0.638 L 0.218 1.092 L 1.109 1.546 C 1.205 1.358 1.358 1.205 1.546 1.109 L 1.092 0.218 Z M 16.8 0 L 16.8 -1 L 16.4 -1 L 16.4 0 L 16.4 1 L 16.8 1 L 16.8 0 Z M 10 6.4 L 9 6.4 L 9 18 L 10 18 L 11 18 L 11 6.4 L 10 6.4 Z M 20 11.8 L 21 11.8 L 21 3.2 L 20 3.2 L 19 3.2 L 19 11.8 L 20 11.8 Z M 10 18 L 10.832 18.555 L 10.932 18.405 L 10.1 17.85 L 9.268 17.295 L 9.168 17.445 L 10 18 Z M 15.425 15 L 15.425 16 L 16.8 16 L 16.8 15 L 16.8 14 L 15.425 14 L 15.425 15 Z M 10.1 17.85 L 10.932 18.405 C 11.661 17.311 11.919 16.943 12.236 16.682 L 11.601 15.91 L 10.966 15.137 C 10.365 15.631 9.928 16.305 9.268 17.295 L 10.1 17.85 Z M 15.425 15 L 15.425 14 C 14.235 14 13.432 13.99 12.688 14.216 L 12.978 15.173 L 13.269 16.129 C 13.662 16.01 14.111 16 15.425 16 L 15.425 15 Z M 11.601 15.91 L 12.236 16.682 C 12.541 16.432 12.892 16.244 13.269 16.129 L 12.978 15.173 L 12.688 14.216 C 12.059 14.407 11.474 14.72 10.966 15.137 L 11.601 15.91 Z M 20 11.8 L 19 11.8 C 19 12.377 18.999 12.749 18.976 13.032 C 18.954 13.304 18.916 13.405 18.891 13.454 L 19.782 13.908 L 20.673 14.362 C 20.866 13.984 20.937 13.59 20.969 13.195 C 21.001 12.811 21 12.344 21 11.8 L 20 11.8 Z M 16.8 15 L 16.8 16 C 17.344 16 17.811 16.001 18.195 15.969 C 18.59 15.937 18.984 15.866 19.362 15.673 L 18.908 14.782 L 18.454 13.891 C 18.405 13.916 18.304 13.954 18.032 13.976 C 17.749 13.999 17.377 14 16.8 14 L 16.8 15 Z M 19.782 13.908 L 18.891 13.454 C 18.795 13.642 18.642 13.795 18.454 13.891 L 18.908 14.782 L 19.362 15.673 C 19.926 15.385 20.385 14.926 20.673 14.362 L 19.782 13.908 Z M 16.4 0 L 16.4 -1 C 15.296 -1 14.409 -1.001 13.691 -0.942 C 12.963 -0.883 12.322 -0.757 11.73 -0.455 L 12.184 0.436 L 12.638 1.327 C 12.901 1.193 13.249 1.101 13.854 1.051 C 14.471 1.001 15.263 1 16.4 1 L 16.4 0 Z M 10 6.4 L 11 6.4 C 11 5.263 11.001 4.471 11.051 3.854 C 11.101 3.249 11.193 2.901 11.327 2.638 L 10.436 2.184 L 9.545 1.73 C 9.243 2.322 9.117 2.963 9.058 3.691 C 8.999 4.409 9 5.296 9 6.4 L 10 6.4 Z M 12.184 0.436 L 11.73 -0.455 C 10.789 0.024 10.024 0.789 9.545 1.73 L 10.436 2.184 L 11.327 2.638 C 11.615 2.074 12.074 1.615 12.638 1.327 L 12.184 0.436 Z M 16.8 0 L 16.8 1 C 17.377 1 17.749 1.001 18.032 1.024 C 18.304 1.046 18.405 1.084 18.454 1.109 L 18.908 0.218 L 19.362 -0.673 C 18.984 -0.866 18.59 -0.937 18.195 -0.969 C 17.811 -1.001 17.344 -1 16.8 -1 L 16.8 0 Z M 20 3.2 L 21 3.2 C 21 2.656 21.001 2.189 20.969 1.805 C 20.937 1.41 20.866 1.016 20.673 0.638 L 19.782 1.092 L 18.891 1.546 C 18.916 1.595 18.954 1.696 18.976 1.968 C 18.999 2.251 19 2.623 19 3.2 L 20 3.2 Z M 18.908 0.218 L 18.454 1.109 C 18.642 1.205 18.795 1.358 18.891 1.546 L 19.782 1.092 L 20.673 0.638 C 20.385 0.074 19.926 -0.385 19.362 -0.673 L 18.908 0.218 Z";
+
+const SUBJ_CFG = {
+  Math: { bg: '#FEF3C7', color: '#a56c00', transform: 'translate(3, 3)', path: CALC_PATH },
+  ELA: { bg: '#ecdcff', color: '#7135ac', transform: 'translate(2, 3)', path: BOOK_PATH }
+};
+function SubjBadge({ subj, size = 28 }) {
+  const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
+  const iconSize = Math.round(size * 0.66);
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: cfg.bg, flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none"
+      style={{ color: cfg.color }}>
+        <g transform={cfg.transform}>
+          <path d={cfg.path} fill="currentColor" fillRule="nonzero" />
+        </g>
+      </svg>
+    </div>);
+
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+function Header({ student, rows, onView, collapsed, densityMult, accentColor, borderStyle }) {
+  const nsCount = rows.filter((r) => r.st === 'ns').length;
+  const ipCount = rows.filter((r) => r.st === 'ip').length;
+  const doneRows = rows.filter((r) => r.st === 'done');
+  const avgSc = doneRows.length ? Math.round(doneRows.reduce((s, r) => s + (r.sc || 0), 0) / doneRows.length) : 0;
+  const avgKey = avgSc >= 80 ? 'prof' : avgSc >= 55 ? 'i' : avgSc >= 33 ? 'e' : 'p';
+  const avgBand = BAND[avgKey];
+
+  function goBack() {
+    window.location.href = 'Roster Run HiFi v2.html';
+  }
+
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: `0 ${32 * densityMult}px`, flexShrink: 0 }}>
+      {collapsed ?
+      /* Compact — breadcrumb + avatar + name condensed to one line */
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, height: 58, opacity: collapsed ? 1 : 0, transform: collapsed ? 'translateY(0)' : 'translateY(-20px)', transition: 'opacity .26s, transform .26s' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13.5, fontWeight: 600, color: '#6d6d6f', cursor: 'pointer', flexShrink: 0 }}>
+          <Ico n="chevLeft" size={15} sw={2.5} stroke="#6d6d6f" />
+          All students
+        </button>
+        <div style={{ width: 1, height: 22, background: '#e1e1e3', flexShrink: 0 }} />
+        <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#f4f4f6', flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, lineHeight: 1,
+          border: '1px solid #ebebeb', overflow: 'hidden', userSelect: 'none' }}>
+          {student.emoji}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, minWidth: 0 }}>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>{student.name}</span>
+          <span style={{ fontSize: 13.5, color: '#6d6d6f', fontWeight: 500, whiteSpace: 'nowrap' }}>{student.grade}</span>
+        </div>
+      </div> :
+
+      /* Expanded — breadcrumb on its own line, full-size avatar + name lockup with chart floated right */
+      <div style={{ paddingTop: 14, marginBottom: 18, opacity: collapsed ? 0 : 1, transform: collapsed ? 'translateY(20px)' : 'translateY(0)', transition: 'opacity .26s, transform .26s' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13.5, fontWeight: 600, color: '#49494b', marginBottom: 16, cursor: 'pointer' }}>
+          <Ico n="chevLeft" size={15} sw={2.5} stroke="#49494b" />
+          All students
+        </button>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24 }}>
+          {/* Avatar + name lockup */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, paddingTop: 6 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#f4f4f6', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, lineHeight: 1,
+              border: '1px solid #ebebeb', overflow: 'hidden', userSelect: 'none' }}>
+              {student.emoji}
+            </div>
+            <div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1.2 }}>{student.name}</div>
+              <div style={{ fontSize: 13.5, color: '#6d6d6f', fontWeight: 500, marginTop: 2 }}>{student.grade}</div>
+            </div>
+          </div>
+
+          {/* Stat card — summary + scatter, floated right */}
+          <div style={{ background: '#f8f8fe', border: '1px solid #ddddfb', borderRadius: 14, padding: '18px 18px 24px', display: 'flex', flexDirection: 'column', gap: "13px", height: "300px", flex: '1 1 0', minWidth: 0, maxWidth: 820, opacity: collapsed ? 0 : 1, transform: collapsed ? 'scale(0.98)' : 'scale(1)', transition: 'opacity .26s, transform .26s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, flexShrink: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: "600", color: "rgb(109, 109, 111)", display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Ico n="bars" size={14} stroke={avgBand.bar} sw={2.2} />
+                <span style={{ fontWeight: "600", color: "rgb(109, 109, 111)" }}>Not started</span> • {nsCount}
+                <span style={{ color: '#d1d5db', margin: '0 7px' }}>·</span>
+                <span style={{ fontWeight: "600" }}>In progress</span> • {ipCount}
+                <span style={{ color: '#d1d5db', margin: '0 7px' }}>·</span>
+                <span style={{ fontWeight: "600", color: "rgb(109, 109, 111)" }}>Complete</span> • {doneRows.length}
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                {['Last 7 days', 'All subjects'].map((l) =>
+                <FilterPill key={l} label={l} />
+                )}
+              </div>
+            </div>
+
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <ScatterStrip rows={rows} onView={onView} />
+            </div>
+
+            {doneRows.length > 0 &&
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600, color: '#6d6d6f', fontSize: "14px" }}>
+                Average • <span style={{ ...{ color: avgBand.fg }, color: "rgb(29, 29, 31)" }}>{avgBand.label}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      }
+
+      {/* Tabs */}
+      <div style={{ display: 'flex' }}>
+        {['Results', 'Assignments', 'Settings'].map((t, i) =>
+        <div key={t} style={{ padding: '0 0 12px', marginRight: 26, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', color: i === 0 ? '#1d1d1f' : '#6d6d6f', borderBottom: i === 0 ? `2.5px solid ${accentColor}` : '2.5px solid transparent', transition: 'color .15s' }}>
+            {t}
+          </div>
+        )}
+      </div>
+    </div>);
+
+}
+
+/* ── Unit titles (synthesized) ──────────────────────────────────────── */
+const UNIT_TITLES = {
+  'Math|K. Unit 1.': 'Counting & Numbers to 10',
+  'Math|K. Unit 2.': 'Quantities & Counting',
+  'ELA|K. Unit 1.': 'Foundational Phonics',
+  'ELA|K. Unit 2.': 'Vowel Sounds & Blends'
+};
+const unitTitle = (subj, unit) => UNIT_TITLES[`${subj}|${unit}`] || 'Unit';
+
+/* ── Chevron that rotates when open ─────────────────────────────────── */
+function Chevron({ open, size = 16 }) {
+  return (
+    <span style={{ display: 'flex', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s ease' }}>
+      <Ico n="chevDown" size={size} stroke="#6d6d6f" sw={2.2} />
+    </span>);
+
+}
+
+/* ── Segmented toggle (Units / Domains) ─────────────────────────────── */
+function SegmentToggle({ options, active, onChange }) {
+  return (
+    <div style={{ display: 'inline-flex', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 100, padding: 3 }}>
+      {options.map((o) =>
+      <button key={o} onClick={() => onChange && onChange(o)} style={{ padding: '8px 20px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: o === active ? '1px solid #c7c6ff' : '1px solid transparent', background: o === active ? '#f5f5ff' : 'transparent', color: o === active ? '#4340e0' : '#6d6d6f', transition: 'all .12s' }}>
+          {o}
+        </button>
+      )}
+    </div>);
+
+}
+
+/* ── Round icon button (collapse / nav) ─────────────────────────────── */
+function navBtn(enabled) {
+  return { width: 32, height: 32, borderRadius: 8, background: '#f4f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: enabled ? 'pointer' : 'default', border: 'none', opacity: enabled ? 1 : 0.35, flexShrink: 0 };
+}
+
+/* ── Assignment list row (left column of expanded unit) ─────────────── */
+function AssignmentListRow({ row, selected, onSelect }) {
+  const [hov, setHov] = React.useState(false);
+  return (
+    <button onClick={() => onSelect(row)} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 16px', background: selected ? '#f5f5ff' : hov ? '#fafafa' : '#fff', border: 'none', borderLeft: selected ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+      <span style={{ fontSize: 14, fontWeight: selected ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{row.name}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap', width: 64, textAlign: 'left', display: 'inline-block' }}>Level {row.lv}</span>
+        <span style={{ fontSize: 13.5, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right', display: 'inline-block' }}>
+          {row.date}
+        </span>
+      </span>
+    </button>);
+
+}
+
+/* ── Inline detail panel (right column of expanded unit) ────────────── */
+function InlineDetail({ row, onClose, onPrev, onNext }) {
+  const b = row?.band ? BAND[row.band] : null;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', alignItems: "stretch" }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, margin: '0px 0px 4px' }}>
+        <SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <button onClick={onPrev} disabled={!onPrev} style={navBtn(onPrev)}><Ico n="arrowUp" size={15} stroke="#49494b" sw={2.5} /></button>
+          <button onClick={onNext} disabled={!onNext} style={navBtn(onNext)}><Ico n="arrowDown" size={15} stroke="#49494b" sw={2.5} /></button>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, margin: '0px 0px 12px' }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.25 }}>{row.name}</div>
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap' }}>Level {row.lv}</span>
+      </div>
+
+      {b ?
+      <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, fontSize: 13 }}>
+            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+            <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
+            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
+          </div>
+          <div style={{ display: 'flex', gap: 14, alignItems: "center", paddingBottom: "22px", borderBottom: '1px solid #e8e8ea', marginBottom: 22 }}>
+            <div style={{ fontWeight: 800, color: b.fg, fontSize: 26, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{row.sc}%</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, whiteSpace: 'nowrap', flexShrink: 0, alignItems: "flex-start" }}>
+              <BandPill band={row.band} sm={false} />
+            </div>
+            <div style={{ flex: 1 }}><AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} /></div>
+          </div>
+          <NextStepSection row={row} />
+        </> :
+
+      <div style={{ padding: '22px 0 0px', margin: 0, borderTop: '1px solid #e8e8ea' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ color: STS_CFG[row.st].color, display: 'flex' }}><StatusIcon type={row.st} /></span>
+            <span style={{ color: STS_CFG[row.st].color, fontWeight: 600, fontSize: 14 }}>{STS_CFG[row.st].label}</span>
+          </div>
+          <div style={{ fontSize: 13.5, fontWeight: 600, color: '#6d6d6f', marginBottom: 10 }}>Level {row.lv} · {row.date}</div>
+          <p style={{ fontSize: 13.5, lineHeight: 1.55, color: '#6d6d6f', maxWidth: 300, textWrap: 'pretty' }}>Results and next-step suggestions will appear here once {PROFILE_STUDENT.name.split(' ')[0]} completes this assignment.</p>
+        </div>
+      }
+    </div>);
+
+}
+
+/* ── Unit card (accordion) ──────────────────────────────────────────── */
+function UnitCard({ subj, unit, rows, defaultOpen }) {
+  const [open, setOpen] = React.useState(!!defaultOpen);
+  const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
+  const doneRows = rows.filter((r) => r.st === 'done');
+  const [sel, setSel] = React.useState(doneRows[0] || doneRows[0]);
+  const avg = doneRows.length ? Math.round(doneRows.reduce((s, r) => s + (r.sc || 0), 0) / doneRows.length) : null;
+  const selIdx = sel ? doneRows.findIndex((r) => r.id === sel.id) : -1;
+  const goTo = (d) => {const n = doneRows[selIdx + d];if (n) setSel(n);};
+  const title = unitTitle(subj, unit);
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} style={{ width: '100%', background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(29,29,31,.04)' }}>
+        <span style={{ fontSize: 15, fontWeight: 700, color: cfg.color }}>{unit.replace(/\.$/, ':')}</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
+        <span style={{ flex: 1 }} />
+        {avg !== null &&
+        <span style={{ fontSize: 13, color: '#9a9a9c', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ color: '#1d1d1f', fontWeight: 700 }}>{avg}%</b> <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> · {doneRows.length} activities</span>
+        }
+        <span style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Chevron open={false} /></span>
+      </button>);
+
+  }
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, boxShadow: '0 1px 4px rgba(29,29,31,.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 600 }}>
+      {/* Card header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 19, fontWeight: 700, color: cfg.color }}>{unit}</span>
+          <span style={{ fontSize: 19, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30, flexShrink: 0 }}>
+          {avg !== null &&
+          <div style={{ textAlign: 'right' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', marginBottom: 6 }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1 }}>{avg}%</div>
+                <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
+              </div>
+              <div style={{ fontSize: 12, color: '#9a9a9c' }}>Average over <b style={{ color: '#6d6d6f' }}>{doneRows.length}</b> activities</div>
+            </div>
+          }
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end' }}>
+              <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
+              <span style={{ fontSize: 16, fontWeight: 700, color: '#018143' }}>Improving</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#9a9a9c', marginTop: 4 }}>over last 4 weeks</div>
+          </div>
+          <button onClick={() => setOpen(false)} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Chevron open={true} />
+          </button>
+        </div>
+      </div>
+      {/* Body: two columns */}
+      <div style={{ display: 'flex', gap: 24, padding: '0 24px 24px', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
+        <div style={{ flex: '2 1 0', minWidth: 0, border: '1px solid #ececef', borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start', width: '100%' }}>
+          {doneRows.map((r, i) =>
+          <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none' }}>
+              <AssignmentListRow row={r} selected={sel && sel.id === r.id} onSelect={setSel} />
+            </div>
+          )}
+        </div>
+        <div style={{ flex: '3 1 0', minWidth: 0, borderLeft: '1px solid #ececef', paddingLeft: 24, overflow: 'auto' }}>
+          {sel && <InlineDetail row={sel} onClose={() => setOpen(false)} onPrev={selIdx > 0 ? () => goTo(-1) : null} onNext={selIdx < doneRows.length - 1 ? () => goTo(1) : null} />}
+        </div>
+      </div>
+    </div>);
+
+}
+
+/* ── Subject section ────────────────────────────────────────────────── */
+function SubjectSection({ subj, units, openFirst, densityMult, accentColor, borderStyle }) {
+  const [open, setOpen] = React.useState(true);
+  const unitNum = (u) => {const m = u.match(/Unit\s+(\d+)/);return m ? +m[1] : 99;};
+  const unitKeys = Object.keys(units).sort((a, b) => unitNum(a) - unitNum(b));
+  return (
+    <section style={{ marginBottom: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+        <SubjBadge subj={subj} size={32} />
+        <span style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f' }}>{subj}</span>
+        <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
+        <button onClick={() => setOpen(!open)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <Chevron open={open} />
+        </button>
+      </div>
+      {open &&
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {unitKeys.map((u, i) => <UnitCard key={u} subj={subj} unit={u} rows={units[u]} defaultOpen={openFirst && i === 0} />)}
+        </div>
+      }
+    </section>);
+
+}
+
+/* ── Table row ───────────────────────────────────────────────────────── */
+function TableRow({ row, selected, onSelect, onView }) {
+  const [hov, setHov] = React.useState(false);
+  const b = row.band ? BAND[row.band] : null;
+  return (
+    <tr onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => onView(row)}
+    style={{ background: selected ? '#f5f5ff' : hov ? '#fafafa' : '#fff', transition: 'background .1s', borderBottom: '1px solid #f0f0f2', cursor: 'pointer' }}>
+      <td style={{ padding: '0 0 0 16px', width: 44, verticalAlign: 'middle' }}>
+        <div onClick={(e) => {e.stopPropagation();onSelect(row.id);}} style={{ width: 18, height: 18, borderRadius: 5, cursor: 'pointer', border: selected ? '2px solid #5a58ff' : '1.5px solid #c5c5c7', background: selected ? '#5a58ff' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {selected && <Ico n="check" size={10} stroke="#fff" sw={3} />}
+        </div>
+      </td>
+      <td style={{ padding: '14px 16px', width: 'auto', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} />
+          <span style={{ fontSize: 14, color: '#1d1d1f', fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
+        </div>
+      </td>
+      <td style={{ padding: '14px 16px', width: 70, fontSize: 14, fontWeight: 600, color: '#49494b', verticalAlign: 'middle' }}>{row.lv}</td>
+      <td style={{ padding: '14px 16px', width: 145, fontSize: 13.5, color: '#49494b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{row.date}</td>
+      <td style={{ padding: '14px 16px', width: 148, verticalAlign: 'middle' }}>
+        <StatusPill st={row.st} />
+      </td>
+      <td style={{ padding: '14px 16px', width: 185, verticalAlign: 'middle' }}>
+        <ScoreBar sc={row.sc} band={row.band} />
+      </td>
+      <td style={{ padding: '12px 16px', width: '100%', verticalAlign: 'middle' }}>
+        {b ?
+        <div>
+            <BandPill band={row.band} />
+            <div style={{ fontSize: 11.5, color: '#6d6d6f', fontWeight: 500, marginTop: 4, paddingLeft: 2, lineHeight: 1.4, textWrap: 'pretty' }}>
+              {BAND_NEXT[row.band]?.(row.lv)}
+            </div>
+          </div> :
+        <span style={{ color: '#d1d5db', fontSize: 16 }}>—</span>}
+      </td>
+      <td style={{ padding: '14px 16px', width: 60, verticalAlign: 'middle' }}>
+        <button onClick={() => onView(row)} style={{ fontSize: 13.5, fontWeight: 600, color: '#5a58ff', cursor: 'pointer', background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0 }}>
+          View
+        </button>
+      </td>
+      <td style={{ padding: '14px 12px 14px 4px', width: 36, verticalAlign: 'middle' }}>
+        <button style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none', color: '#9a9a9c', background: hov ? '#ebebed' : 'transparent' }}>
+          <svg width={14} height={3} viewBox="0 0 14 3" fill="currentColor">
+            <circle cx="1.5" cy="1.5" r="1.4" /><circle cx="7" cy="1.5" r="1.4" /><circle cx="12.5" cy="1.5" r="1.4" />
+          </svg>
+        </button>
+      </td>
+    </tr>);
+
+}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+function AssignmentsTable({ rows, onView }) {
+  const [selected, setSelected] = React.useState(new Set());
+  const doneRows = rows.filter((r) => r.st === 'done');
+  const toggle = (id) => setSelected((prev) => {const n = new Set(prev);n.has(id) ? n.delete(id) : n.add(id);return n;});
+  return (
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e8e8ea', overflowX: 'auto', boxShadow: '0 1px 4px rgba(29,29,31,.05)' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ borderBottom: '1.5px solid #eaeaea', background: '#fafafa' }}>
+            <th style={{ padding: '11px 0 11px 16px', width: 44 }}>
+              <div style={{ width: 18, height: 18, borderRadius: 5, border: '1.5px solid #c5c5c7' }} />
+            </th>
+            {['Assignment', 'Level', 'Date available', 'Status', 'Results'].map((h) =>
+            <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 700, color: '#6d6d6f', letterSpacing: '.02em', whiteSpace: 'nowrap', width: h === 'Assignment' ? 'auto' : undefined }}>{h}</th>
+            )}
+            <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 700, color: '#6d6d6f', letterSpacing: '.02em', whiteSpace: 'nowrap', width: '100%' }}>Performance</th>
+            <th style={{ width: 60 }} /><th style={{ width: 36 }} />
+          </tr>
+        </thead>
+        <tbody>
+          {doneRows.map((row) =>
+          <TableRow key={row.id} row={row} selected={selected.has(row.id)} onSelect={toggle} onView={onView} />
+          )}
+        </tbody>
+      </table>
+    </div>);
+
+}
+
+/* ── NextStepLabel — lightbulb + label inline with "Next step" ──── */
+function NextStepLabel() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 12 }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><Ico n="bulb" size={14} stroke="#6d6d6f" sw={2} /></div>
+      <span>Next step</span>
+    </div>);
+
+}
+
+/* ── SuggestionLabel — label for next step suggestions ──── */
+function SuggestionLabel({ label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 12 }}>
+      <span style={{ fontWeight: 500, color: '#1d1d1f', fontSize: "14px" }}>{label}</span>
+    </div>);
+
+}
+
+/* ── AssignButton ───────────────────────────────────────────────────── */
+function AssignButton({ label, primary = true }) {
+  return (
+    <button style={{ height: 44, borderRadius: 100, background: primary ? '#141415' : 'transparent', color: primary ? '#fff' : '#1d1d1f', fontFamily: "'Figtree',sans-serif", fontSize: 14, fontWeight: 600, border: primary ? 'none' : '1.5px solid #323234', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', width: 'auto', paddingLeft: 20, paddingRight: 20, whiteSpace: 'nowrap' }}>
+      <Ico n="users" size={16} stroke={primary ? '#fff' : 'currentColor'} sw={2.5} />
+      {label}
+    </button>);
+
+}
+
+/* ── OrDivider — vertical "or" rule between side-by-side options ─────── */
+function OrDivider() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, alignSelf: 'stretch', flexShrink: 0 }}>
+      <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
+      <span style={{ fontSize: 12, fontWeight: 600, color: '#9a9a9c' }}>or</span>
+      <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
+    </div>);
+
+}
+
+/* ── NextStepSection ─────────────────────────────────────────────────── */
+function NextStepSection({ row }) {
+  const { band, lv, subj, unit, name } = row;
+
+  if (band === 'prof') {
+    if (lv <= 2) {
+      return (
+        <section style={{ marginBottom: 24 }}>
+          <NextStepLabel />
+          <div style={{ display: 'flex', gap: 20, alignItems: 'stretch' }}>
+            {/* Move to next skill */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+              <SuggestionLabel label="Move to next skill" />
+              <div style={{ marginBottom: 12 }}>
+                <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
+              </div>
+              <div style={{ marginTop: 'auto' }}><AssignButton label="Assign next skill" primary={true} /></div>
+            </div>
+            <OrDivider />
+            {/* Move up a level */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+              <SuggestionLabel label="Move up a level" />
+              <div style={{ marginBottom: 12 }}>
+                <LessonPreviewCard subj={subj} unit={unit} level={lv + 1} lessonType="Lesson" title={name} />
+              </div>
+              <div style={{ marginTop: 'auto' }}><AssignButton label={`Assign Level ${lv + 1}`} primary={false} /></div>
+            </div>
+          </div>
+        </section>);
+
+    }
+    // Proficient Level 3
+    return (
+      <section style={{ marginBottom: 24 }}>
+        <NextStepLabel />
+        <SuggestionLabel label="Move to next skill" />
+        <div style={{ marginBottom: 12 }}>
+          <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
+        </div>
+        <AssignButton label="Assign next skill" primary={true} />
+      </section>);
+
+  }
+
+  if (band === 'i') {
+    return (
+      <section style={{ marginBottom: 24 }}>
+        <NextStepLabel />
+        <SuggestionLabel label="Continue at current level with routine instruction and practice." />
+        <AssignButton label="Re-assign" primary={true} />
+      </section>);
+
+  }
+
+  if (band === 'e') {
+    return (
+      <section style={{ marginBottom: 24, margin: "0px 0px 24px" }}>
+        <NextStepLabel />
+        <div style={{ display: 'flex', gap: 20, alignItems: 'stretch' }}>
+          {/* Reteach ideas */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <SuggestionLabel label="Reteach ideas" />
+            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+              {[0, 1, 2].map((i) =>
+              <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                  <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
+                  <div style={{ height: 14, background: '#d1d5db', borderRadius: 3, flex: 1 }} />
+                </li>
+              )}
+            </ul>
+          </div>
+          <OrDivider />
+          {/* Try lower level */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <SuggestionLabel label="Try lower level" />
+            <div style={{ marginBottom: 12 }}>
+              <LessonPreviewCard subj={subj} unit={unit} level={Math.max(1, lv - 1)} lessonType="Read Aloud" title={name} />
+            </div>
+            <div style={{ marginTop: 'auto' }}><AssignButton label={`Assign Level ${Math.max(1, lv - 1)}`} primary={true} /></div>
+          </div>
+        </div>
+      </section>);
+
+  }
+
+  // Pre-emerging
+  return (
+    <section style={{ marginBottom: 24 }}>
+      <NextStepLabel />
+      <SuggestionLabel label="Teach prerequisite skills before continuing this skill." />
+      <div style={{ marginBottom: 12 }}>
+        <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
+      </div>
+      <AssignButton label="Assign previous skill" primary={true} />
+    </section>);
+
+}
+
+/* ── LessonPreviewCard ──────────────────────────────────────────────── */
+function LessonPreviewCard({ subj, unit, level, lessonType, title }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#fff', borderRadius: 16, border: '1px solid #e8e8ea', padding: '14px 16px', boxShadow: '0 1px 3px rgba(29,29,31,.06)' }}>
+      {/* Thumbnail placeholder */}
+      <div style={{ width: 96, height: 80, borderRadius: 12, background: '#f0f0f2', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width={36} height={32} viewBox="0 0 36 32" fill="none">
+          <rect x="1" y="1" width="34" height="30" rx="4" stroke="#c5c5c7" strokeWidth="1.5" fill="#e8e8ea" />
+          <circle cx="12" cy="12" r="4" fill="#c5c5c7" />
+          <path d="M1 22l8-6 6 5 5-4 15 10" stroke="#c5c5c7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      </div>
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <SubjectUnitLabel subj={subj} unit={unit} level={level} />
+        <div style={{ fontSize: 12.5, color: '#6d6d6f', fontWeight: 500 }}>{lessonType}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+      </div>
+    </div>);
+
+}
+
+/* ── Side panel ──────────────────────────────────────────────────────── */
+function SidePanel({ row, onClose, onPrev, onNext, idx, total }) {
+  const b = row?.band ? BAND[row.band] : null;
+  const open = !!(row && b);
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(29,29,31,.18)', zIndex: 100, opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .22s' }} />
+      <aside style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 420, background: '#fff', zIndex: 101, boxShadow: '-4px 0 40px rgba(29,29,31,.12)', transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform .26s cubic-bezier(.4,0,.2,1)', display: 'flex', flexDirection: 'column' }}>
+        {open && <>
+          {/* Header — meta row + nav only, fits 64px */}
+          <div style={{ padding: '0 24px', display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', height: '64px', flexShrink: 0 }}>
+            <div style={{ flex: 1 }}><SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} /></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+              <button onClick={onPrev} disabled={!onPrev} style={{ width: 32, height: 32, borderRadius: 8, background: '#f4f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onPrev ? 'pointer' : 'default', border: 'none', opacity: onPrev ? 1 : 0.35 }}>
+                <Ico n="arrowUp" size={15} stroke="#49494b" sw={2.5} />
+              </button>
+              <button onClick={onNext} disabled={!onNext} style={{ width: 32, height: 32, borderRadius: 8, background: '#f4f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onNext ? 'pointer' : 'default', border: 'none', opacity: onNext ? 1 : 0.35 }}>
+                <Ico n="arrowDown" size={15} stroke="#49494b" sw={2.5} />
+              </button>
+              <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, background: '#f4f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, border: 'none' }}>
+                <Ico n="x" size={15} stroke="#49494b" sw={2.5} />
+              </button>
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: "2px 24px 28px" }}>
+            {/* Assignment name */}
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.3, marginBottom: 20 }}>{row.name}</div>
+            {/* Result section — full width with divider */}
+            <section style={{ marginBottom: 20, paddingBottom: 20, borderBottom: '1px solid #e8e8ea', marginLeft: -24, marginRight: -24, paddingLeft: 24, paddingRight: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, fontSize: 11, fontWeight: 700, color: '#9a9a9c', letterSpacing: '.05em' }}>
+                <div><span style={{ color: '#6d6d6f', fontWeight: 500 }}>Date available</span><br /><span style={{ color: '#1d1d1f', fontWeight: 600, marginTop: 2, display: 'block', fontSize: "14px", letterSpacing: "0px" }}>Dec 1, 2025</span></div>
+                <div style={{ textAlign: 'right' }}><span style={{ color: '#6d6d6f', fontWeight: 500 }}>Date completed</span><br /><span style={{ color: '#1d1d1f', fontWeight: 600, marginTop: 2, display: 'block', fontSize: "14px", letterSpacing: "0px" }}>{row.date}</span></div>
+              </div>
+              
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 14 }}>Level {row.lv}</div>
+
+              {/* Score and bar in horizontal layout — bar left, score right */}
+              <div style={{ display: 'flex', gap: 12, marginBottom: 8, alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} />
+                </div>
+                <div style={{ fontWeight: 800, color: b.fg, letterSpacing: '-.02em', lineHeight: 1, flexShrink: 0, fontSize: "24px" }}>{row.sc}%</div>
+              </div>
+
+              {/* Band and threshold together at bottom */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: 6 }}>
+                <div>
+                  <BandPill band={row.band} sm={true} />
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9a9a9c' }}>Math threshold</span>
+                    <span style={{ fontWeight: 800, color: b.fg, fontSize: "11px" }}>{THRESHOLDS[row.band]?.[row.subj]}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Next step — band & level conditional */}
+            <NextStepSection row={row} />
+          </div>
+        </>}
+      </aside>
+    </>);
+
+}
+
+/* ── App ─────────────────────────────────────────────────────────────── */
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [view, setView] = React.useState('Units');
+  const [collapsed, setCollapsed] = React.useState(false);
+
+  // Density multiplier for padding/gaps
+  const densityMult = { compact: 0.75, regular: 1, spacious: 1.35 };
+  const dm = densityMult[t.density];
+
+  // Color mood: shift accent color
+  const colorMood = { default: '#5a58ff', warm: '#d97757', cool: '#0066cc' };
+  const accentColor = colorMood[t.colorMood];
+
+  // Border style: radius and stroke weight
+  const borderStyle = { sharp: { r: 4, sw: 1.5 }, soft: { r: 8, sw: 1 }, minimal: { r: 0, sw: 0.5 } };
+  const bs = borderStyle[t.borderStyle];
+
+  const subjects = {};
+  ROWS.forEach((r) => {
+    subjects[r.subj] = subjects[r.subj] || {};
+    (subjects[r.subj][r.unit] = subjects[r.subj][r.unit] || []).push(r);
+  });
+  const subjOrder = ['Math', 'ELA'].filter((s) => subjects[s]);
+  const onScroll = (e) => {
+    const st = e.currentTarget.scrollTop;
+    setCollapsed((c) => st > 48 ? true : st < 12 ? false : c);
+  };
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: "'Figtree',-apple-system,sans-serif" }}>
+      <NavRail />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f4f6' }}>
+        <Header student={PROFILE_STUDENT} rows={ROWS} onView={() => {}} collapsed={collapsed} densityMult={dm} accentColor={accentColor} borderStyle={bs} />
+        <div onScroll={onScroll} style={{ flex: 1, overflow: 'auto', padding: `${24 * dm}px ${32 * dm}px ${48 * dm}px`, margin: "1px" }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 * dm, marginBottom: 28 * dm }}>
+              <SegmentToggle options={['Units', 'Domains']} active={view} onChange={setView} />
+              <FilterPill label="All subjects" />
+            </div>
+            {subjOrder.map((s, i) =>
+            <SubjectSection key={s} subj={s} units={subjects[s]} openFirst={i === 0} densityMult={dm} accentColor={accentColor} borderStyle={bs} />
+            )}
+          </div>
+        </div>
+      </div>
+      <TweaksPanel>
+        <TweakSection label="Layout" />
+        <TweakRadio label="Density" value={t.density}
+        options={['compact', 'regular', 'spacious']}
+        onChange={(v) => setTweak('density', v)} />
+        <TweakSection label="Visual" />
+        <TweakRadio label="Color mood" value={t.colorMood}
+        options={['default', 'warm', 'cool']}
+        onChange={(v) => setTweak('colorMood', v)} />
+        <TweakRadio label="Borders" value={t.borderStyle}
+        options={['sharp', 'soft', 'minimal']}
+        onChange={(v) => setTweak('borderStyle', v)} />
+      </TweaksPanel>
+    </div>);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

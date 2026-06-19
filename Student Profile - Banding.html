@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Score interpretation — wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Gaegu:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ink:  #2b2b2b; --ink2: #666; --ink3: #9a9a96;
+  --paper:#fbfaf6; --panel:#ffffff;
+  --line: #3a3a38; --line-soft:#c9c7c0;
+  --hi:   #ffe49c; --hi-edge:#e9bf4f;
+  --accent:#5a58ff;
+  --shade:#efede7; --shade2:#e4e1d8;
+  font-size:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+body{font-family:'Kalam',cursive;color:var(--ink);background:#dcdad2;-webkit-font-smoothing:antialiased;}
+
+/* ── rough wobble ── */
+.rough{position:relative;}
+.rough::before{content:"";position:absolute;inset:0;border:2px solid var(--line);
+  border-radius:11px 9px 12px 8px;filter:url(#wob);pointer-events:none;}
+.rough.soft::before{border-color:var(--line-soft);border-width:1.6px;}
+.rough.dash::before{border-style:dashed;border-color:var(--line-soft);}
+.rough.tight::before{border-radius:7px 6px 8px 6px;}
+
+/* ── viewer chrome ── */
+.viewer{position:sticky;top:0;z-index:50;background:#1d1d1f;color:#f4f4f2;
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;row-gap:9px;
+  padding:9px 20px;border-bottom:2px solid #000;font-family:'Gaegu',cursive;}
+.vtitle{font-weight:700;font-size:18px;letter-spacing:.3px;white-space:nowrap;}
+.vtitle small{color:#a7a7a3;font-weight:400;margin-left:8px;font-size:14px;}
+.vtabs{display:flex;gap:8px;}
+.vtab{font-family:'Gaegu',cursive;font-size:16px;font-weight:700;color:#cfcfca;
+  background:transparent;border:1.5px solid #4a4a4c;border-radius:9px 7px 10px 6px;
+  padding:5px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;line-height:1;}
+.vtab .n{display:inline-grid;place-items:center;width:20px;height:20px;
+  border-radius:50%;border:1.5px solid currentColor;font-size:12px;}
+.vtab:hover{color:#fff;border-color:#6f6f72;}
+.vtab.active{color:#1d1d1f;background:var(--hi);border-color:var(--hi-edge);}
+.vspring{flex:1;}
+.togs{display:flex;gap:8px;align-items:center;}
+.tog{font-family:'Gaegu',cursive;font-size:14px;font-weight:700;color:#cfcfca;
+  background:transparent;border:1.5px dashed #5a5a5c;border-radius:8px;
+  padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:7px;}
+.tog .box{width:14px;height:14px;border:1.5px solid #8a8a8c;border-radius:3px;
+  display:inline-grid;place-items:center;font-size:11px;color:#1d1d1f;}
+.tog.on{color:#fff;border-style:solid;border-color:var(--hi-edge);}
+.tog.on .box{background:var(--hi);border-color:var(--hi-edge);}
+
+/* ── app shell ── */
+.stage{display:flex;justify-content:center;padding:22px;}
+.app{width:min(1300px,100%);background:var(--paper);
+  border:2px solid var(--line);border-radius:14px;
+  box-shadow:6px 7px 0 rgba(0,0,0,.10);
+  display:grid;grid-template-columns:62px 1fr;overflow:hidden;min-height:820px;}
+.rail{background:#1d1d1f;display:flex;flex-direction:column;
+  align-items:center;gap:18px;padding:16px 0;}
+.rail .glyph{width:26px;height:26px;border:1.8px solid #6c6c6e;border-radius:7px;}
+.rail .glyph.on{border-color:#fff;background:#3a3a3c;}
+.rail .sep{flex:1;}
+.rail .ava{width:30px;height:30px;border-radius:50%;border:1.8px solid #8a8a8c;}
+.work{display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+
+/* topbar */
+.topbar{display:flex;align-items:center;gap:14px;
+  padding:12px 22px;background:var(--panel);border-bottom:1.8px solid var(--line-soft);}
+.back{font-size:15px;color:var(--ink2);display:flex;align-items:center;gap:5px;cursor:pointer;}
+.back svg{width:14px;height:14px;flex-shrink:0;}
+.spring{flex:1;}
+.body{padding:0;flex:1;overflow:auto;position:relative;}
+.body.panel-mode{overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── profile header ── */
+.prof-hd{background:var(--panel);border-bottom:1.8px dashed var(--line-soft);padding:18px 22px 0;}
+.prof-row{display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+.stu-ava{width:52px;height:52px;border:1.8px solid var(--line-soft);border-radius:11px 9px 12px 10px;
+  background:var(--shade);display:grid;place-items:center;flex-shrink:0;
+  font-size:12px;color:var(--ink3);font-weight:700;}
+.stu-name{font-size:25px;font-weight:700;color:var(--ink);line-height:1.15;}
+.stu-grade{font-size:14px;color:var(--ink2);}
+.stat-cards{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap;}
+.stat-card{padding:11px 16px;border:1.8px solid var(--line-soft);
+  border-radius:11px 9px 12px 10px;background:var(--panel);min-width:175px;position:relative;}
+.stat-card.new-card{border-style:dashed;border-color:var(--ink2);background:var(--shade);}
+.stat-card .s-row{display:flex;align-items:baseline;gap:6px;}
+.stat-card .s-num{font-size:24px;font-weight:700;color:var(--ink);line-height:1;}
+.stat-card .s-label{font-size:14px;color:var(--ink2);}
+.stat-card .s-sub{font-size:12px;color:var(--ink3);margin-top:4px;}
+.new-bdg{background:var(--hi);border:1.5px solid var(--hi-edge);
+  border-radius:7px;padding:0 6px;font-size:11px;font-weight:700;color:var(--ink);
+  font-family:'Gaegu',cursive;display:inline-block;}
+.stat-card .new-bdg{position:absolute;top:-9px;right:10px;}
+.band-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.bchip{font-size:11px;font-weight:700;border:1.4px solid var(--line-soft);
+  border-radius:20px;padding:1px 7px;color:var(--ink2);
+  display:inline-flex;align-items:center;gap:3px;}
+.bchip .d{width:5px;height:5px;border-radius:50%;background:var(--ink3);flex-shrink:0;}
+
+/* page-level tabs */
+.ptabs{display:flex;padding:0 22px;}
+.ptab{font-size:15px;font-weight:700;padding:10px 0 13px;margin-right:24px;
+  color:var(--ink2);cursor:pointer;border-bottom:2.5px solid transparent;}
+.ptab.on{color:var(--ink);border-bottom-color:var(--accent);}
+
+/* ── filter bar ── */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:16px 22px 14px;}
+.fsel{display:inline-flex;align-items:center;gap:8px;
+  border:1.8px solid var(--line-soft);border-radius:9px 7px 10px 7px;
+  padding:6px 12px;font-size:14px;font-weight:700;color:var(--ink2);
+  background:var(--panel);cursor:pointer;}
+.fsel .car{color:var(--ink3);font-size:13px;}
+.fsp{flex:1;}
+.f-tog{display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;color:var(--ink2);cursor:pointer;}
+.f-sw{width:34px;height:18px;border-radius:9px;border:1.8px solid var(--line-soft);
+  background:var(--shade);position:relative;flex-shrink:0;}
+.f-sw.on{background:var(--hi);border-color:var(--hi-edge);}
+.f-sw::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;
+  border-radius:50%;background:var(--panel);border:1.5px solid var(--line-soft);transition:left .15s;}
+.f-sw.on::after{left:18px;border-color:var(--hi-edge);}
+
+/* ── table ── */
+.tbl-wrap{margin:0 22px 26px;border:1.8px solid var(--line-soft);
+  border-radius:12px 10px 13px 11px;overflow:hidden;background:var(--panel);}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-family:'Kalam',cursive;font-size:13px;font-weight:700;
+  color:var(--ink2);text-align:left;padding:10px 11px;
+  border-bottom:1.8px solid var(--line-soft);background:var(--shade);white-space:nowrap;}
+.tbl th.new-col{color:var(--ink);}
+.tbl td{font-family:'Kalam',cursive;font-size:14px;color:var(--ink);
+  padding:12px 11px;border-bottom:1.4px dashed var(--line-soft);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--shade);}
+
+/* cells */
+.chk{width:16px;height:16px;border:1.6px solid var(--line-soft);
+  border-radius:4px;display:inline-block;vertical-align:middle;}
+.type-sq{width:22px;height:22px;border:1.6px solid var(--line-soft);
+  border-radius:5px;background:var(--shade);display:inline-block;flex-shrink:0;}
+.asgn-cell{display:flex;align-items:center;gap:8px;}
+.asgn-unit{font-size:12px;color:var(--ink3);font-weight:700;}
+.asgn-name-text{font-size:14px;font-weight:700;}
+.ph{display:inline-block;height:10px;background:var(--shade2);border-radius:3px;vertical-align:middle;}
+
+/* status */
+.sts{display:inline-flex;align-items:center;gap:5px;
+  border:1.5px solid var(--line-soft);border-radius:20px;
+  padding:3px 9px;font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap;}
+.sts.done{border-color:var(--line);color:var(--ink);}
+.sts-dot{width:6px;height:6px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;}
+.sts.done .sts-dot{background:var(--ink);}
+
+/* score bar */
+.score-bar{display:flex;align-items:center;gap:8px;}
+.s-track{flex:1;min-width:90px;height:8px;border:1.6px solid var(--line-soft);
+  border-radius:5px;overflow:hidden;background:var(--shade);}
+.s-fill{height:100%;background:var(--ink2);border-radius:3px;}
+.s-pct{font-size:13px;font-weight:700;color:var(--ink2);width:34px;text-align:right;}
+.s-pct.dim{color:var(--ink3);}
+
+/* band chips — wireframe without color */
+.band{display:inline-flex;align-items:center;gap:5px;
+  border:1.6px solid var(--line);border-radius:20px;
+  padding:3px 9px;font-size:13px;font-weight:700;color:var(--ink);background:var(--panel);}
+.band.b-i{}
+.band.b-e{}
+.band.b-p{}
+.band-step{font-size:11.5px;color:var(--ink3);font-weight:700;margin-top:3px;}
+
+/* view / more */
+.vlink{font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;text-decoration:none;}
+.more-btn{color:var(--ink3);letter-spacing:.1em;font-size:16px;cursor:pointer;}
+
+/* ── panel layout for view 3 ── */
+.panel-wrap{flex:1;display:flex;overflow:hidden;}
+.panel-main{flex:1;overflow:auto;min-width:0;}
+.side-panel{width:360px;flex-shrink:0;border-left:1.8px solid var(--line-soft);
+  background:var(--panel);display:flex;flex-direction:column;}
+.sp-hd{padding:16px 18px 14px;border-bottom:1.8px dashed var(--line-soft);}
+.sp-meta{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:5px;}
+.sp-title{font-size:17px;font-weight:700;color:var(--ink);line-height:1.3;}
+.sp-body{padding:16px 18px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:14px;}
+.sp-lbl{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:7px;}
+.sp-score-box{background:var(--shade);border-radius:9px 7px 10px 8px;padding:12px 14px;}
+.sp-big{font-size:27px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:6px;}
+.sp-bar{height:10px;border:1.6px solid var(--line-soft);border-radius:6px;
+  overflow:hidden;background:var(--panel);margin-bottom:6px;}
+.sp-bar-fill{height:100%;background:var(--ink2);}
+.sp-sub{font-size:12px;color:var(--ink3);}
+.sp-band-box{border:1.8px dashed var(--line-soft);border-radius:9px 7px 10px 8px;
+  padding:12px 14px;background:var(--shade);}
+.sp-band-name{font-size:16px;font-weight:700;color:var(--ink);
+  display:flex;align-items:center;gap:7px;margin-bottom:3px;}
+.sp-thresh{font-size:12px;color:var(--ink2);}
+.sp-rec{border-left:3px solid var(--line);padding:10px 12px;
+  background:var(--shade);border-radius:0 8px 8px 0;
+  font-size:14px;font-weight:700;color:var(--ink);line-height:1.6;}
+.sp-actions{display:flex;flex-direction:column;gap:8px;}
+.sp-btn{height:40px;border-radius:20px 18px 21px 19px;border:2px solid var(--line);
+  background:var(--panel);font-family:'Kalam',cursive;font-size:14px;font-weight:700;
+  cursor:pointer;color:var(--ink);display:flex;align-items:center;
+  justify-content:center;gap:7px;}
+.sp-btn.pri{background:var(--ink);color:var(--panel);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="wob">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.016" numOctaves="2" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+  </filter>
+</svg>
+
+<!-- VIEWER CHROME -->
+<div class="viewer">
+  <div class="vtitle">Score interpretation<small>low-fi wireframes</small></div>
+  <div class="vtabs" id="vtabs">
+    <button class="vtab active" data-v="1"><span class="n">1</span> With banding</button>
+    <button class="vtab"        data-v="2"><span class="n">2</span> Detail panel</button>
+  </div>
+  <div class="vspring"></div>
+  <div class="togs">
+    <button class="tog on" id="togFill"><span class="box">✓</span> Sample data</button>
+  </div>
+</div>
+
+<!-- STAGE -->
+<div class="stage">
+  <div class="app">
+    <div class="rail">
+      <div class="glyph"></div>
+      <div class="glyph"></div>
+      <div class="glyph on"></div>
+      <div class="glyph"></div>
+      <div class="sep"></div>
+      <div class="ava"></div>
+    </div>
+    <div class="work">
+      <div class="topbar">
+        <div class="back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          All Students
+        </div>
+      </div>
+      <div class="body" id="bodyHost"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── data ── */
+var ROWS = [
+  { id:1,  subj:'Math', unit:'K. Unit 2.', name:'Counting to 100',            lv:1, date:'Due Today',      st:'ip',   sc:null, band:null },
+  { id:2,  subj:'ELA',  unit:'K. Unit 1.', name:'Sight Words: Set A',          lv:1, date:'Due Today',      st:'ns',   sc:null, band:null },
+  { id:3,  subj:'ELA',  unit:'K. Unit 2.', name:'Short Vowel Sounds',          lv:2, date:'Due Feb 18',     st:'ip',   sc:null, band:null },
+  { id:4,  subj:'Math', unit:'K. Unit 2.', name:'Adding Within 10',            lv:1, date:'Due Feb 19',     st:'ns',   sc:null, band:null },
+  { id:5,  subj:'Math', unit:'K. Unit 2.', name:'Skip Counting by 2s',         lv:2, date:'Due Jan 10',     st:'ip',   sc:null, band:null },
+  { id:6,  subj:'Math', unit:'K. Unit 2.', name:'Comparing Numbers 1–20', lv:1, date:'Due Jun 30',     st:'ip',   sc:null, band:null },
+  { id:7,  subj:'Math', unit:'K. Unit 1.', name:'Counting & Numbers to 10',    lv:1, date:'Jan 5, 2026',    st:'done', sc:50,   band:'e'  },
+  { id:8,  subj:'Math', unit:'K. Unit 1.', name:'Addition to 5',               lv:1, date:'Nov 1, 2025',    st:'done', sc:100,  band:'prof'},
+  { id:9,  subj:'ELA',  unit:'K. Unit 1.', name:'Phonics & Word Study',        lv:2, date:'Oct 15, 2025',   st:'done', sc:72,   band:'i'  },
+  { id:10, subj:'Math', unit:'K. Unit 1.', name:'Number Sense',                lv:1, date:'Sep 20, 2025',   st:'done', sc:28,   band:'p'  },
+  { id:11, subj:'Math', unit:'K. Unit 1.', name:'Shapes & Patterns',           lv:1, date:'Aug 10, 2025',   st:'done', sc:88,   band:'prof'},
+  { id:12, subj:'ELA',  unit:'K. Unit 1.', name:'Letter Formation Practice',   lv:1, date:'Jul 22, 2025',   st:'done', sc:61,   band:'i'  },
+  { id:13, subj:'Math', unit:'K. Unit 1.', name:'Number Bonds to 10',          lv:2, date:'Jul 5, 2025',    st:'done', sc:38,   band:'e'  },
+];
+
+var BAND_REC = {
+  prof:'Move to next skill at same level, or consider moving the student up a level.',
+  i:   'Continue at current level with routine instruction and practice.',
+  e:   'Use lesson reteach ideas; consider moving to a more supported level.',
+  p:   'Teach prerequisite skills before continuing this skill.',
+};
+
+var THRESHOLDS = {
+  Math:{ prof:'80–100%', i:'55–79%', e:'33–54%', p:'0–32%' },
+  ELA: { prof:'85–100%', i:'55–84%', e:'33–54%', p:'0–32%' },
+};
+
+function getBand(subj, pct){
+  if(pct===null||pct===undefined) return null;
+  var t = subj==='ELA' ? 85 : 80;
+  if(pct>=t)  return 'prof';
+  if(pct>=55) return 'i';
+  if(pct>=33) return 'e';
+  return 'p';
+}
+
+var BAND_META = {
+  prof:{ sym:'●', lbl:'Proficient',   cls:'',    step:'Move to next skill' },
+  i:   { sym:'◐', lbl:'Instructional',cls:'b-i', step:'Continue at current level' },
+  e:   { sym:'○', lbl:'Emerging',     cls:'b-e', step:'Reteach or consider lower level' },
+  p:   { sym:'✕', lbl:'Pre-emerging', cls:'b-p', step:'Teach prerequisite skills' },
+};
+
+var STS_META = {
+  done:{ dot:'●', lbl:'Complete',    cls:'done' },
+  ip:  { dot:'○', lbl:'In Progress', cls:'' },
+  ns:  { dot:'○', lbl:'Not Started', cls:'' },
+};
+
+// placeholder widths per row id
+var PH_W = [90,130,110,100,110,140,180,80,155,100,140,155,110];
+
+var filled      = true;
+var view        = '1';
+var selectedRow = null;
+
+function ph(w){ return '<span class="ph" style="width:'+w+'px"></span>'; }
+
+/* ── SCATTER STRIP ── */
+var SUBJ_STYLES = {
+  'Math':            { fill:'var(--ink)',   stroke:'none',        shape:'circle' },
+  'ELA':             { fill:'none',         stroke:'var(--ink)',   shape:'circle' },
+  'Science':         { fill:'var(--ink)',   stroke:'none',        shape:'rect'   },
+  'Social Studies':  { fill:'none',         stroke:'var(--ink)',   shape:'rect'   },
+};
+
+function buildScatter(doneRows, filled){
+  var bandOrder  = ['p','e','i','prof'];
+  var bandLabels = ['Pre-emg.','Emerging','Instr.','Proficient'];
+  var rowH   = 22;
+  var totalH = 4 * rowH;
+
+  var chronoIds = [13,12,11,10,9,8,7];
+  var sorted = [];
+  if(filled){
+    chronoIds.forEach(function(id){
+      var found = doneRows.filter(function(r){ return r.id===id; })[0];
+      if(found) sorted.push(found);
+    });
+  }
+
+  // Y-axis labels
+  var labelHtml = '';
+  for(var bi=0;bi<4;bi++){
+    labelHtml += '<div style="height:'+rowH+'px;display:flex;align-items:center;justify-content:flex-end;'+
+      'padding-right:5px;font-size:9px;color:var(--ink3);line-height:1">'+bandLabels[3-bi]+'</div>';
+  }
+
+  // Zone backgrounds
+  var zoneDivs = '';
+  for(var bi=0;bi<4;bi++){
+    var bandIdx = 3-bi;
+    zoneDivs += '<div style="position:absolute;left:0;right:0;top:'+(bi*rowH)+'px;height:'+rowH+'px;'+
+      (bandIdx%2===1?'background:var(--shade);':'')+
+      (bi<3?'border-bottom:1.5px dashed var(--line-soft);':'')+
+    '"></div>';
+  }
+
+  // Dots — absolutely positioned divs (perfect circles)
+  var n = sorted.length;
+  var dotHtml = '';
+  sorted.forEach(function(r,i){
+    var xPct = n===1 ? 50 : (i/(n-1))*84+8;
+    var row  = 3 - bandOrder.indexOf(r.band);
+    var yCtr = row*rowH + rowH/2;
+    var sty  = SUBJ_STYLES[r.subj] || SUBJ_STYLES['Math'];
+    var bgStyle = sty.fill==='none'
+      ? 'background:var(--panel);border:1.5px solid var(--ink);'
+      : 'background:var(--ink);border:none;';
+    dotHtml += '<div style="position:absolute;left:'+xPct+'%;top:'+yCtr+'px;'+
+      'transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;'+
+      bgStyle+'box-sizing:border-box;z-index:2"></div>';
+  });
+
+  // Legend (only subjects present in data)
+  var subjsSeen = {};
+  sorted.forEach(function(r){ subjsSeen[r.subj]=true; });
+  var legendHtml = '<div style="display:flex;gap:12px;font-size:9px;color:var(--ink2);margin-top:4px;padding-left:2px">';
+  Object.keys(subjsSeen).forEach(function(s){
+    var sty = SUBJ_STYLES[s]||SUBJ_STYLES['Math'];
+    var sym = sty.shape==='circle'
+      ? (sty.fill==='none' ? '○' : '●')
+      : (sty.fill==='none' ? '□' : '■');
+    legendHtml += '<span>'+sym+' '+s+'</span>';
+  });
+  legendHtml += '</div>';
+
+  var xAxis = filled
+    ? '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ink3);margin-top:2px;padding-left:58px">'+
+        '<span>Jun 4</span><span>Jun 10</span></div>'
+    : '<div style="height:13px"></div>';
+
+  return '<div style="display:flex;height:'+totalH+'px;margin-bottom:3px">'+
+    '<div style="width:58px;flex-shrink:0">'+labelHtml+'</div>'+
+    '<div style="flex:1;position:relative;background:var(--panel);border:1.5px solid var(--line-soft);border-radius:4px;overflow:hidden">'+
+      zoneDivs+dotHtml+
+    '</div>'+
+  '</div>'+(filled?xAxis+legendHtml:xAxis);
+}
+
+/* ── HEADER ── */
+function mkHeader(withBands){
+  var name  = filled ? 'Mia Brown' : ph(110);
+  var grade = filled ? 'Grade 3'   : ph(60);
+
+  var nsRows   = ROWS.filter(function(r){ return r.st==='ns'; });
+  var ipRows   = ROWS.filter(function(r){ return r.st==='ip'; });
+  var doneRows = ROWS.filter(function(r){ return r.st==='done'; });
+
+  var sumHtml = filled
+    ? '<span style="font-weight:700">Not started</span> '+nsRows.length+
+      ' <span style="color:var(--line-soft)">&nbsp;•&nbsp;</span>'+
+      '<span style="font-weight:700">In progress</span> '+ipRows.length+
+      ' <span style="color:var(--line-soft)">&nbsp;•&nbsp;</span>'+
+      '<span style="font-weight:700">Scored</span> '+doneRows.length
+    : ph(220);
+
+  var avgBandLbl='', modeLvLbl='';
+  if(filled && doneRows.length>0){
+    var avgSc = doneRows.reduce(function(s,r){ return s+(r.sc||0); },0)/doneRows.length;
+    var avgB  = getBand('Math', Math.round(avgSc));
+    avgBandLbl = 'Avg: '+(BAND_META[avgB]?BAND_META[avgB].lbl:'—');
+    var lvMap={};
+    doneRows.forEach(function(r){ lvMap[r.lv]=(lvMap[r.lv]||0)+1; });
+    var mLv=Object.keys(lvMap).sort(function(a,b){ return lvMap[b]-lvMap[a]; })[0];
+    modeLvLbl = 'Level '+mLv;
+  }
+
+  var statsRow = '<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink2);margin-top:6px">'+
+    '<span>'+(filled?avgBandLbl:ph(90))+'</span>'+
+  '</div>';
+
+  var scatterSection = withBands
+    ? '<div style="margin-top:10px">'+
+        buildScatter(doneRows,filled)+statsRow+
+      '</div>'
+    : '';
+
+  var cardInner = '<div style="display:flex;align-items:center;font-size:13px;color:var(--ink2);margin-bottom:0">'+sumHtml+'<span style="margin-left:auto;display:flex;gap:6px">'+
+      '<span style="font-family:Kalam,cursive;font-size:11px;font-weight:700;color:var(--ink2);background:var(--panel);border:1.5px solid var(--line-soft);border-radius:7px 5px 8px 5px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px">Last 7 days <span style="color:var(--ink3);font-size:10px">▾</span></span>'+
+      '<span style="font-family:Kalam,cursive;font-size:11px;font-weight:700;color:var(--ink2);background:var(--panel);border:1.5px solid var(--line-soft);border-radius:7px 5px 8px 5px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px">All subjects <span style="color:var(--ink3);font-size:10px">▾</span></span>'+
+    '</span>'+'</div>'+scatterSection;
+
+  var card = withBands
+    ? '<div class="stat-card new-card rough dash" style="flex:1;min-width:420px;position:relative">'+
+        cardInner+'</div>'
+    : '<div class="stat-card rough soft" style="flex:1;min-width:300px">'+cardInner+'</div>';
+
+  return '<div class="prof-hd">'+
+    '<div class="prof-row">'+
+      '<div class="stu-ava">'+(filled?'img':'img')+'</div>'+
+      '<div><div class="stu-name">'+name+'</div><div class="stu-grade">'+grade+'</div></div>'+
+      '<div class="stat-cards" style="flex:1;max-width:700px">'+card+'</div>'+
+    '</div>'+
+    '<div class="ptabs">'+
+      '<div class="ptab on">Past Assignments</div>'+
+      '<div class="ptab">Upcoming Assignments</div>'+
+      '<div class="ptab">Settings</div>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ── FILTER BAR ── */
+function mkFilter(withBands){
+  return '<div class="filter-bar">'+
+    '<div class="fsel">All subjects <span class="car">▾</span></div>'+
+    '<div class="fsel">All statuses <span class="car">▾</span></div>'+
+    '<div class="fsel">📅 All dates</div>'+
+  '</div>';
+}
+
+/* ── TABLE ── */
+function mkTable(withBands, interactive){
+  var ths = [
+    '<th style="width:36px"><span class="chk"></span></th>',
+    '<th>Assignment ↕</th>',
+    '<th>Level ↕</th>',
+    '<th>Date ↕</th>',
+    '<th>Status ↕</th>',
+    '<th>Results ↕</th>',
+  ];
+  if(withBands){
+    ths.push('<th class="new-col">Performance</th>');
+  }
+  ths.push('<th></th><th></th>');
+
+  var rows = ROWS.filter(function(r){ return r.st === 'done'; })
+               .map(function(r){ return mkRow(r, withBands, interactive); }).join('');
+
+  return '<div class="tbl-wrap">'+
+    '<table class="tbl">'+
+      '<thead><tr>'+ths.join('')+'</tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+  '</div>';
+}
+
+function mkRow(r, withBands, interactive){
+  var done     = r.st === 'done';
+  var sm       = STS_META[r.st];
+  var isActive = (selectedRow === r.id);
+
+  // assignment name cell
+  var nameInner = filled
+    ? '<span class="asgn-unit">'+r.unit+'</span> <span class="asgn-name-text">'+r.name+'</span>'
+    : ph(PH_W[r.id-1]);
+
+  // score bar
+  var barHtml;
+  if(done && filled){
+    barHtml = '<div class="score-bar"><div class="s-track"><div class="s-fill" style="width:'+r.sc+'%"></div></div>'+
+              '<span class="s-pct">'+r.sc+'%</span></div>';
+  } else if(done){
+    barHtml = '<div class="score-bar"><div class="s-track"><div class="s-fill" style="width:55%"></div></div>'+
+              '<span class="s-pct">—%</span></div>';
+  } else {
+    barHtml = '<div class="score-bar"><div class="s-track"></div>'+
+              '<span class="s-pct dim">0%</span></div>';
+  }
+
+  // band cell
+  var bandCell = '';
+  if(withBands){
+    if(done && r.band){
+      var bm = BAND_META[r.band];
+      var lbl = filled ? bm.lbl : '— —';
+      var step = filled ? bm.step : ph(100);
+      bandCell = '<td><div><span class="band '+bm.cls+'">'+lbl+'</span></div>'+
+                 '<div class="band-step">'+step+'</div></td>';
+    } else {
+      bandCell = '<td><span style="color:var(--ink3)">—</span></td>';
+    }
+  }
+
+  var trStyle = '';
+  if(isActive) trStyle = ' style="background:var(--hi)"';
+  else if(interactive && done) trStyle = ' style="cursor:pointer"';
+  var rid = (interactive && done) ? ' data-rid="'+r.id+'"' : '';
+
+  return '<tr'+trStyle+rid+'>'+
+    '<td><span class="chk"></span></td>'+
+    '<td><div class="asgn-cell"><span class="type-sq"></span><div>'+nameInner+'</div></div></td>'+
+    '<td>'+(filled?r.lv:ph(14))+'</td>'+
+    '<td>'+(filled?r.date:ph(70))+'</td>'+
+    '<td><span class="sts '+sm.cls+'"><span class="sts-dot"></span>'+(filled?sm.lbl:'— —')+'</span></td>'+
+    '<td>'+barHtml+'</td>'+
+    bandCell+
+    '<td>'+(done?'<a class="vlink">View</a>':'')+'</td>'+
+    '<td><span class="more-btn">···</span></td>'+
+  '</tr>';
+}
+
+/* ── SIDE PANEL ── */
+
+function buildAnnotatedBar(sc, thresholds, band, filled){
+  var bandToZone = { p:0, e:1, i:2, prof:3 };
+  var activeZone = bandToZone[band];
+  var boundaries = [0].concat(thresholds).concat([100]);
+  var zoneLabels = ['Pre-em.','Emerging','Instructional','Proficient'];
+
+  var zoneDivs = '';
+  for(var zi=0; zi<4; zi++){
+    var zS = boundaries[zi], zE = boundaries[zi+1], zW = zE-zS;
+    zoneDivs += '<div style="position:absolute;left:'+zS+'%;width:'+zW+'%;height:100%;box-sizing:border-box;'+
+      (zi===activeZone?'background:var(--shade2);':'')+
+      (zi<3?'border-right:1.5px dashed var(--line-soft);':'')+
+    '"></div>';
+  }
+  var fillW  = (filled && sc!==null) ? sc : 0;
+  var scFill = '<div style="position:absolute;left:0;width:'+fillW+'%;height:100%;background:var(--ink3);border-radius:3px 0 0 3px;z-index:1"></div>';
+  var marker = (filled && sc!==null) ? '<div style="position:absolute;left:'+sc+'%;top:-4px;bottom:-4px;width:2.5px;background:var(--ink);transform:translateX(-50%);z-index:2;border-radius:1px"></div>' : '';
+
+  var track = '<div style="position:relative;height:18px;border:1.6px solid var(--line-soft);border-radius:4px;overflow:visible;background:var(--shade);margin-bottom:5px">'+
+    zoneDivs+scFill+marker+'</div>';
+
+  var labels = '<div style="display:flex;margin-bottom:4px;">';
+  for(var zi=0; zi<4; zi++){
+    var zS=boundaries[zi],zE=boundaries[zi+1],zW=zE-zS;
+    var act = (zi===activeZone);
+    labels += '<div style="width:'+zW+'%;text-align:center;font-size:9px;font-weight:'+(act?'700':'400')+';color:'+(act?'var(--ink2)':'var(--ink3)')+'">'+zoneLabels[zi]+'</div>';
+  }
+  labels += '</div>';
+
+  var scoreNum = '<span style="font-size:22px;font-weight:700;color:var(--ink);line-height:1;flex-shrink:0;width:44px;text-align:right">'+
+    (filled&&sc!==null ? sc+'%' : '—%')+'</span>';
+
+  return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+
+    scoreNum+
+    '<div style="flex:1">'+track+labels+'</div>'+
+  '</div>';
+}
+
+function buildNextStep(r, bm, filled){
+  var html = '<div><div class="sp-lbl">Next step</div>';
+
+  if(r.band==='e'||r.band==='p'){
+    html += '<div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px">Reteach</div>';
+    html += '<ul style="margin:0 0 10px;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.7">';
+    html += '<li>'+ph(160)+'</li><li>'+ph(140)+'</li><li>'+ph(150)+'</li>';
+    html += '</ul>';
+    html += '<button class="sp-btn pri" style="width:100%;margin-bottom:14px">↩ Re-assign</button>';
+
+    var suggestLv = r.lv > 1 ? r.lv-1 : 1;
+    html += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">Try lower level</div>';
+    html += '<div style="border:1.8px dashed var(--line-soft);border-radius:9px 7px 10px 8px;padding:10px 12px;margin-bottom:8px;font-size:12px;color:var(--ink2)">';
+    html += filled ? r.subj+' · Level '+suggestLv+' · '+r.unit+'<br><em>'+r.name+'</em>' : ph(120)+'<br>'+ph(100);
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px">'+
+      '<button class="sp-btn pri" style="flex:1">→ Assign</button>'+
+      '<button class="sp-btn" style="flex:1">View</button>'+
+    '</div>';
+  }
+
+  if(r.band==='prof'){
+    html += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">Move to next skill</div>';
+    html += '<div style="border:1.8px dashed var(--line-soft);border-radius:9px 7px 10px 8px;padding:10px 12px;margin-bottom:8px;font-size:12px;color:var(--ink2)">';
+    html += filled ? r.subj+' · Level '+r.lv+' · '+r.unit+'<br><em>Next skill</em>' : ph(120)+'<br>'+ph(80);
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px">'+
+      '<button class="sp-btn pri" style="flex:1">→ Assign</button>'+
+      '<button class="sp-btn" style="flex:1">View</button>'+
+    '</div>';
+  }
+
+  if(r.band==='i'){
+    html += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">Continue at this level</div>';
+    html += '<div style="border:1.8px dashed var(--line-soft);border-radius:9px 7px 10px 8px;padding:10px 12px;margin-bottom:8px;font-size:12px;color:var(--ink2)">';
+    html += filled ? r.subj+' · Level '+r.lv+' · '+r.unit+'<br><em>'+r.name+'</em>' : ph(120)+'<br>'+ph(100);
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px">'+
+      '<button class="sp-btn pri" style="flex:1">→ Assign</button>'+
+      '<button class="sp-btn" style="flex:1">View</button>'+
+    '</div>';
+  }
+
+  return html+'</div>';
+}
+
+function mkPanel(r){
+  r = r || ROWS[6];
+  var bm = BAND_META[r.band];
+
+  var thresholds = (r.subj==='ELA') ? [33,55,85] : [33,55,80];
+  var topicTitles = { Math:'Number & Operations', ELA:'Foundational Skills' };
+  var topicTitle  = filled ? (topicTitles[r.subj]||r.subj) : ph(120);
+  var lessonTitle = filled ? r.name : ph(140);
+  var metaLine    = filled ? 'Grade 3 · '+r.unit : ph(80)+' · '+ph(60);
+  var subjectLetter = filled ? r.subj.charAt(0) : '?';
+
+  var datesHtml = '<div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">'+
+    '<div><span style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:1px">Available</span>'+
+    '<span style="font-weight:700;color:var(--ink2)">'+(filled?'Dec 1, 2025':ph(65))+'</span></div>'+
+    '<div><span style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:1px">Completed</span>'+
+    '<span style="font-weight:700;color:var(--ink2)">'+(filled?r.date:ph(65))+'</span></div>'+
+  '</div>';
+
+  var levelHtml = '<div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">'+
+    'Level '+(filled?r.lv:ph(14))+'</div>';
+
+  var barHtml = buildAnnotatedBar(r.sc, thresholds, r.band, filled);
+
+  var bandRow = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;border-top:1.5px dashed var(--line-soft);margin-top:2px">'+
+    '<div class="sp-band-name" style="margin-bottom:0">'+(filled?bm.lbl:ph(80))+'</div>'+
+    '<div class="sp-thresh">'+(filled?r.subj+' threshold: '+(THRESHOLDS[r.subj]||{})[r.band]:ph(100))+'</div>'+
+  '</div>';
+
+  return '<div class="side-panel">'+
+    '<div class="sp-hd" style="padding-bottom:14px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+        '<span style="width:22px;height:22px;border-radius:5px;background:var(--shade);border:1.5px solid var(--line-soft);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink3);flex-shrink:0">'+subjectLetter+'</span>'+
+        '<span style="font-size:12px;font-weight:700;color:var(--ink2)">'+metaLine+'</span>'+
+        '<button id="panelPrev" style="margin-left:auto;font-family:Kalam,cursive;font-size:14px;color:var(--ink2);background:none;border:1.6px solid var(--line-soft);border-radius:6px 5px 7px 5px;cursor:pointer;padding:1px 6px;line-height:1">↑</button>'+
+        '<button id="panelNext" style="font-family:Kalam,cursive;font-size:14px;color:var(--ink2);background:none;border:1.6px solid var(--line-soft);border-radius:6px 5px 7px 5px;cursor:pointer;padding:1px 6px;line-height:1">↓</button>'+
+        '<button id="panelClose" style="margin-left:4px;font-family:Kalam,cursive;font-size:18px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0;line-height:1">×</button>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--ink2);font-weight:700;margin-bottom:3px">'+topicTitle+'</div>'+
+      '<div style="font-size:15px;font-weight:700;color:var(--ink)"><em>'+lessonTitle+'</em></div>'+
+    '</div>'+
+    '<div class="sp-body">'+
+      '<div><div class="sp-lbl">Result</div>'+
+        '<div class="sp-score-box">'+datesHtml+levelHtml+barHtml+bandRow+'</div>'+
+      '</div>'+
+      buildNextStep(r, bm, filled)+
+    '</div>'+
+  '</div>';
+}
+
+/* ── RENDER ── */
+function render(){
+  var host        = document.getElementById('bodyHost');
+  var interactive = (view === '1');
+  var hdr         = mkHeader(true);
+  var filter      = mkFilter();
+  var table       = mkTable(true, interactive);
+  var showPanel   = (view === '2') || (interactive && selectedRow !== null);
+  var panelRow    = (view === '2')
+    ? ROWS[6]
+    : ROWS.filter(function(r){ return r.id === selectedRow; })[0];
+
+  host.classList.toggle('panel-mode', showPanel);
+
+  if(showPanel && panelRow){
+    host.innerHTML = hdr +
+      '<div class="panel-wrap">'+
+        '<div class="panel-main">'+filter+table+'</div>'+
+        mkPanel(panelRow)+
+      '</div>';
+  } else {
+    host.innerHTML = hdr + filter + table;
+  }
+
+  // row click handlers (interactive view only)
+  if(interactive){
+    host.querySelectorAll('tr[data-rid]').forEach(function(tr){
+      tr.addEventListener('click', function(e){
+        if(e.target.closest('#panelClose')) return;
+        selectedRow = parseInt(this.dataset.rid);
+        render();
+      });
+    });
+  }
+
+  // panel nav
+  var doneIds = ROWS.filter(function(r){ return r.st==='done'; }).map(function(r){ return r.id; });
+  var curIdx  = doneIds.indexOf(selectedRow);
+  var prevBtn = document.getElementById('panelPrev');
+  var nextBtn = document.getElementById('panelNext');
+  if(prevBtn){
+    if(curIdx <= 0) prevBtn.style.opacity = '0.3';
+    prevBtn.addEventListener('click', function(){
+      if(curIdx > 0){ selectedRow = doneIds[curIdx-1]; render(); }
+    });
+  }
+  if(nextBtn){
+    if(curIdx >= doneIds.length-1) nextBtn.style.opacity = '0.3';
+    nextBtn.addEventListener('click', function(){
+      if(curIdx < doneIds.length-1){ selectedRow = doneIds[curIdx+1]; render(); }
+    });
+  }
+  var closeBtn = document.getElementById('panelClose');
+  if(closeBtn){
+    closeBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      selectedRow = null;
+      render();
+    });
+  }
+}
+
+/* ── EVENTS ── */
+document.getElementById('vtabs').addEventListener('click', function(e){
+  var tab = e.target.closest('.vtab');
+  if(!tab) return;
+  view = tab.dataset.v;
+  selectedRow = null;
+  document.querySelectorAll('.vtab').forEach(function(t){
+    t.classList.toggle('active', t === tab);
+  });
+  render();
+});
+
+document.getElementById('togFill').addEventListener('click', function(){
+  filled = !filled;
+  this.classList.toggle('on', filled);
+  this.querySelector('.box').textContent = filled ? '✓' : '';
+  render();
+});
+
+render();
+})();
+</script>
+</body>
+</html>

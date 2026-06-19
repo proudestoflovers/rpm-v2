@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Offline worksheet scoring — wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Gaegu:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#2b2b2b;
+    --ink2:#666;
+    --ink3:#9a9a96;
+    --paper:#fbfaf6;
+    --panel:#ffffff;
+    --line:#3a3a38;
+    --line-soft:#c9c7c0;
+    --hi:#ffe49c;          /* highlighter */
+    --hi-edge:#e9bf4f;
+    --accent:#5a58ff;      /* brand indigo, used sparingly */
+    --good:#5e8c6a;
+    --shade:#efede7;
+    --shade2:#e4e1d8;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Kalam',cursive;
+    color:var(--ink);
+    background:#dcdad2;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* hand-drawn wobble for selected strokes */
+  .rough{position:relative;}
+  .rough::before{
+    content:"";position:absolute;inset:0;
+    border:2px solid var(--line);
+    border-radius:11px 9px 12px 8px;
+    filter:url(#wob);
+    pointer-events:none;
+  }
+  .rough.soft::before{border-color:var(--line-soft);border-width:1.6px;}
+  .rough.tight::before{border-radius:8px 7px 9px 6px;}
+
+  /* ============ VIEWER CHROME ============ */
+  .viewer{
+    position:sticky;top:0;z-index:50;
+    background:#1d1d1f;color:#f4f4f2;
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;row-gap:9px;
+    padding:9px 20px;border-bottom:2px solid #000;
+    font-family:'Gaegu',cursive;
+  }
+  .viewer .vtitle{font-weight:700;font-size:18px;letter-spacing:.3px;white-space:nowrap;}
+  .viewer .vtitle small{color:#a7a7a3;font-weight:400;margin-left:8px;font-size:14px;}
+  .tabs{display:flex;gap:8px;}
+  .tab{
+    font-family:'Gaegu',cursive;font-size:16px;font-weight:700;
+    color:#cfcfca;background:transparent;border:1.5px solid #4a4a4c;
+    border-radius:9px 7px 10px 6px;padding:5px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:8px;line-height:1;
+  }
+  .tab .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;
+    border:1.5px solid currentColor;font-size:12px;}
+  .tab:hover{color:#fff;border-color:#6f6f72;}
+  .tab.active{color:#1d1d1f;background:var(--hi);border-color:var(--hi-edge);}
+  .vspring{flex:1;}
+  .togs{display:flex;gap:8px;align-items:center;}
+  .tog{
+    font-family:'Gaegu',cursive;font-size:14px;font-weight:700;color:#cfcfca;
+    background:transparent;border:1.5px dashed #5a5a5c;border-radius:8px;
+    padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  }
+  .tog .box{width:14px;height:14px;border:1.5px solid #8a8a8c;border-radius:3px;display:inline-grid;place-items:center;font-size:11px;color:#1d1d1f;}
+  .tog.on{color:#fff;border-style:solid;border-color:var(--hi-edge);}
+  .tog.on .box{background:var(--hi);border-color:var(--hi-edge);}
+
+  /* ============ APP SHELL ============ */
+  .stage{display:flex;justify-content:center;padding:22px;}
+  .app{
+    width:min(1340px,100%);
+    background:var(--paper);
+    border:2px solid var(--line);border-radius:14px;
+    box-shadow:6px 7px 0 rgba(0,0,0,.10);
+    display:grid;grid-template-columns:62px 1fr;overflow:hidden;
+    min-height:760px;
+  }
+  .rail{
+    background:#1d1d1f;display:flex;flex-direction:column;align-items:center;
+    gap:18px;padding:16px 0;
+  }
+  .rail .glyph{width:26px;height:26px;border:1.8px solid #6c6c6e;border-radius:7px;}
+  .rail .glyph.on{border-color:#fff;background:#3a3a3c;}
+  .rail .sep{flex:1;}
+  .rail .ava{width:30px;height:30px;border-radius:50%;border:1.8px solid #8a8a8c;}
+
+  .work{display:flex;flex-direction:column;min-width:0;}
+  .topbar{
+    display:flex;align-items:center;gap:14px;
+    padding:13px 22px;background:var(--panel);border-bottom:2px solid var(--line);
+  }
+  .crumb{font-size:15px;color:var(--ink2);}
+  .crumb b{color:var(--ink);}
+  .chev{margin:0 6px;color:var(--ink3);}
+  .topbar h1{font-size:21px;margin:0;font-weight:700;}
+  .spring{flex:1;}
+  .save{display:flex;align-items:center;gap:7px;color:var(--good);font-size:15px;}
+  .save .dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--good);display:inline-grid;place-items:center;font-size:9px;}
+  .btn{
+    font-family:'Kalam',cursive;font-size:15px;font-weight:700;cursor:pointer;
+    border:2px solid var(--line);background:var(--panel);color:var(--ink);
+    border-radius:10px 8px 11px 7px;padding:7px 16px;
+  }
+  .btn.primary{background:var(--ink);color:#fff;}
+  .btn.ghost{border-style:dashed;}
+  .btn.sm{font-size:14px;padding:4px 11px;}
+
+  .body{padding:20px 22px 26px;overflow:auto;flex:1;position:relative;}
+
+  /* context / setup bar */
+  .ctx{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .field{display:flex;flex-direction:column;gap:3px;}
+  .field .lab{font-size:13px;color:var(--ink2);font-weight:700;}
+  .select{
+    background:var(--panel);border:1.8px solid var(--line);border-radius:9px 7px 10px 7px;
+    padding:7px 13px;font-family:'Kalam',cursive;font-size:15px;font-weight:700;
+    display:flex;align-items:center;gap:10px;min-width:160px;justify-content:space-between;
+  }
+  .select .car{color:var(--ink3);}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;}
+  .chip{
+    background:var(--shade);border:1.6px solid var(--line-soft);border-radius:20px;
+    padding:5px 12px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;
+    font-family:'Kalam',cursive;color:var(--ink);cursor:pointer;line-height:1.1;
+  }
+  .chip:focus-visible{outline:2px solid var(--line);outline-offset:2px;}
+  .chip.on{background:var(--hi);border-color:var(--hi-edge);}
+  .chip .x{color:var(--ink3);font-weight:400;}
+  .chip.add{border-style:dashed;background:transparent;color:var(--ink2);}
+
+  .prog{display:flex;align-items:center;gap:12px;margin-left:auto;}
+  .prog .bar{width:150px;height:12px;border:1.8px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);}
+  .prog .bar i{display:block;height:100%;background:var(--hi);border-right:1.8px solid var(--hi-edge);}
+  .prog .txt{font-size:14px;font-weight:700;color:var(--ink2);white-space:nowrap;}
+
+  /* ====== shared cell input ====== */
+  .scell{display:inline-flex;align-items:center;gap:3px;}
+  .sin{
+    width:46px;text-align:center;font-family:'Kalam',cursive;font-weight:700;font-size:19px;
+    color:var(--ink);background:var(--panel);border:1.8px solid var(--line-soft);
+    border-radius:8px 6px 9px 6px;padding:5px 2px;
+  }
+  .sin:focus{outline:none;border-color:var(--line);background:var(--hi);box-shadow:2px 2px 0 rgba(0,0,0,.12);}
+  .sin.abs{color:var(--ink3);font-size:14px;}
+  .den{font-size:15px;color:var(--ink3);font-weight:700;white-space:nowrap;}
+
+  /* annotations hidden — removed */
+  .anno{display:none;}
+  .anno .arrow{position:absolute;width:46px;height:30px;}
+  .anno .arrow path{stroke:var(--accent);stroke-width:2;fill:none;}
+
+  .section{display:none;}
+  .section.active{display:block;}
+
+  .muted{color:var(--ink3);}
+  .small{font-size:13px;}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--shade2);border:1.6px solid var(--line-soft);
+    display:inline-grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink2);flex:none;}
+  .hr{height:0;border-top:1.6px dashed var(--line-soft);margin:14px 0;}
+
+  /* keyboard hint footer */
+  .keys{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--ink2);margin-top:16px;}
+  .keys b{font-weight:700;color:var(--ink);}
+  .kbd{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;
+    border:1.8px solid var(--line);border-radius:6px;background:var(--panel);font-family:'Gaegu',cursive;font-weight:700;font-size:13px;box-shadow:1px 1px 0 rgba(0,0,0,.12);}
+
+  /* per-cell qualitative affordance + popover */
+  .scell{position:relative;}
+  .cellnote{display:inline-grid;place-items:center;width:26px;height:24px;flex:none;margin-left:2px;
+    border:1.6px dashed var(--line-soft);border-radius:7px 6px 8px 6px;background:var(--panel);
+    color:var(--ink2);cursor:pointer;padding:0;visibility:hidden;}
+  .cellnote svg{width:14px;height:14px;display:block;}
+  .scell.focused .cellnote{visibility:visible;}
+  .cellnote:hover{border-color:var(--line);color:var(--ink);}
+  .cellnote.has{visibility:visible;border-style:solid;border-color:var(--line);background:var(--panel);color:var(--ink2);}
+  .cellpop{position:fixed;z-index:200;background:var(--panel);border-radius:12px;padding:13px 15px;
+    box-shadow:5px 7px 0 rgba(0,0,0,.13);font-family:'Kalam',cursive;}
+  .cellpop .pophead{font-size:14px;color:var(--ink2);margin-bottom:4px;}
+  .cellpop .pophead b{color:var(--ink);font-size:16px;}
+  .poplab{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin:11px 0 4px;text-transform:uppercase;letter-spacing:.4px;}
+  .popsel,.popcustom,.popnote{width:100%;font-family:'Kalam',cursive;font-size:15px;font-weight:700;
+    border:1.7px solid var(--line);border-radius:8px 7px 9px 6px;padding:7px 10px;background:var(--panel);color:var(--ink);}
+  .popcustom{margin-top:6px;font-weight:400;}
+  .popnote{font-weight:400;}
+  .popchips{display:flex;flex-wrap:wrap;gap:6px;}
+  .pophint{font-size:12px;color:var(--ink3);margin-top:12px;display:flex;align-items:center;gap:6px;}
+  .pophint .kbd{min-width:20px;height:20px;font-size:11px;}
+  .rosterActive::before{border-color:var(--line)!important;}
+  .rDetail input{width:100%;font-family:'Kalam',cursive;font-size:15px;font-weight:400;
+    border:1.7px solid var(--line);border-radius:8px 7px 9px 6px;padding:7px 10px;
+    background:var(--panel);color:var(--ink);margin-bottom:2px;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="wob"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.016" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/></filter></svg>
+
+<!-- ===== VIEWER CHROME ===== -->
+<div class="viewer">
+  <div class="vtitle">Offline scoring<small>low-fi wireframes</small></div>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-dir="C"><span class="n">1</span> Roster run · wide</button>
+    <button class="tab" data-dir="E"><span class="n">2</span> Roster run · narrow</button>
+    <button class="tab" data-dir="A"><span class="n">3</span> Score grid</button>
+    <button class="tab" data-dir="B"><span class="n">4</span> Worksheet stack</button>
+    <button class="tab" data-dir="D"><span class="n">5</span> Flipped grid</button>
+  </div>
+  <div class="vspring"></div>
+  <div class="togs">
+    <button class="tog" id="togFill"><span class="box"></span> Sample data</button>
+  </div>
+</div>
+
+<!-- ===== STAGE ===== -->
+<div class="stage">
+  <div class="app">
+    <!-- left rail -->
+    <div class="rail">
+      <div class="glyph"></div>
+      <div class="glyph on"></div>
+      <div class="glyph"></div>
+      <div class="glyph"></div>
+      <div class="sep"></div>
+      <div class="ava"></div>
+    </div>
+
+    <!-- work area -->
+    <div class="work">
+      <div class="topbar">
+        <div class="crumb"><b>Students</b><span class="chev">›</span><span id="crumbLeaf">Enter scores</span></div>
+        <div class="spring"></div>
+        <div class="save"><span class="dot">✓</span> All changes saved</div>
+        <button class="btn primary">Done</button>
+      </div>
+
+      <div class="body" id="bodyHost">
+        <!-- direction sections injected here -->
+        <section class="section" id="dirA"></section>
+        <section class="section" id="dirB"></section>
+        <section class="section active" id="dirC"></section>
+        <section class="section" id="dirE"></section>
+        <section class="section" id="dirD"></section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Keep the page visible even if an assistive browser extension tries to hide
+   the body until it finishes processing (it never resolves in a sandbox).
+   Use a static CSS override + one-shot timeouts only — NO MutationObserver,
+   which can ping-pong with the extension's own observer and lock the thread. */
+(function(){
+  try{ var st=document.createElement('style'); st.textContent='html body{display:block !important}'; (document.head||document.documentElement).appendChild(st); }catch(e){}
+  function fix(){ try{ if(getComputedStyle(document.body).display==='none'){ document.body.style.setProperty('display','block','important'); } }catch(e){} }
+  [0,150,400,1000,2500].forEach(function(t){ setTimeout(fix,t); });
+})();
+</script>
+<script src="wireframe.js"></script>
+</body>
+</html>

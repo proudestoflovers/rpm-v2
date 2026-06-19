@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html data-eds-theme="light" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Score Card — Roster Run</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="eds.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: 'Figtree', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #f4f4f6;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 24px 64px;
+  }
+
+  /* Score input */
+  .sc-score-input {
+    width: 72px; height: 44px;
+    border: 1.5px solid #939395; border-radius: 12px;
+    text-align: center; font-family: 'Figtree', sans-serif;
+    font-size: 20px; font-weight: 700; color: #1d1d1f;
+    background: #fff; outline: none;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .sc-score-input:focus {
+    border-color: #5a58ff;
+    box-shadow: 0 0 0 3px rgba(90,88,255,.15);
+  }
+  .sc-score-input.sc-abs { color: #6d6d6f; font-size: 14px; font-weight: 500; }
+
+  /* Prompt chips */
+  .sc-prompt-chip {
+    height: 32px; padding: 0 14px;
+    border: 1.5px solid #e1e1e3; border-radius: 99px;
+    background: #fff; font-family: 'Figtree', sans-serif;
+    font-size: 13px; font-weight: 600; color: #49494b;
+    cursor: pointer; white-space: nowrap;
+    transition: background .1s, border-color .1s, color .1s;
+  }
+  .sc-prompt-chip:hover { background: #f4f4f6; border-color: #939395; }
+  .sc-chip-on {
+    background: #eaeaff !important;
+    border-color: #5a58ff !important;
+    color: #3d33cc !important;
+  }
+
+  /* Note input */
+  .sc-note-input {
+    flex: 1; height: 36px; padding: 0 12px;
+    border: 1.5px solid #e1e1e3; border-radius: 10px;
+    font-family: 'Figtree', sans-serif; font-size: 14px;
+    color: #1d1d1f; background: #fff; outline: none;
+  }
+  .sc-note-input:focus {
+    border-color: #5a58ff;
+    box-shadow: 0 0 0 3px rgba(90,88,255,.12);
+  }
+  .sc-note-input::placeholder { color: #9a9a9c; }
+
+  /* Nav button */
+  .sc-nav-btn {
+    border: none; background: transparent;
+    font-family: 'Figtree', sans-serif;
+    font-size: 14px; font-weight: 600; color: #5a58ff;
+    display: flex; align-items: center; gap: 4px;
+    padding: 0; cursor: pointer;
+    transition: opacity .1s;
+  }
+  .sc-nav-btn:disabled { opacity: 0.3; cursor: default; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Shared primitives from the RR kit -->
+<script type="text/babel" src="rr-kit.jsx"></script>
+
+<script type="text/babel">
+
+/* ── Sample data ──────────────────────────────────────────────────────────── */
+
+const CARD_ASSIGNMENT = {
+  id:      'n203',
+  name:    'Exploring Money Post-Assessment',
+  available: 'Jun 10',
+  unit:    9,
+  topic:   'Exploring Money',
+  subject: 'math',
+};
+
+const CARD_STUDENTS = [
+  { id:'s4', name:'Chloe McKim',    emoji:'👱🏻‍♀️', level:2, max:15 },
+  { id:'s1', name:'Mia Brown',      emoji:'👩🏾',   level:2, max:15 },
+  { id:'s5', name:'Noah Stevenson', emoji:'👦🏼',   level:3, max:10 },
+  { id:'s3', name:'Sophia Millet',  emoji:'👩🏽',   level:1, max:20 },
+];
+
+const SC_PROMPTS = ['Independent','Verbal','Gestural','Physical','Hand-over-hand'];
+
+const SC_SUBJ = {
+  math: { bg:'#FEF3C7', color:'#a56c00', dot:'#f5c842' },
+  ela:  { bg:'#ecdcff', color:'#7135ac', dot:'#c4a0e8' },
+  sci:  { bg:'#c8f5da', color:'#166634', dot:'#6dd0c0' },
+  ss:   { bg:'#c4f0eb', color:'#026663', dot:'#87c4e8' },
+};
+
+/* ── Thumbnail placeholder ────────────────────────────────────────────────── */
+function ThumbPlaceholder() {
+  return (
+    <svg width={40} height={40} viewBox="0 0 24 24" fill="none"
+      stroke="#c4c4c8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  );
+}
+
+/* ── Score Card page ──────────────────────────────────────────────────────── */
+function ScoreCardPage() {
+  const [studentIdx, setStudentIdx] = React.useState(0);
+  const [scores,  setScores]  = React.useState({});
+  const [prompts, setPrompts] = React.useState({});
+  const [notes,   setNotes]   = React.useState({});
+  const inputRef = React.useRef(null);
+
+  const s   = CARD_STUDENTS[studentIdx];
+  const asg = CARD_ASSIGNMENT;
+  const k   = s.id + '|' + asg.id;
+  const score  = scores[k]  ?? '';
+  const prompt = prompts[k] || '';
+  const note   = notes[k]   || '';
+  const isAbs  = score === 'Abs';
+  const isFirst = studentIdx === 0;
+  const isLast  = studentIdx === CARD_STUDENTS.length - 1;
+
+  const doneCount = CARD_STUDENTS.filter(st => {
+    const v = scores[st.id + '|' + asg.id];
+    return v != null && v !== '';
+  }).length;
+
+  const subj = SC_SUBJ[asg.subject] || SC_SUBJ.math;
+
+  /* Auto-focus score input when student changes */
+  React.useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [studentIdx]);
+
+  function goNext() { if (!isLast)  setStudentIdx(i => i + 1); }
+  function goPrev() { if (!isFirst) setStudentIdx(i => i - 1); }
+
+  function handleScoreKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      goNext();
+    }
+    if ((e.key === 'a' || e.key === 'A') && score === '') {
+      e.preventDefault();
+      setScores(p => ({ ...p, [k]: 'Abs' }));
+      setTimeout(goNext, 80);
+    }
+  }
+
+  return (
+    <div style={{ width:'100%', maxWidth:600 }}>
+
+      {/* ──────────── Combined card ──────────── */}
+      <div style={{
+        background: '#fff',
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: '1px solid #e8e8ea',
+        boxShadow: '0 1px 3px rgba(29,29,31,0.04), 0 8px 32px rgba(29,29,31,0.06)',
+      }}>
+
+        {/* ── LESSON HEADER ── */}
+        <div style={{ display:'flex', borderBottom:'1px solid #f0f0f2', minHeight:152 }}>
+
+          {/* Thumbnail */}
+          <div style={{
+            width:140, flexShrink:0,
+            margin:'12px 0 12px 12px',
+            background:'#f4f4f6', borderRadius:12,
+            display:'flex', alignItems:'center', justifyContent:'center',
+          }}>
+            <ThumbPlaceholder />
+          </div>
+
+          {/* Metadata */}
+          <div style={{ flex:1, padding:'16px 18px', display:'flex', flexDirection:'column', minWidth:0 }}>
+
+            {/* Subject badge + unit */}
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
+              <div style={{
+                width:26, height:26, borderRadius:'50%',
+                background:subj.bg, flexShrink:0,
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                <span style={{ width:10, height:10, borderRadius:'50%', background:subj.dot, display:'block' }} />
+              </div>
+              <span style={{ fontSize:13, fontWeight:700, color:subj.color }}>1. Unit {asg.unit}</span>
+            </div>
+
+            {/* Topic */}
+            <div style={{ fontSize:13, color:'#9a9a9c', marginBottom:3 }}>{asg.topic}</div>
+
+            {/* Lesson title */}
+            <div style={{ fontSize:18, fontWeight:700, color:'#1d1d1f', lineHeight:1.3, textWrap:'pretty', marginBottom:'auto' }}>
+              {asg.name}
+            </div>
+
+            {/* Footer row */}
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, paddingTop:10, borderTop:'1px solid #f4f4f6' }}>
+              <span style={{ fontSize:12, color:'#9a9a9c', flexShrink:0 }}>Available {asg.available}</span>
+              <span style={{ color:'#ddd' }}>·</span>
+              <div style={{ flex:1, height:4, borderRadius:99, background:'#e1e1e3', overflow:'hidden' }}>
+                <div style={{
+                  width:`${Math.round(doneCount / CARD_STUDENTS.length * 100)}%`,
+                  height:'100%', background:'#5a58ff', transition:'width .3s',
+                }} />
+              </div>
+              <span style={{ fontSize:12, fontWeight:600, color:'#6d6d6f', flexShrink:0 }}>
+                {doneCount}/{CARD_STUDENTS.length}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── STUDENT RECORD ── */}
+        <div style={{ padding:'18px 20px 20px' }}>
+
+          {/* Identity row */}
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
+
+            {/* Avatar */}
+            <div style={{
+              width:42, height:42, borderRadius:'50%', flexShrink:0,
+              background:'#f4f4f6', border:'1px solid #ebebeb',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:24, userSelect:'none',
+            }}>
+              {s.emoji}
+            </div>
+
+            {/* Name + level */}
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
+              <span style={{ fontSize:16, fontWeight:700, color:'#1d1d1f', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                {s.name}
+              </span>
+              <RRTag tone="default">Level {s.level}</RRTag>
+            </div>
+
+            {/* Score input */}
+            <div style={{ display:'flex', alignItems:'center', gap:6, flexShrink:0 }}>
+              <input
+                ref={inputRef}
+                className={'sc-score-input' + (isAbs ? ' sc-abs' : '')}
+                inputMode="numeric"
+                value={isAbs ? 'Abs' : score}
+                onChange={e => setScores(p => ({ ...p, [k]: e.target.value.replace(/[^0-9]/g, '') }))}
+                onKeyDown={handleScoreKey}
+              />
+              <span style={{ fontSize:14, fontWeight:600, color:'#9a9a9c' }}>/{s.max}</span>
+            </div>
+
+          </div>
+
+          {/* Prompting level */}
+          <div style={{ marginBottom:14 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:'#9a9a9c', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>
+              Prompting level
+            </div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {SC_PROMPTS.map(p => (
+                <button key={p}
+                  className={'sc-prompt-chip' + (prompt === p ? ' sc-chip-on' : '')}
+                  onClick={() => setPrompts(prev => ({ ...prev, [k]: prompt === p ? '' : p }))}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Note */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:18 }}>
+            <RRIcon name="pen" size={14} color="#9a9a9c" />
+            <input className="sc-note-input"
+              placeholder="Add a note…"
+              value={note}
+              onChange={e => setNotes(p => ({ ...p, [k]: e.target.value }))} />
+          </div>
+
+          {/* Navigation */}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingTop:14, borderTop:'1px solid #f0f0f2' }}>
+
+            <button className="sc-nav-btn" onClick={goPrev} disabled={isFirst}>
+              <RRIcon name="chevLeft" size={16} color="#5a58ff" />
+              Previous
+            </button>
+
+            <span style={{ fontSize:13, color:'#9a9a9c' }}>
+              {studentIdx + 1} of {CARD_STUDENTS.length}
+            </span>
+
+            {isLast
+              ? <RRButton variant="brand" size="sm">Done</RRButton>
+              : (
+                <button className="sc-nav-btn" onClick={goNext}>
+                  Next
+                  <RRIcon name="chevRight" size={16} color="#5a58ff" />
+                </button>
+              )
+            }
+
+          </div>
+        </div>
+      </div>
+
+      {/* Keyboard hints */}
+      <div style={{ display:'flex', gap:16, marginTop:14, fontSize:13, color:'#9a9a9c', justifyContent:'center' }}>
+        <span>
+          <kbd style={{ background:'#fff', border:'1px solid #e1e1e3', borderRadius:5, padding:'2px 7px', fontFamily:'inherit', fontSize:12 }}>Enter</kbd>
+          {' '}next student
+        </span>
+        <span>
+          <kbd style={{ background:'#fff', border:'1px solid #e1e1e3', borderRadius:5, padding:'2px 7px', fontFamily:'inherit', fontSize:12 }}>A</kbd>
+          {' '}mark absent
+        </span>
+        <span>· Autosaves</span>
+      </div>
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<ScoreCardPage />);
+</script>
+</body>
+</html>

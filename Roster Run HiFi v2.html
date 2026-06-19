@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html data-eds-theme="light" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Roster Run — Everway</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="eds.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; overflow: hidden; }
+  body { font-family: 'Figtree', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; background: #0e0e0f; }
+  button, input { font-family: inherit; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d0d0d2; border-radius: 99px; }
+
+  /* Score input */
+  .rr-score-input {
+    width: 72px; height: 44px;
+    border: 1.5px solid #939395; border-radius: 12px;
+    text-align: center; font-family: 'Figtree', sans-serif;
+    font-size: 20px; font-weight: 700; color: #1d1d1f;
+    background: #fff; outline: none;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .rr-score-input:focus {
+    border-color: #5a58ff;
+    box-shadow: 0 0 0 3px rgba(90,88,255,.15);
+  }
+  .rr-score-input.rr-abs { color: #6d6d6f; font-size: 14px; font-weight: 500; }
+
+  /* Prompt chips */
+  .rr-prompt-chip {
+    height: 32px; padding: 0 14px;
+    border: 1.5px solid #e1e1e3; border-radius: 99px;
+    background: #fff; font-family: 'Figtree', sans-serif;
+    font-size: 13px; font-weight: 600; color: #49494b;
+    cursor: pointer; white-space: nowrap;
+    transition: background .1s, border-color .1s, color .1s;
+  }
+  .rr-prompt-chip:hover { background: #f4f4f6; border-color: #939395; }
+  .rr-chip-on {
+    background: #eaeaff !important;
+    border-color: #5a58ff !important;
+    color: #3d33cc !important;
+  }
+
+  /* Note input */
+  .rr-note-input {
+    flex: 1; height: 36px; padding: 0 12px;
+    border: 1.5px solid #e1e1e3; border-radius: 10px;
+    font-family: 'Figtree', sans-serif; font-size: 14px;
+    color: #1d1d1f; background: #fff; outline: none;
+  }
+  .rr-note-input:focus {
+    border-color: #5a58ff;
+    box-shadow: 0 0 0 3px rgba(90,88,255,.12);
+  }
+  .rr-note-input::placeholder { color: #9a9a9c; }
+
+  /* Screen transition */
+  .rr-screen { opacity: 1; }
+
+  /* Chip pulse on keyboard select */
+  @keyframes rrChipPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(90,88,255,.25); }
+    100% { transform: scale(1); }
+  }
+  .rr-chip-pulse { animation: rrChipPulse .35s ease-out; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0e0e0f">
+  <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+    <rect width="240" height="160" fill="#0e0e0f"/>
+    <rect x="12" y="12" width="216" height="136" rx="8" fill="#ffffff"/>
+    <rect x="20" y="20" width="200" height="24" fill="#f4f4f6" rx="4"/>
+    <rect x="20" y="52" width="48" height="80" fill="#eaeaff" rx="4"/>
+    <rect x="76" y="52" width="144" height="16" fill="#e1e1e3" rx="2"/>
+    <rect x="76" y="72" width="144" height="12" fill="#ebebeb" rx="2"/>
+    <rect x="76" y="88" width="100" height="12" fill="#ebebeb" rx="2"/>
+    <rect x="20" y="140" width="200" height="1" fill="#e1e1e3"/>
+  </svg>
+</template>
+<div id="root"></div>
+
+<!-- ── DATA ──────────────────────────────────────────────────────────────────-->
+<script>
+/* Students — shared by both the overview and scoring screens */
+const ROSTER_STUDENTS = [
+  { id:'s1', name:'Mia Brown',      emoji:'👩🏾', level:2, max:15 },
+  { id:'s2', name:'Leo Smith',      emoji:'🧑🏽', level:1, max:20 },
+  { id:'s3', name:'Sophia Millet',  emoji:'👩🏽', level:1, max:20 },
+  { id:'s4', name:'Chloe McKim',    emoji:'👱🏻‍♀️', level:2, max:15 },
+  { id:'s5', name:'Noah Stevenson', emoji:'👦🏼', level:3, max:10 },
+  { id:'s6', name:'Elijah Wright',  emoji:'👦🏿', level:2, max:15 },
+];
+
+const ASSIGNMENTS = [
+  {id:"n203",name:"Exploring Money Post-Assessment",available:"Jun 10"},
+  {id:"n202",name:"Exploring Money Review",available:"Jun 9"},
+  {id:"n201",name:"Identifying Coin Values",available:"Jun 8"},
+  {id:"n200",name:"Learning Coin Values",available:"Jun 5"},
+  {id:"n199",name:"Identifying Coins",available:"Jun 4"},
+  {id:"n198",name:"Naming Coins",available:"Jun 3"},
+  {id:"n197",name:"Exploring Money Pre-Assessment",available:"Jun 2"},
+  {id:"n196",name:"Exploring Money Overview",available:"Jun 1"},
+  {id:"n195",name:"Exploring Measurement and Data Post-Assessment",available:"May 29"},
+  {id:"n194",name:"Exploring Measurement and Data Review",available:"May 28"},
+  {id:"n193",name:"Reading Tally Graphs",available:"May 27"},
+  {id:"n192",name:"Reading Bar Graphs",available:"May 26"},
+  {id:"n191",name:"Reading Picture Graphs",available:"May 25"},
+  {id:"n190",name:"Making Tally Graphs",available:"May 22"},
+  {id:"n189",name:"Making Bar Graphs",available:"May 21"},
+  {id:"n188",name:"Making Picture Graphs",available:"May 20"},
+  {id:"n187",name:"Introduction to Data",available:"May 19"},
+  {id:"n186",name:"Ordering 3 Objects: Taller or Shorter",available:"May 18"},
+  {id:"n185",name:"Ordering 3 Objects: Longer or Shorter",available:"May 15"},
+  {id:"n184",name:"Taller or Shorter?",available:"May 14"},
+  {id:"n183",name:"Longer or Shorter?",available:"May 13"},
+  {id:"n182",name:"Non-Standard Measurements",available:"May 12"},
+  {id:"n181",name:"Introduction to Measurement",available:"May 11"},
+  {id:"n180",name:"Exploring Measurement and Data Pre-Assessment",available:"May 8"},
+  {id:"n179",name:"Exploring Measurement and Data Overview",available:"May 7"},
+  {id:"n178",name:"Exploring Shapes Post-Assessment",available:"May 6"},
+  {id:"n177",name:"Exploring Shapes Review",available:"May 5"},
+  {id:"n176",name:"Create 3D Shapes Craft Activity",available:"May 4"},
+  {id:"n175",name:"Create 3D Shapes",available:"May 1"},
+  {id:"n174",name:"Create 3D Shapes (Parts)",available:"Apr 30"},
+  {id:"n173",name:"Sort 3D Shapes (Edges)",available:"Apr 29"},
+  {id:"n172",name:"3D Shapes: Attributes (Edges)",available:"Apr 28"},
+  {id:"n171",name:"Sort 3D Shapes (Corners)",available:"Apr 27"},
+  {id:"n170",name:"3D Shapes: Attributes (Corners)",available:"Apr 24"},
+  {id:"n169",name:"Sort 3D Shapes (Faces)",available:"Apr 23"},
+  {id:"n168",name:"3D Shapes: Attributes (Faces)",available:"Apr 22"},
+  {id:"n167",name:"Naming 3D Shapes",available:"Apr 21"},
+  {id:"n166",name:"Relationship between 2D and 3D",available:"Apr 20"},
+  {id:"n165",name:"Divide 2D Shapes (Drawing)",available:"Apr 17"},
+  {id:"n164",name:"Divide 2D Shapes in Half",available:"Apr 16"},
+  {id:"n163",name:"Divide 2D Shapes (Equal/Not Equal)",available:"Apr 15"},
+  {id:"n162",name:"Create 2D Shapes (Triangles)",available:"Apr 14"},
+  {id:"n161",name:"Create 2D Shapes (Hexagons)",available:"Apr 13"},
+  {id:"n160",name:"Create 2D Shapes (Parts)",available:"Apr 10"},
+  {id:"n159",name:"Sorting 2D Shapes: Corners",available:"Apr 9"},
+  {id:"n158",name:"Identify 2D Shapes Attributes: Corners",available:"Apr 8"},
+  {id:"n157",name:"Sorting 2D Shapes: Sides",available:"Apr 7"},
+  {id:"n156",name:"Identify 2D Shapes Attributes: Sides",available:"Apr 6"},
+  {id:"n155",name:"Naming 2D Shapes",available:"Apr 3"},
+  {id:"n154",name:"Non-Defining Attributes",available:"Apr 2"},
+  {id:"n153",name:"Defining Attributes",available:"Apr 1"},
+  {id:"n152",name:"What are Attributes?",available:"Mar 31"},
+  {id:"n151",name:"Common 2D Things (Advanced Shapes)",available:"Mar 30"},
+  {id:"n150",name:"Common 2D Things (Common Shapes)",available:"Mar 27"},
+  {id:"n149",name:"What is a 2D Shape?",available:"Mar 26"},
+  {id:"n148",name:"Exploring Shapes Pre-Assessment",available:"Mar 25"},
+  {id:"n147",name:"Exploring Shapes Overview",available:"Mar 24"},
+  {id:"n146",name:"Exploring Time Post-Assessment",available:"Mar 23"},
+  {id:"n145",name:"Exploring Time Unit Review",available:"Mar 20"},
+  {id:"n144",name:"Reading Time: Analog Match",available:"Mar 19"},
+  {id:"n143",name:"Reading Time: Analog Combo",available:"Mar 18"},
+  {id:"n142",name:"Reading Time: Analog Hour",available:"Mar 17"},
+  {id:"n141",name:"Parts of an Analog Clock: Hours",available:"Mar 16"},
+  {id:"n140",name:"Parts of an Analog Clock: Physical Components",available:"Mar 13"},
+  {id:"n139",name:"Reading Time: Digital",available:"Mar 12"},
+  {id:"n138",name:"Parts of a Digital Clock",available:"Mar 11"},
+  {id:"n137",name:"Clocks: Analog vs Digital",available:"Mar 10"},
+  {id:"n136",name:"Understanding the Calendar (Special Dates)",available:"Mar 9"},
+  {id:"n135",name:"Understanding the Calendar (Seasons)",available:"Mar 6"},
+  {id:"n134",name:"Understanding the Calendar (Yearly)",available:"Mar 5"},
+  {id:"n133",name:"Understanding the Calendar (Monthly)",available:"Mar 4"},
+  {id:"n132",name:"Concept of Time: Compare Week/Year",available:"Mar 3"},
+  {id:"n131",name:"Concept of Time: Compare Day/Month",available:"Mar 2"},
+  {id:"n130",name:"Concept of Time: Yearly",available:"Feb 27"},
+  {id:"n129",name:"Understanding the Calendar (Weekly)",available:"Feb 26"},
+  {id:"n128",name:"Concept of Time: AM/PM",available:"Feb 25"},
+  {id:"n127",name:"Parts of the Day Order",available:"Feb 24"},
+  {id:"n126",name:"Parts of the Day Vocab",available:"Feb 23"},
+  {id:"n125",name:"Parts of the Day",available:"Feb 20"},
+  {id:"n124",name:"Introduction to Time",available:"Feb 19"},
+  {id:"n123",name:"Exploring Time Pre-Assessment",available:"Feb 18"},
+  {id:"n122",name:"Exploring Time Unit Overview",available:"Feb 17"},
+  {id:"n121",name:"Exploring Place Value Post-Assessment",available:"Feb 16"},
+  {id:"n120",name:"Exploring Place Value Unit Review",available:"Feb 13"},
+  {id:"n119",name:"Find 10 Less",available:"Feb 12"},
+  {id:"n118",name:"Find 10 More",available:"Feb 11"},
+  {id:"n117",name:"Show 10 Less",available:"Feb 10"},
+  {id:"n116",name:"Show 10 More",available:"Feb 9"},
+  {id:"n115",name:"Compare Numbers (Abstract)",available:"Feb 6"},
+  {id:"n114",name:"Compare Numbers (Representational)",available:"Feb 5"},
+  {id:"n113",name:"Compare Numbers (Concrete)",available:"Feb 4"},
+  {id:"n112",name:"Introduction to Number Comparison",available:"Feb 3"},
+  {id:"n111",name:"Identify Digits' Amount (Abstract)",available:"Feb 2"},
+  {id:"n110",name:"Identify Digits' Amount (Representational)",available:"Jan 30"},
+  {id:"n109",name:"Identify Digits' Amount (Concrete)",available:"Jan 29"},
+  {id:"n108",name:"Identify Digits' Place Value (Abstract)",available:"Jan 28"},
+  {id:"n107",name:"Identify Digits' Place Value (Representational)",available:"Jan 27"},
+  {id:"n106",name:"Identify Digits' Place Value (Concrete)",available:"Jan 26"},
+  {id:"n105",name:"Identify Tens Digit Place Values (Abstract)",available:"Jan 23"},
+  {id:"n104",name:"Identify Tens Digit Place Values (Concrete)",available:"Jan 22"},
+  {id:"n103",name:"Model Place Value to 99 (Representational)",available:"Jan 21"},
+  {id:"n102",name:"Model Place Value to 99 (Concrete)",available:"Jan 20"},
+  {id:"n101",name:"Creating 10s 11-20 (Representational)",available:"Jan 19"},
+  {id:"n100",name:"Creating 10s 11-20 (Concrete)",available:"Jan 16"},
+  {id:"n99",name:"Practice Place Value 0-9",available:"Jan 15"},
+  {id:"n98",name:"Introduction to Place Value",available:"Jan 14"},
+  {id:"n97",name:"Exploring Place Value Pre-Assessment",available:"Jan 13"},
+  {id:"n96",name:"Exploring Place Value Unit Overview",available:"Jan 12"},
+  {id:"n95",name:"Building Algebraic Thinking: Subtraction Post-Assessment",available:"Jan 9"},
+  {id:"n94",name:"Building Algebraic Thinking: Subtraction Unit Review",available:"Jan 8"},
+  {id:"n93",name:"Subtraction Word Problems (Abstract)",available:"Jan 7"},
+  {id:"n92",name:"Subtraction-Words into Equations",available:"Jan 6"},
+  {id:"n91",name:"Subtraction Word Problems (Representational)",available:"Jan 5"},
+  {id:"n90",name:"Subtraction Word Problems (Concrete)",available:"Jan 2"},
+  {id:"n89",name:"Introduction to Subtraction Word Problems",available:"Jan 1"},
+  {id:"n88",name:"Subtraction with Unknowns (Abstract)",available:"Dec 31"},
+  {id:"n87",name:"Subtraction with Unknowns (Representational)",available:"Dec 30"},
+  {id:"n86",name:"Subtraction with Unknowns (Concrete)",available:"Dec 29"},
+  {id:"n85",name:"Subtraction from 10 (Abstract)",available:"Dec 26"},
+  {id:"n84",name:"Subtraction from 10 (Representational)",available:"Dec 25"},
+  {id:"n83",name:"Subtraction from 10 (Concrete)",available:"Dec 24"},
+  {id:"n82",name:"Subtraction from 5 (Abstract)",available:"Dec 23"},
+  {id:"n81",name:"Subtraction from 5 (Concrete / Representational)",available:"Dec 22"},
+  {id:"n80",name:"Subtraction Properties",available:"Dec 19"},
+  {id:"n79",name:"Subtraction with Equal Sides (Representational)",available:"Dec 18"},
+  {id:"n78",name:"Subtraction with Equal Sides (Concrete)",available:"Dec 17"},
+  {id:"n77",name:"Represent Subtraction (Abstract)",available:"Dec 16"},
+  {id:"n76",name:"Represent Subtraction (Representational)",available:"Dec 15"},
+  {id:"n75",name:"Represent Subtraction (Concrete)",available:"Dec 12"},
+  {id:"n74",name:"Introduction to Subtraction",available:"Dec 11"},
+  {id:"n73",name:"Subtraction Symbols",available:"Dec 10"},
+  {id:"n72",name:"Counting Backwards from 10",available:"Dec 9"},
+  {id:"n71",name:"Reviewing Counting Backwards from 10",available:"Dec 8"},
+  {id:"n70",name:"Building Algebraic Thinking: Subtraction Pre-Assessment",available:"Dec 5"},
+  {id:"n69",name:"Building Algebraic Thinking: Subtraction Unit Overview",available:"Dec 4"},
+];
+
+/* Deterministic helpers */
+function studentsFor(aid) {
+  let h = 0;
+  for (let i = 0; i < aid.length; i++) h = Math.imul(31, h) + aid.charCodeAt(i) | 0;
+  const seed = h >>> 0;
+  let r = seed;
+  r = ((r * 1664525) + 1013904223) >>> 0;
+  const n = 3 + (r % 4);
+  const arr = [...ROSTER_STUDENTS];
+  let s2 = seed;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s2 = ((s2 * 1664525) + 1013904223) >>> 0;
+    const j = s2 % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, n).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function onlineStudentsFor(aid, paperStudents) {
+  const paperIds = new Set(paperStudents.map(s => s.id));
+  const pool = ROSTER_STUDENTS.filter(s => !paperIds.has(s.id));
+  if (!pool.length) return [];
+  let h = 0;
+  for (let i = 0; i < aid.length; i++) h = Math.imul(53, h) + aid.charCodeAt(i) | 0;
+  const seed = (h ^ 0xabcd1234) >>> 0;
+  let r = seed;
+  r = ((r * 1664525) + 1013904223) >>> 0;
+  const n = Math.min(r % 3, pool.length);
+  if (!n) return [];
+  const arr = [...pool];
+  let s2 = seed;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s2 = ((s2 * 1664525) + 1013904223) >>> 0;
+    const j = s2 % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, n).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function onlineScore(s, aid) {
+  let h = 0;
+  const str = s.id + aid;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  return Math.round(s.max * (0.8 + ((h >>> 0) % 21) * 0.01));
+}
+
+const UNIT_TOPICS = {
+  1:'Exploring Patterns', 2:'Building Algebraic Thinking: Addition',
+  3:'Expanding Addition', 4:'Building Algebraic Thinking: Subtraction',
+  5:'Exploring Place Value', 6:'Exploring Time',
+  7:'Exploring Shapes', 8:'Exploring Measurement and Data', 9:'Exploring Money',
+};
+function getTopicName(asgName) {
+  const meta = getAssignmentMeta(asgName || '');
+  return UNIT_TOPICS[meta.unit] || 'Grade 1';
+}
+
+function subjectDotColor(id) {
+  const n = parseInt(id.slice(1));
+  if (n <= 17)  return '#6dd0c0';
+  if (n <= 121) return '#f5c842';
+  if (n <= 146) return '#87c4e8';
+  if (n <= 178) return '#6dd0c0';
+  return '#87c4e8';
+}
+
+function getAssignmentMeta(name) {
+  if (/Money/.test(name))                                              return { unit:9, subject:'math' };
+  if (/Measurement|Taller|Longer|Non-Standard/.test(name))             return { unit:8, subject:'sci'  };
+  if (/Shape|2D|3D|Attribute|Divide/.test(name))                       return { unit:7, subject:'math' };
+  if (/Time|Calendar|Clock|AM\/PM|Day/.test(name))                    return { unit:6, subject:'ss'   };
+  if (/Place Value|Digit|Tens|Compare Num/.test(name))                 return { unit:5, subject:'math' };
+  if (/Subtraction|Backward/.test(name))                              return { unit:4, subject:'math' };
+  if (/Word Problem|Expanding|Unknowns to 20|within 20/.test(name))   return { unit:3, subject:'ela'  };
+  if (/Addition|Algebraic|Equal Sides|Commutative|Associative|Identity/.test(name)) return { unit:2, subject:'math' };
+  return { unit:1, subject:'math' };
+}
+</script>
+
+<!-- ── React + Babel ──────────────────────────────────────────────────────── -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- ── Components ─────────────────────────────────────────────────────────── -->
+<script type="text/babel" src="rr-kit.jsx"></script>
+<script type="text/babel" src="rr-students.jsx"></script>
+<script type="text/babel" src="rr-roster.jsx"></script>
+
+<!-- ── App ────────────────────────────────────────────────────────────────── -->
+<script type="text/babel">
+
+
+
+
+
+
+
+
+
+
+const RR_PROMPTS = ["Independent", "Verbal", "Gestural", "Physical", "Hand-over-hand"];
+
+// ── SubjectBadge ───────────────────────────────────────────────
+const CALC_PATH = "M 1.638 17.673 L 1.184 18.564 L 1.638 17.673 Z M 0.327 16.362 L -0.564 16.816 L 0.327 16.362 Z M 17.673 16.362 L 18.564 16.816 L 17.673 16.362 Z M 16.362 17.673 L 16.816 18.564 L 16.362 17.673 Z M 16.362 0.327 L 16.816 -0.564 L 16.362 0.327 Z M 17.673 1.638 L 18.564 1.184 L 17.673 1.638 Z M 1.638 0.327 L 1.184 -0.564 L 1.638 0.327 Z M 0.327 1.638 L -0.564 1.184 L 0.327 1.638 Z M 15.207 4.207 C 15.598 3.817 15.598 3.183 15.207 2.793 C 14.817 2.402 14.183 2.402 13.793 2.793 L 14.5 3.5 L 15.207 4.207 Z M 2.793 13.793 C 2.402 14.183 2.402 14.817 2.793 15.207 C 3.183 15.598 3.817 15.598 4.207 15.207 L 3.5 14.5 L 2.793 13.793 Z M 4.5 7.5 C 4.5 8.052 4.948 8.5 5.5 8.5 C 6.052 8.5 6.5 8.052 6.5 7.5 L 5.5 7.5 L 4.5 7.5 Z M 6.5 3.5 C 6.5 2.948 6.052 2.5 5.5 2.5 C 4.948 2.5 4.5 2.948 4.5 3.5 L 5.5 3.5 L 6.5 3.5 Z M 3.5 4.5 C 2.948 4.5 2.5 4.948 2.5 5.5 C 2.5 6.052 2.948 6.5 3.5 6.5 L 3.5 5.5 L 3.5 4.5 Z M 7.5 6.5 C 8.052 6.5 8.5 6.052 8.5 5.5 C 8.5 4.948 8.052 4.5 7.5 4.5 L 7.5 5.5 L 7.5 6.5 Z M 10.5 11.5 C 9.948 11.5 9.5 11.948 9.5 12.5 C 9.5 13.052 9.948 13.5 10.5 13.5 L 10.5 12.5 L 10.5 11.5 Z M 14.5 13.5 C 15.052 13.5 15.5 13.052 15.5 12.5 C 15.5 11.948 15.052 11.5 14.5 11.5 L 14.5 12.5 L 14.5 13.5 Z M 4.8 0 L 4.8 1 L 13.2 1 L 13.2 0 L 13.2 -1 L 4.8 -1 L 4.8 0 Z M 18 4.8 L 17 4.8 L 17 13.2 L 18 13.2 L 19 13.2 L 19 4.8 L 18 4.8 Z M 13.2 18 L 13.2 17 L 4.8 17 L 4.8 18 L 4.8 19 L 13.2 19 L 13.2 18 Z M 0 13.2 L 1 13.2 L 1 4.8 L 0 4.8 L -1 4.8 L -1 13.2 L 0 13.2 Z M 4.8 18 L 4.8 17 C 3.943 17 3.361 16.999 2.911 16.962 C 2.473 16.927 2.248 16.862 2.092 16.782 L 1.638 17.673 L 1.184 18.564 C 1.669 18.811 2.186 18.91 2.748 18.956 C 3.299 19.001 3.976 19 4.8 19 L 4.8 18 Z M 0 13.2 L -1 13.2 C -1 14.024 -1.001 14.701 -0.956 15.252 C -0.91 15.814 -0.811 16.331 -0.564 16.816 L 0.327 16.362 L 1.218 15.908 C 1.138 15.752 1.073 15.527 1.038 15.089 C 1.001 14.639 1 14.057 1 13.2 L 0 13.2 Z M 1.638 17.673 L 2.092 16.782 C 1.716 16.59 1.41 16.284 1.218 15.908 L 0.327 16.362 L -0.564 16.816 C -0.181 17.569 0.431 18.181 1.184 18.564 L 1.638 17.673 Z M 18 13.2 L 17 13.2 C 17 14.057 16.999 14.639 16.962 15.089 C 16.927 15.527 16.862 15.752 16.782 15.908 L 17.673 16.362 L 18.564 16.816 C 18.811 16.331 18.91 15.814 18.956 15.252 C 19.001 14.701 19 14.024 19 13.2 L 18 13.2 Z M 13.2 18 L 13.2 19 C 14.024 19 14.701 19.001 15.252 18.956 C 15.814 18.91 16.331 18.811 16.816 18.564 L 16.362 17.673 L 15.908 16.782 C 15.752 16.862 15.527 16.927 15.089 16.962 C 14.639 16.999 14.057 17 13.2 17 L 13.2 18 Z M 17.673 16.362 L 16.782 15.908 C 16.59 16.284 16.284 16.59 15.908 16.782 L 16.362 17.673 L 16.816 18.564 C 17.569 18.181 18.181 17.569 18.564 16.816 L 17.673 16.362 Z M 13.2 0 L 13.2 1 C 14.057 1 14.639 1.001 15.089 1.038 C 15.527 1.073 15.752 1.138 15.908 1.218 L 16.362 0.327 L 16.816 -0.564 C 16.331 -0.811 15.814 -0.91 15.252 -0.956 C 14.701 -1.001 14.024 -1 13.2 -1 L 13.2 0 Z M 18 4.8 L 19 4.8 C 19 3.976 19.001 3.299 18.956 2.748 C 18.91 2.186 18.811 1.669 18.564 1.184 L 17.673 1.638 L 16.782 2.092 C 16.862 2.248 16.927 2.473 16.962 2.911 C 16.999 3.361 17 3.943 17 4.8 L 18 4.8 Z M 16.362 0.327 L 15.908 1.218 C 16.284 1.41 16.59 1.716 16.782 2.092 L 17.673 1.638 L 18.564 1.184 C 18.181 0.431 17.569 -0.181 16.816 -0.564 L 16.362 0.327 Z M 4.8 0 L 4.8 -1 C 3.976 -1 3.299 -1.001 2.748 -0.956 C 2.186 -0.91 1.669 -0.811 1.184 -0.564 L 1.638 0.327 L 2.092 1.218 C 2.248 1.138 2.473 1.073 2.911 1.038 C 3.361 1.001 3.943 1 4.8 1 L 4.8 0 Z M 0 4.8 L 1 4.8 C 1 3.943 1.001 3.361 1.038 2.911 C 1.073 2.473 1.138 2.248 1.218 2.092 L 0.327 1.638 L -0.564 1.184 C -0.811 1.669 -0.91 2.186 -0.956 2.748 C -1.001 3.299 -1 3.976 -1 4.8 L 0 4.8 Z M 1.638 0.327 L 1.184 -0.564 C 0.431 -0.181 -0.181 0.431 -0.564 1.184 L 0.327 1.638 L 1.218 2.092 C 1.41 1.716 1.716 1.41 2.092 1.218 L 1.638 0.327 Z M 14.5 3.5 L 13.793 2.793 L 2.793 13.793 L 3.5 14.5 L 4.207 15.207 L 15.207 4.207 L 14.5 3.5 Z M 5.5 7.5 L 6.5 7.5 L 6.5 3.5 L 5.5 3.5 L 4.5 3.5 L 4.5 7.5 L 5.5 7.5 Z M 3.5 5.5 L 3.5 6.5 L 7.5 6.5 L 7.5 5.5 L 7.5 4.5 L 3.5 4.5 L 3.5 5.5 Z M 10.5 12.5 L 10.5 13.5 L 14.5 13.5 L 14.5 12.5 L 14.5 11.5 L 10.5 11.5 L 10.5 12.5 Z";
+const GLASSES_PATH = "M 6.828 7.172 L 7.536 6.464 L 7.536 6.464 L 6.828 7.172 Z M 6.828 12.828 L 7.536 13.536 L 7.536 13.536 L 6.828 12.828 Z M 1.172 12.828 L 0.464 13.536 L 0.464 13.536 L 1.172 12.828 Z M 1.172 7.172 L 0.464 6.464 L 0.464 6.464 L 1.172 7.172 Z M 18.828 7.172 L 19.536 6.464 L 19.536 6.464 L 18.828 7.172 Z M 18.828 12.828 L 19.536 13.536 L 19.536 13.536 L 18.828 12.828 Z M 13.172 12.828 L 12.464 13.536 L 12.464 13.536 L 13.172 12.828 Z M 13.172 7.172 L 12.464 6.464 L 12.464 6.464 L 13.172 7.172 Z M 7.5 8.669 C 7.021 8.945 6.858 9.557 7.134 10.035 C 7.411 10.513 8.022 10.677 8.5 10.401 L 8 9.535 L 7.5 8.669 Z M 11.499 10.401 C 11.978 10.677 12.589 10.513 12.866 10.035 C 13.142 9.557 12.978 8.945 12.5 8.669 L 12 9.535 L 11.499 10.401 Z M -0.995 9.9 C -1.05 10.45 -0.649 10.94 -0.1 10.995 C 0.45 11.05 0.94 10.649 0.995 10.1 L 0 10 L -0.995 9.9 Z M 0.701 2.985 L 1.697 3.085 L 1.697 3.085 L 0.701 2.985 Z M 0.762 2.472 L -0.223 2.296 L -0.223 2.296 L 0.762 2.472 Z M 4 1 C 4.552 1 5 0.552 5 0 C 5 -0.552 4.552 -1 4 -1 L 4 0 L 4 1 Z M 3.484 0.009 L 3.561 1.006 L 3.561 1.006 L 3.484 0.009 Z M 19.005 10.1 C 19.06 10.649 19.55 11.05 20.1 10.995 C 20.649 10.94 21.05 10.45 20.995 9.9 L 20 10 L 19.005 10.1 Z M 19.299 2.985 L 18.303 3.085 L 18.303 3.085 L 19.299 2.985 Z M 19.238 2.472 L 18.254 2.648 L 18.254 2.648 L 19.238 2.472 Z M 16 -1 C 15.448 -1 15 -0.552 15 0 C 15 0.552 15.448 1 16 1 L 16 0 L 16 -1 Z M 16.516 0.009 L 16.439 1.006 L 16.516 0.009 Z M 6.828 7.172 L 6.121 7.879 C 7.293 9.05 7.293 10.95 6.121 12.121 L 6.828 12.828 L 7.536 13.536 C 9.488 11.583 9.488 8.417 7.536 6.464 L 6.828 7.172 Z M 6.828 12.828 L 6.121 12.121 C 4.95 13.293 3.05 13.293 1.879 12.121 L 1.172 12.828 L 0.464 13.536 C 2.417 15.488 5.583 15.488 7.536 13.536 L 6.828 12.828 Z M 1.172 12.828 L 1.879 12.121 C 0.707 10.95 0.707 9.05 1.879 7.879 L 1.172 7.172 L 0.464 6.464 C -1.488 8.417 -1.488 11.583 0.464 13.536 L 1.172 12.828 Z M 1.172 7.172 L 1.879 7.879 C 3.05 6.707 4.95 6.707 6.121 7.879 L 6.828 7.172 L 7.536 6.464 C 5.583 4.512 2.417 4.512 0.464 6.464 L 1.172 7.172 Z M 18.828 7.172 L 18.121 7.879 C 19.293 9.05 19.293 10.95 18.121 12.121 L 18.828 12.828 L 19.536 13.536 C 21.488 11.583 21.488 8.417 19.536 6.464 L 18.828 7.172 Z M 18.828 12.828 L 18.121 12.121 C 16.95 13.293 15.05 13.293 13.879 12.121 L 13.172 12.828 L 12.464 13.536 C 14.417 15.488 17.583 15.488 19.536 13.536 L 18.828 12.828 Z M 13.172 12.828 L 13.879 12.121 C 12.707 10.95 12.707 9.05 13.879 7.879 L 13.172 7.172 L 12.464 6.464 C 10.512 8.417 10.512 11.583 12.464 13.536 L 13.172 12.828 Z M 13.172 7.172 L 13.879 7.879 C 15.05 6.707 16.95 6.707 18.121 7.879 L 18.828 7.172 L 19.536 6.464 C 17.583 4.512 14.417 4.512 12.464 6.464 L 13.172 7.172 Z M 8 9.535 L 8.5 10.401 C 9.424 9.866 10.576 9.866 11.499 10.401 L 12 9.535 L 12.5 8.669 C 10.957 7.777 9.043 7.777 7.5 8.669 L 8 9.535 Z M 0 10 L 0.995 10.1 L 1.697 3.085 L 0.701 2.985 L -0.294 2.886 L -0.995 9.9 L 0 10 Z M 0.701 2.985 L 1.697 3.085 C 1.725 2.801 1.734 2.715 1.746 2.648 L 0.762 2.472 L -0.223 2.296 C -0.252 2.458 -0.269 2.638 -0.294 2.886 L 0.701 2.985 Z M 4 0 L 4 -1 C 3.751 -1 3.57 -1.001 3.406 -0.988 L 3.484 0.009 L 3.561 1.006 C 3.628 1.001 3.715 1 4 1 L 4 0 Z M 0.762 2.472 L 1.746 2.648 C 1.906 1.751 2.652 1.076 3.561 1.006 L 3.484 0.009 L 3.406 -0.988 C 1.59 -0.848 0.098 0.503 -0.223 2.296 L 0.762 2.472 Z M 20 10 L 20.995 9.9 L 20.294 2.886 L 19.299 2.985 L 18.303 3.085 L 19.005 10.1 L 20 10 Z M 19.299 2.985 L 20.294 2.886 C 20.269 2.638 20.251 2.458 20.223 2.296 L 19.238 2.472 L 18.254 2.648 C 18.266 2.715 18.275 2.801 18.303 3.085 L 19.299 2.985 Z M 16 0 L 16 1 C 16.285 1 16.372 1.001 16.439 1.006 L 16.516 0.009 L 16.594 -0.988 C 16.43 -1.001 16.249 -1 16 -1 L 16 0 Z M 19.238 2.472 L 20.223 2.296 C 19.902 0.503 18.41 -0.848 16.594 -0.988 L 16.516 0.009 L 16.439 1.006 C 17.348 1.076 18.094 1.751 18.254 2.648 L 19.238 2.472 Z";
+const BOOK_PATH = "M 10 18 L 9.168 18.555 C 9.353 18.833 9.666 19 10 19 C 10.334 19 10.647 18.833 10.832 18.555 L 10 18 Z M 9.9 17.85 L 9.068 18.405 L 9.068 18.405 L 9.9 17.85 Z M 8.399 15.91 L 7.764 16.682 L 7.764 16.682 L 8.399 15.91 Z M 7.022 15.173 L 6.731 16.129 L 7.022 15.173 Z M 0.218 13.908 L 1.109 13.454 L 0.218 13.908 Z M 1.092 14.782 L 1.546 13.891 L 1.092 14.782 Z M 7.816 0.436 L 7.362 1.327 L 7.816 0.436 Z M 9.564 2.184 L 8.673 2.638 L 9.564 2.184 Z M 1.092 0.218 L 1.546 1.109 L 1.092 0.218 Z M 0.218 1.092 L 1.109 1.546 L 0.218 1.092 Z M 10.1 17.85 L 10.932 18.405 L 10.932 18.405 L 10.1 17.85 Z M 11.601 15.91 L 12.236 16.682 L 12.236 16.682 L 11.601 15.91 Z M 12.978 15.173 L 13.269 16.129 L 12.978 15.173 Z M 19.782 13.908 L 18.891 13.454 L 19.782 13.908 Z M 18.908 14.782 L 18.454 13.891 L 18.908 14.782 Z M 12.184 0.436 L 12.638 1.327 L 12.184 0.436 Z M 10.436 2.184 L 11.327 2.638 L 10.436 2.184 Z M 18.908 0.218 L 18.454 1.109 L 18.908 0.218 Z M 19.782 1.092 L 18.891 1.546 L 19.782 1.092 Z M 3.2 0 L 3.2 1 L 3.6 1 L 3.6 0 L 3.6 -1 L 3.2 -1 L 3.2 0 Z M 0 11.8 L 1 11.8 L 1 3.2 L 0 3.2 L -1 3.2 L -1 11.8 L 0 11.8 Z M 10 18 L 10.832 17.445 L 10.732 17.295 L 9.9 17.85 L 9.068 18.405 L 9.168 18.555 L 10 18 Z M 4.575 15 L 4.575 14 L 3.2 14 L 3.2 15 L 3.2 16 L 4.575 16 L 4.575 15 Z M 9.9 17.85 L 10.732 17.295 C 10.072 16.305 9.635 15.631 9.034 15.137 L 8.399 15.91 L 7.764 16.682 C 8.081 16.943 8.339 17.311 9.068 18.405 L 9.9 17.85 Z M 4.575 15 L 4.575 16 C 5.889 16 6.338 16.01 6.731 16.129 L 7.022 15.173 L 7.312 14.216 C 6.568 13.99 5.765 14 4.575 14 L 4.575 15 Z M 8.399 15.91 L 9.034 15.137 C 8.526 14.72 7.941 14.407 7.312 14.216 L 7.022 15.173 L 6.731 16.129 C 7.108 16.244 7.459 16.432 7.764 16.682 L 8.399 15.91 Z M 0 11.8 L -1 11.8 C -1 12.344 -1.001 12.811 -0.969 13.195 C -0.937 13.59 -0.866 13.984 -0.673 14.362 L 0.218 13.908 L 1.109 13.454 C 1.084 13.405 1.046 13.304 1.024 13.032 C 1.001 12.749 1 12.377 1 11.8 L 0 11.8 Z M 3.2 15 L 3.2 14 C 2.623 14 2.251 13.999 1.968 13.976 C 1.696 13.954 1.595 13.916 1.546 13.891 L 1.092 14.782 L 0.638 15.673 C 1.016 15.866 1.41 15.937 1.805 15.969 C 2.189 16.001 2.656 16 3.2 16 L 3.2 15 Z M 0.218 13.908 L -0.673 14.362 C -0.385 14.926 0.074 15.385 0.638 15.673 L 1.092 14.782 L 1.546 13.891 C 1.358 13.795 1.205 13.642 1.109 13.454 L 0.218 13.908 Z M 3.6 0 L 3.6 1 C 4.737 1 5.529 1.001 6.146 1.051 C 6.751 1.101 7.099 1.193 7.362 1.327 L 7.816 0.436 L 8.27 -0.455 C 7.678 -0.757 7.037 -0.883 6.309 -0.942 C 5.591 -1.001 4.704 -1 3.6 -1 L 3.6 0 Z M 10 6.4 L 11 6.4 C 11 5.296 11.001 4.409 10.942 3.691 C 10.883 2.963 10.757 2.322 10.455 1.73 L 9.564 2.184 L 8.673 2.638 C 8.807 2.901 8.899 3.249 8.949 3.854 C 8.999 4.471 9 5.263 9 6.4 L 10 6.4 Z M 7.816 0.436 L 7.362 1.327 C 7.926 1.615 8.385 2.074 8.673 2.638 L 9.564 2.184 L 10.455 1.73 C 9.976 0.789 9.211 0.024 8.27 -0.455 L 7.816 0.436 Z M 3.2 0 L 3.2 -1 C 2.656 -1 2.189 -1.001 1.805 -0.969 C 1.41 -0.937 1.016 -0.866 0.638 -0.673 L 1.092 0.218 L 1.546 1.109 C 1.595 1.084 1.696 1.046 1.968 1.024 C 2.251 1.001 2.623 1 3.2 1 L 3.2 0 Z M 0 3.2 L 1 3.2 C 1 2.623 1.001 2.251 1.024 1.968 C 1.046 1.696 1.084 1.595 1.109 1.546 L 0.218 1.092 L -0.673 0.638 C -0.866 1.016 -0.937 1.41 -0.969 1.805 C -1.001 2.189 -1 2.656 -1 3.2 L 0 3.2 Z M 1.092 0.218 L 0.638 -0.673 C 0.074 -0.385 -0.385 0.074 -0.673 0.638 L 0.218 1.092 L 1.109 1.546 C 1.205 1.358 1.358 1.205 1.546 1.109 L 1.092 0.218 Z M 16.8 0 L 16.8 -1 L 16.4 -1 L 16.4 0 L 16.4 1 L 16.8 1 L 16.8 0 Z M 10 6.4 L 9 6.4 L 9 18 L 10 18 L 11 18 L 11 6.4 L 10 6.4 Z M 20 11.8 L 21 11.8 L 21 3.2 L 20 3.2 L 19 3.2 L 19 11.8 L 20 11.8 Z M 10 18 L 10.832 18.555 L 10.932 18.405 L 10.1 17.85 L 9.268 17.295 L 9.168 17.445 L 10 18 Z M 15.425 15 L 15.425 16 L 16.8 16 L 16.8 15 L 16.8 14 L 15.425 14 L 15.425 15 Z M 10.1 17.85 L 10.932 18.405 C 11.661 17.311 11.919 16.943 12.236 16.682 L 11.601 15.91 L 10.966 15.137 C 10.365 15.631 9.928 16.305 9.268 17.295 L 10.1 17.85 Z M 15.425 15 L 15.425 14 C 14.235 14 13.432 13.99 12.688 14.216 L 12.978 15.173 L 13.269 16.129 C 13.662 16.01 14.111 16 15.425 16 L 15.425 15 Z M 11.601 15.91 L 12.236 16.682 C 12.541 16.432 12.892 16.244 13.269 16.129 L 12.978 15.173 L 12.688 14.216 C 12.059 14.407 11.474 14.72 10.966 15.137 L 11.601 15.91 Z M 20 11.8 L 19 11.8 C 19 12.377 18.999 12.749 18.976 13.032 C 18.954 13.304 18.916 13.405 18.891 13.454 L 19.782 13.908 L 20.673 14.362 C 20.866 13.984 20.937 13.59 20.969 13.195 C 21.001 12.811 21 12.344 21 11.8 L 20 11.8 Z M 16.8 15 L 16.8 16 C 17.344 16 17.811 16.001 18.195 15.969 C 18.59 15.937 18.984 15.866 19.362 15.673 L 18.908 14.782 L 18.454 13.891 C 18.405 13.916 18.304 13.954 18.032 13.976 C 17.749 13.999 17.377 14 16.8 14 L 16.8 15 Z M 19.782 13.908 L 18.891 13.454 C 18.795 13.642 18.642 13.795 18.454 13.891 L 18.908 14.782 L 19.362 15.673 C 19.926 15.385 20.385 14.926 20.673 14.362 L 19.782 13.908 Z M 16.4 0 L 16.4 -1 C 15.296 -1 14.409 -1.001 13.691 -0.942 C 12.963 -0.883 12.322 -0.757 11.73 -0.455 L 12.184 0.436 L 12.638 1.327 C 12.901 1.193 13.249 1.101 13.854 1.051 C 14.471 1.001 15.263 1 16.4 1 L 16.4 0 Z M 10 6.4 L 11 6.4 C 11 5.263 11.001 4.471 11.051 3.854 C 11.101 3.249 11.193 2.901 11.327 2.638 L 10.436 2.184 L 9.545 1.73 C 9.243 2.322 9.117 2.963 9.058 3.691 C 8.999 4.409 9 5.296 9 6.4 L 10 6.4 Z M 12.184 0.436 L 11.73 -0.455 C 10.789 0.024 10.024 0.789 9.545 1.73 L 10.436 2.184 L 11.327 2.638 C 11.615 2.074 12.074 1.615 12.638 1.327 L 12.184 0.436 Z M 16.8 0 L 16.8 1 C 17.377 1 17.749 1.001 18.032 1.024 C 18.304 1.046 18.405 1.084 18.454 1.109 L 18.908 0.218 L 19.362 -0.673 C 18.984 -0.866 18.59 -0.937 18.195 -0.969 C 17.811 -1.001 17.344 -1 16.8 -1 L 16.8 0 Z M 20 3.2 L 21 3.2 C 21 2.656 21.001 2.189 20.969 1.805 C 20.937 1.41 20.866 1.016 20.673 0.638 L 19.782 1.092 L 18.891 1.546 C 18.916 1.595 18.954 1.696 18.976 1.968 C 18.999 2.251 19 2.623 19 3.2 L 20 3.2 Z M 18.908 0.218 L 18.454 1.109 C 18.642 1.205 18.795 1.358 18.891 1.546 L 19.782 1.092 L 20.673 0.638 C 20.385 0.074 19.926 -0.385 19.362 -0.673 L 18.908 0.218 Z";
+const ATOM_PATH = "M 9.195 8.195 C 8.643 8.195 8.195 8.643 8.195 9.195 C 8.195 9.747 8.643 10.195 9.195 10.195 L 9.195 9.195 L 9.195 8.195 Z M 9.205 10.195 C 9.757 10.195 10.205 9.747 10.205 9.195 C 10.205 8.643 9.757 8.195 9.205 8.195 L 9.205 9.195 L 9.205 10.195 Z M 12.73 12.731 L 12.023 12.023 C 9.75 14.297 7.34 15.936 5.314 16.77 C 4.299 17.188 3.428 17.385 2.745 17.39 C 2.068 17.395 1.658 17.215 1.417 16.973 L 0.71 17.68 L 0.002 18.387 C 0.737 19.122 1.733 19.397 2.76 19.39 C 3.782 19.382 4.915 19.097 6.076 18.62 C 8.4 17.662 11.024 15.851 13.437 13.438 L 12.73 12.731 Z M 0.71 17.68 L 1.417 16.973 C 1.175 16.731 0.995 16.322 1 15.645 C 1.005 14.962 1.201 14.091 1.62 13.076 C 2.454 11.05 4.093 8.64 6.366 6.367 L 5.659 5.659 L 4.952 4.952 C 2.539 7.365 0.727 9.99 -0.23 12.314 C -0.708 13.474 -0.992 14.608 -1 15.63 C -1.008 16.657 -0.732 17.653 0.002 18.387 L 0.71 17.68 Z M 5.659 5.659 L 6.366 6.367 C 8.64 4.093 11.05 2.454 13.076 1.62 C 14.091 1.202 14.962 1.005 15.645 1 C 16.322 0.995 16.731 1.175 16.973 1.417 L 17.68 0.71 L 18.387 0.003 C 17.653 -0.732 16.657 -1.007 15.63 -1 C 14.607 -0.992 13.474 -0.707 12.314 -0.23 C 9.989 0.727 7.365 2.539 4.952 4.952 L 5.659 5.659 Z M 17.68 0.71 L 16.973 1.417 C 17.215 1.659 17.395 2.068 17.39 2.745 C 17.384 3.428 17.188 4.299 16.77 5.314 C 15.936 7.34 14.296 9.75 12.023 12.023 L 12.73 12.731 L 13.437 13.438 C 15.851 11.024 17.662 8.4 18.62 6.076 C 19.097 4.916 19.382 3.782 19.389 2.76 C 19.397 1.733 19.122 0.737 18.387 0.003 L 17.68 0.71 Z M 12.73 5.659 L 12.023 6.366 C 14.296 8.639 15.936 11.049 16.77 13.076 C 17.188 14.091 17.384 14.962 17.389 15.645 C 17.395 16.322 17.215 16.731 16.973 16.973 L 17.68 17.68 L 18.387 18.387 C 19.122 17.653 19.397 16.657 19.389 15.63 C 19.382 14.607 19.097 13.474 18.619 12.314 C 17.662 9.989 15.851 7.365 13.437 4.952 L 12.73 5.659 Z M 17.68 17.68 L 16.973 16.973 C 16.731 17.215 16.322 17.395 15.645 17.389 C 14.962 17.384 14.091 17.188 13.076 16.77 C 11.049 15.936 8.639 14.296 6.366 12.023 L 5.659 12.73 L 4.952 13.437 C 7.365 15.851 9.989 17.662 12.314 18.619 C 13.474 19.097 14.607 19.382 15.63 19.389 C 16.657 19.397 17.653 19.122 18.387 18.387 L 17.68 17.68 Z M 5.659 12.73 L 6.366 12.023 C 4.093 9.75 2.454 7.34 1.619 5.314 C 1.201 4.299 1.005 3.427 1 2.745 C 0.995 2.067 1.175 1.658 1.417 1.417 L 0.71 0.71 L 0.002 0.002 C -0.732 0.737 -1.008 1.733 -1 2.76 C -0.992 3.782 -0.708 4.915 -0.23 6.076 C 0.727 8.4 2.539 11.024 4.952 13.437 L 5.659 12.73 Z M 0.71 0.71 L 1.417 1.417 C 1.658 1.175 2.067 0.995 2.745 1 C 3.427 1.005 4.299 1.201 5.314 1.619 C 7.34 2.454 9.75 4.093 12.023 6.366 L 12.73 5.659 L 13.437 4.952 C 11.024 2.539 8.4 0.727 6.076 -0.23 C 4.915 -0.708 3.782 -0.992 2.76 -1 C 1.733 -1.008 0.737 -0.732 0.002 0.002 L 0.71 0.71 Z M 9.195 9.195 L 9.195 10.195 L 9.205 10.195 L 9.205 9.195 L 9.205 8.195 L 9.195 8.195 L 9.195 9.195 Z M 9.695 9.195 L 8.695 9.195 C 8.695 8.919 8.919 8.695 9.195 8.695 L 9.195 9.695 L 9.195 10.695 C 10.023 10.695 10.695 10.023 10.695 9.195 L 9.695 9.195 Z M 9.195 9.695 L 9.195 8.695 C 9.471 8.695 9.695 8.919 9.695 9.195 L 8.695 9.195 L 7.695 9.195 C 7.695 10.023 8.366 10.695 9.195 10.695 L 9.195 9.695 Z M 8.695 9.195 L 9.695 9.195 C 9.695 9.471 9.471 9.695 9.195 9.695 L 9.195 8.695 L 9.195 7.695 C 8.366 7.695 7.695 8.367 7.695 9.195 L 8.695 9.195 Z M 9.195 8.695 L 9.195 9.695 C 8.919 9.695 8.695 9.471 8.695 9.195 L 9.695 9.195 L 10.695 9.195 C 10.695 8.367 10.023 7.695 9.195 7.695 L 9.195 8.695 Z";
+
+const SUBJECT_CFG = {
+  math: { bg: '#FEF3C7', color: '#a56c00',
+    transform: 'translate(3, 3)', path: CALC_PATH },
+  ela: { bg: '#ecdcff', color: '#7135ac',
+    transform: 'translate(2, 3)', path: BOOK_PATH },
+  sci: { bg: '#c8f5da', color: '#166534',
+    transform: 'translate(2.805, 2.805)', path: ATOM_PATH },
+  ss: { bg: '#c4f0eb', color: '#026663',
+    transform: 'translate(2, 5)', path: GLASSES_PATH }
+};
+
+function SubjectBadge({ subject = 'math', size = 32 }) {
+  const cfg = SUBJECT_CFG[subject] || SUBJECT_CFG.math;
+  const iconSize = Math.round(size * 0.66);
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%',
+        background: cfg.bg, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none"
+        style={{ color: cfg.color }}>
+        <g transform={cfg.transform}>
+          <path d={cfg.path} fill="currentColor" fillRule="nonzero" />
+        </g>
+      </svg>
+    </div>);
+
+}
+
+/* ── Assignment sidebar ───────────────────────────────────────── */
+function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
+  const [sidebarW, setSidebarW] = React.useState(360);
+  const dragging = React.useRef(false);
+  const startX = React.useRef(0);
+  const startW = React.useRef(0);
+
+  React.useEffect(() => {
+    function onMove(e) {
+      if (!dragging.current) return;
+      const delta = e.clientX - startX.current;
+      setSidebarW(Math.max(200, Math.min(560, startW.current + delta)));
+    }
+    function onUp() {
+      if (!dragging.current) return;
+      dragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {window.removeEventListener('mousemove', onMove);window.removeEventListener('mouseup', onUp);};
+  }, []);
+
+  function onDragHandleDown(e) {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startW.current = sidebarW;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+  function rosterDone(aid) {
+    return studentsFor(aid).every((s) => {
+      const v = scores[s.id + '|' + aid];
+      return v != null && v !== '';
+    });
+  }
+  function rosterCount(aid) {
+    return studentsFor(aid).filter((s) => {
+      const v = scores[s.id + '|' + aid];
+      return v != null && v !== '';
+    }).length;
+  }
+
+  const [visibleCount, setVisibleCount] = React.useState(30);
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [subjectFilter, setSubjectFilter] = React.useState('');
+  const [dateFilter, setDateFilter] = React.useState('');
+  const [studentFilter, setStudentFilter] = React.useState([]);
+  const [studentDropOpen, setStudentDropOpen] = React.useState(false);
+  const studentDropRef = React.useRef(null);
+  React.useEffect(() => {setVisibleCount(30);}, [filter, subjectFilter, dateFilter, studentFilter]);
+  React.useEffect(() => {
+    if (!studentDropOpen) return;
+    function onOutside(e) {if (studentDropRef.current && !studentDropRef.current.contains(e.target)) setStudentDropOpen(false);}
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [studentDropOpen]);
+
+  const listRef = React.useRef(null);
+  React.useEffect(() => {
+    const el = listRef.current?.querySelector('[data-selected="true"]');
+    if (!el || !listRef.current) return;
+    const top = el.offsetTop;
+    const bot = top + el.offsetHeight;
+    const cTop = listRef.current.scrollTop;
+    const cBot = cTop + listRef.current.offsetHeight;
+    if (top < cTop) listRef.current.scrollTop = top - 8;else
+    if (bot > cBot) listRef.current.scrollTop = bot - listRef.current.offsetHeight + 8;
+  }, [selected]);
+
+  function parseAvail(str) {
+    const ms = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+    const [mon, day] = str.split(' ');
+    const m = ms[mon];const d = parseInt(day);
+    return new Date(m > 6 ? 2025 : 2026, m - 1, d);
+  }
+  const TODAY = new Date(2026, 5, 12);
+  const filtered = ASSIGNMENTS.filter((a) => {
+    if (filter && !a.name.toLowerCase().includes(filter.toLowerCase())) return false;
+    if (subjectFilter) {const m = getAssignmentMeta(a.name);if (m.subject !== subjectFilter) return false;}
+    if (dateFilter) {
+      const avail = parseAvail(a.available);
+      const days = { d7: 7, d30: 30, d90: 90 }[dateFilter];
+      const cutoff = new Date(TODAY);cutoff.setDate(cutoff.getDate() - days);
+      if (avail < cutoff || avail > TODAY) return false;
+    }
+    if (studentFilter.length > 0) {
+      const sids = new Set(studentsFor(a.id).map((s) => s.id));
+      if (!studentFilter.some((id) => sids.has(id))) return false;
+    }
+    return true;
+  });
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = filtered.length > visibleCount;
+  const filtersActive = !!(subjectFilter || dateFilter || studentFilter.length);
+
+  return (
+    <div style={{ width: sidebarW, flexShrink: 0, display: 'flex', flexDirection: 'column', position: 'relative', background: '#fff', height: '100%', overflow: 'hidden' }}>
+      {/* Drag handle */}
+      <div onMouseDown={onDragHandleDown}
+      style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 4, cursor: 'col-resize', zIndex: 10,
+        background: 'transparent', transition: 'background .15s' }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(90,88,255,0.25)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'} />
+      
+      {/* Right border */}
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 1, background: '#e1e1e3', pointerEvents: 'none' }} />
+      <div style={{ padding: '16px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, background: '#f4f4f6', borderRadius: 10, padding: '8px 12px' }}>
+            <RRIcon name="search" size={15} color="#6d6d6f" />
+            <input value={filter} onChange={(e) => onFilter(e.target.value)}
+            placeholder="Search assignments"
+            style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: '#1d1d1f', outline: 'none' }} />
+            {filter &&
+            <button onClick={() => onFilter('')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#6d6d6f', padding: 0, display: 'flex' }}>
+              <RRIcon name="x" size={14} />
+            </button>}
+          </div>
+          {/* Filter button */}
+          <button
+            onClick={() => setFilterOpen((v) => !v)}
+            title="Filter"
+            style={{ position: 'relative', flexShrink: 0, border: filtersActive ? '1.5px solid #5a58ff' : '1.5px solid #e1e1e3', borderRadius: 10, background: filtersActive ? '#eaeaff' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .1s, border-color .1s', height: "33px", width: "33px" }}
+            onMouseEnter={(e) => {if (!filtersActive) {e.currentTarget.style.background = '#f4f4f6';e.currentTarget.style.borderColor = '#939395';}}}
+            onMouseLeave={(e) => {if (!filtersActive) {e.currentTarget.style.background = '#fff';e.currentTarget.style.borderColor = '#e1e1e3';}}}>
+            
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={filtersActive ? '#5a58ff' : '#49494b'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+            {filtersActive && <span style={{ position: 'absolute', top: -4, right: -4, width: 11, height: 11, borderRadius: '50%', background: '#5a58ff', border: '2px solid #fff' }} />}
+          </button>
+        </div>
+        {/* Filter panel */}
+        {filterOpen &&
+        <div style={{ background: '#f9f9fb', border: '1px solid #e8e8ea', borderRadius: 10, display: 'flex', flexDirection: 'column', gap: "16px", padding: "16px 12px 20px" }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', lineHeight: 1.43, letterSpacing: '0.056px' }}>Filters</span>
+              <button onClick={() => {setSubjectFilter('');setDateFilter('');setStudentFilter([]);setStudentDropOpen(false);}}
+            style={{ height: 28, padding: '0 12px', borderRadius: 99, background: '#fff', fontSize: 14, fontWeight: 600, color: '#1d1d1f', lineHeight: 1.43, letterSpacing: '0.056px', cursor: 'pointer', transition: 'background .1s', visibility: filtersActive ? 'visible' : 'hidden', border: "1.5px solid rgb(225, 225, 227)" }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
+              Clear all</button>
+            </div>
+            {/* Subject */}
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Subject</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: "8px" }}>
+                {[['math', 'Math'], ['ela', 'ELA'], ['sci', 'Science'], ['ss', 'Social studies']].map(([val, label]) => {
+                const on = subjectFilter === val;
+                const cfg = SUBJECT_CFG[val] || SUBJECT_CFG.math;
+                return (
+                  <button key={val} onClick={() => setSubjectFilter(on ? '' : val)}
+                  style={{ padding: '0 13px 0 7px', border: '1.5px solid ' + (on ? '#5a58ff' : '#e1e1e3'), borderRadius: 99, background: on ? '#eaeaff' : '#fff', fontSize: 13, fontWeight: 600, color: on ? '#3d33cc' : '#49494b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all .1s', height: '38px' }}>
+                      <SubjectBadge subject={val} size={24} />{label}
+                    </button>);
+
+              })}
+              </div>
+            </div>
+            {/* Date available */}
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Date available</div>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
+              style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (dateFilter ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, fontSize: 13, fontWeight: 600, color: dateFilter ? '#3d33cc' : '#49494b', background: dateFilter ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}>
+                  <option value="">All time</option>
+                  <option value="d7">Last 7 days</option>
+                  <option value="d30">Last 30 days</option>
+                  <option value="d90">Last 90 days</option>
+                </select>
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={dateFilter ? '#5a58ff' : '#49494b'} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
+              </div>
+            </div>
+            {/* Assigned to */}
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Assigned to</div>
+              <div ref={studentDropRef} style={{ position: 'relative' }}>
+                <button onClick={() => setStudentDropOpen((v) => !v)}
+              style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', fontSize: 13, fontWeight: 600, color: studentFilter.length ? '#3d33cc' : '#49494b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                  <span>{studentFilter.length ? studentFilter.length + ' student' + (studentFilter.length > 1 ? 's' : '') : 'All students'}</span>
+                  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: studentDropOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><polyline points="6 9 12 15 18 9" /></svg>
+                </button>
+                {studentDropOpen &&
+              <div style={{ position: 'absolute', top: 42, left: 0, right: 0, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 10, boxShadow: '0 4px 16px rgba(29,29,31,0.1)', zIndex: 100, overflow: 'hidden' }}>
+                    {ROSTER_STUDENTS.map((s) => {
+                  const checked = studentFilter.includes(s.id);
+                  return (
+                    <div key={s.id}
+                    onClick={() => setStudentFilter((prev) => checked ? prev.filter((id) => id !== s.id) : [...prev, s.id])}
+                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px', cursor: 'pointer', background: checked ? '#f8f8fe' : '#fff', transition: 'background .1s' }}
+                    onMouseEnter={(e) => {if (!checked) e.currentTarget.style.background = '#fafafa';}}
+                    onMouseLeave={(e) => {if (!checked) e.currentTarget.style.background = '#fff';}}>
+                      
+                          <div style={{ width: 15, height: 15, borderRadius: 4, border: '1.5px solid ' + (checked ? '#5a58ff' : '#939395'), background: checked ? '#5a58ff' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .1s' }}>
+                            {checked && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                          </div>
+                          <span style={{ fontSize: 18, lineHeight: 1 }}>{s.emoji}</span>
+                          <span style={{ fontSize: 13, fontWeight: 500, color: '#1d1d1f' }}>{s.name}</span>
+                        </div>);
+
+                })}
+                  </div>
+              }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '0 8px 16px' }}>
+        {visible.length === 0 &&
+        <div style={{ padding: '20px 12px', fontSize: 14, color: '#6d6d6f', textAlign: 'center' }}>No results</div>
+        }
+        {visible.map((a) => {
+          const active = a.id === selected;
+          const meta = getAssignmentMeta(a.name);
+          const done = rosterDone(a.id);
+          const cnt = rosterCount(a.id);
+          const tot = studentsFor(a.id).length;
+          return (
+            <div key={a.id}
+            data-selected={active}
+            onClick={() => onSelect(a.id)}
+            onMouseEnter={(e) => {if (!active) e.currentTarget.style.background = '#fafafa';}}
+            onMouseLeave={(e) => {if (!active) e.currentTarget.style.background = 'transparent';}}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+              cursor: 'pointer', position: 'relative',
+              borderBottom: '1px solid #e1e1e3',
+              background: active ? '#f8f8fe' : 'transparent',
+              transition: 'background .1s' }}>
+              {active && <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#5a58ff', borderRadius: '0 2px 2px 0' }} />}
+              <SubjectBadge subject={meta.subject} size={28} />
+              <span style={{ flex: 1, fontSize: 15, lineHeight: 1.4, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ color: (SUBJECT_CFG[meta.subject] || SUBJECT_CFG.math).color, fontWeight: 700 }}>1. Unit {meta.unit}.</span>
+                {' '}<span style={{ color: '#1d1d1f', fontWeight: 400 }}>{a.name}</span>
+              </span>
+              {done ?
+              <RRIcon name="check" size={13} color="#016a36" /> :
+              cnt > 0 ?
+              <span style={{ fontSize: 12, color: '#6d6d6f', flexShrink: 0 }}>{cnt}/{tot}</span> :
+              null}
+            </div>);
+
+        })}
+        {hasMore &&
+        <div style={{ padding: '12px 12px 4px', display: 'flex', justifyContent: 'center' }}>
+            <RRButton variant="ghost" size="sm" onClick={() => setVisibleCount((c) => c + 30)}>
+              Load more <span style={{ color: '#9a9a9c', fontWeight: 500, fontSize: "14px", letterSpacing: "0.1px" }}>({filtered.length - visibleCount})</span>
+            </RRButton>
+          </div>
+        }
+      </div>
+    </div>);
+
+}
+
+/* ── Student row ──────────────────────────────────────────────── */
+function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScore, onPrompt, onNote, inputRef, onKeyDown, onChipEnter, isFirst }) {
+  const k = s.id + '|' + aid;
+  const score = scores[k] ?? '';
+  const prompt = prompts[k] || '';
+  const note = notes[k] || '';
+  const isAbs = score === 'Abs';
+  const isOnline = !!s.online;
+
+  return (
+    <div
+      data-card-sid={s.id}
+      tabIndex={isOnline && expanded ? -1 : undefined}
+      style={{ position: 'relative', borderTop: '1px solid rgb(225, 225, 227)', outline: 'none', borderRightColor: "rgb(225, 225, 227)", borderBottomColor: "rgb(225, 225, 227)", borderLeftColor: "rgb(225, 225, 227)" }}>
+      {expanded && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#5a58ff', zIndex: 1 }} />}
+      <div
+        onClick={() => { onExpand(s.id); if (!isOnline) setTimeout(() => { const inp = document.querySelector(`.rr-score-input[data-sid="${s.id}"]`); if (inp) { inp.focus(); inp.select(); } }, 0); }}
+        style={{ display: 'flex', alignItems: 'center', gap: 14, background: expanded ? '#fafafe' : '#fff', padding: "14px 20px", transition: 'background .15s', cursor: 'pointer' }}>
+        <StudentAvatar emoji={s.emoji} size={36} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <a
+            href={`Student Profile - Banding v3.html?name=${encodeURIComponent(s.name)}&emoji=${encodeURIComponent(s.emoji || '')}&level=${s.level}&grade=${encodeURIComponent('Grade 1')}`}
+            onClick={e => e.stopPropagation()}
+            style={{ fontSize: 15, fontWeight: 600, color: '#1d1d1f', textDecoration: 'none', transition: 'color .1s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#1d1d1f'; e.currentTarget.style.textDecoration = 'none'; }}
+          >{s.name}</a>
+          <RRTag tone="default">Level {s.level}</RRTag>
+          {isOnline && <RRTag tone="success">Online ✓</RRTag>}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {isOnline ?
+          <span style={{ fontSize: 20, fontWeight: 700, color: '#6d6d6f' }}>{score}</span> :
+          <input ref={inputRef}
+          className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
+          inputMode="numeric"
+          value={isAbs ? 'Abs' : score}
+          onFocus={() => onExpand(s.id)}
+          onChange={(e) => onScore(k, e.target.value.replace(/[^0-9]/g, ''))}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+              const chips = document.querySelectorAll(`.rr-prompt-chip[data-sid="${s.id}"]`);
+              if (chips[0]) chips[0].focus();
+            } else {onKeyDown(e, k, s.id);}
+          }}
+          data-sid={s.id} />
+
+          }
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#6d6d6f' }}>/{s.max}</span>
+        </div>
+      </div>
+
+      {expanded &&
+      <div style={{ padding: '12px 20px 16px', borderTop: '1px solid #efefef', background: '#fafafe' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#6d6d6f', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Prompting level</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+            {RR_PROMPTS.map((p) =>
+          <button key={p}
+          tabIndex={0}
+          data-sid={s.id}
+          className={'rr-prompt-chip' + (prompt === p ? ' rr-chip-on' : '')}
+          onClick={() => onPrompt(k, prompt === p ? '' : p)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onPrompt(k, prompt === p ? '' : p);
+              e.currentTarget.classList.add('rr-chip-pulse');
+              e.currentTarget.addEventListener('animationend',
+              () => e.currentTarget.classList.remove('rr-chip-pulse'), { once: true });
+              if (onChipEnter) onChipEnter(s.id);
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              const chips = [...document.querySelectorAll(`.rr-prompt-chip[data-sid="${s.id}"]`)];
+              const i = chips.indexOf(e.currentTarget);
+              if (chips[i + 1]) chips[i + 1].focus();
+            } else if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              const chips = [...document.querySelectorAll(`.rr-prompt-chip[data-sid="${s.id}"]`)];
+              const i = chips.indexOf(e.currentTarget);
+              if (chips[i - 1]) chips[i - 1].focus();
+            }
+          }}>
+            {p}</button>
+          )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <RRIcon name="pen" size={14} color="#6d6d6f" />
+            <input className="rr-note-input" placeholder="Add a note…" value={note}
+          onChange={(e) => onNote(k, e.target.value)}
+          onKeyDown={(e) => {if (e.key === 'Enter') {e.preventDefault();if (onChipEnter) onChipEnter(s.id);}}} />
+          </div>
+        </div>
+      }
+    </div>);
+
+}
+
+/* ── Roster Run screen ────────────────────────────────────────── */
+function RosterRunScreen({ onDone }) {
+  const [aid, setAid] = React.useState(ASSIGNMENTS[0].id);
+  const [scores, setScores] = React.useState({});
+  const [prompts, setPrompts] = React.useState({});
+  const [notes, setNotes] = React.useState({});
+  const [expanded, setExpanded] = React.useState(null);
+  const [filter, setFilter] = React.useState('');
+  const inputRefs = React.useRef({});
+
+  // Stable refs for use inside effects
+  const aidRef = React.useRef(aid);
+  aidRef.current = aid;
+  const paperStudentsRef = React.useRef([]);
+  const onlineStudentsRef = React.useRef([]);
+
+  function selectAssignment(newAid) {
+    setAid(newAid);setExpanded(null);setFilter('');
+  }
+  const selectRef = React.useRef(selectAssignment);
+  selectRef.current = selectAssignment;
+
+  function focusStudent(id) {
+    setExpanded(id);
+    setTimeout(() => {
+      const r = inputRefs.current[id];
+      if (r) {r.focus();r.select();}
+    }, 0);
+  }
+
+  function focusChips(sid) {
+    setExpanded(sid);
+    setTimeout(() => {
+      const chips = document.querySelectorAll(`.rr-prompt-chip[data-sid="${sid}"]`);
+      if (chips[0]) chips[0].focus();
+    }, 80);
+  }
+
+  function focusOnlineCard(sid) {
+    setExpanded(sid);
+    setTimeout(() => {
+      const card = document.querySelector(`[data-card-sid="${sid}"]`);
+      if (card) {
+        card.focus();
+        function onTab(e) {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            const chips = document.querySelectorAll(`.rr-prompt-chip[data-sid="${sid}"]`);
+            if (chips[0]) chips[0].focus();
+            card.removeEventListener('keydown', onTab);
+          }
+        }
+        card.addEventListener('keydown', onTab);
+      }
+    }, 80);
+  }
+
+  // Global ↑/↓ arrow key assignment navigation
+  React.useEffect(() => {
+    function onGlobalKey(e) {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      e.preventDefault();
+      const idx = ASSIGNMENTS.findIndex((a) => a.id === aidRef.current);
+      if (e.key === 'ArrowDown') {
+        if (idx < ASSIGNMENTS.length - 1) selectRef.current(ASSIGNMENTS[idx + 1].id);
+      } else {
+        if (idx > 0) selectRef.current(ASSIGNMENTS[idx - 1].id);
+      }
+    }
+    window.addEventListener('keydown', onGlobalKey);
+    return () => window.removeEventListener('keydown', onGlobalKey);
+  }, []);
+
+  function goNextAssignment() {
+    const idx = ASSIGNMENTS.findIndex((a) => a.id === aidRef.current);
+    if (idx < ASSIGNMENTS.length - 1) selectRef.current(ASSIGNMENTS[idx + 1].id);
+  }
+
+  function handleChipEnter(sid) {
+    const paper = paperStudentsRef.current;
+    const online = onlineStudentsRef.current;
+    const pi = paper.findIndex((s) => s.id === sid);
+    if (pi >= 0 && pi < paper.length - 1) {
+      focusStudent(paper[pi + 1].id);
+    } else if (pi === paper.length - 1 && online.length > 0) {
+      focusOnlineCard(online[0].id);
+    } else {
+      const oi = online.findIndex((s) => s.id === sid);
+      if (oi >= 0 && oi < online.length - 1) focusOnlineCard(online[oi + 1].id);
+      else goNextAssignment();
+    }
+  }
+
+  const asg = ASSIGNMENTS.find((a) => a.id === aid);
+  const paperStudents = React.useMemo(() => studentsFor(aid), [aid]);
+  const onlineStudents = React.useMemo(
+    () => onlineStudentsFor(aid, paperStudents).map((s) => ({ ...s, online: true })),
+    [aid, paperStudents]
+  );
+  const allStudents = [...paperStudents, ...onlineStudents];
+  // Keep refs in sync with latest computed values (must be after useMemo)
+  paperStudentsRef.current = paperStudents;
+  onlineStudentsRef.current = onlineStudents;
+
+  React.useEffect(() => {
+    const updates = {};
+    onlineStudents.forEach((s) => {
+      const k = s.id + '|' + aid;
+      if (scores[k] == null) updates[k] = String(onlineScore(s, aid));
+    });
+    if (Object.keys(updates).length) setScores((prev) => ({ ...prev, ...updates }));
+    setExpanded(paperStudents[0]?.id || null);
+    setTimeout(() => {
+      const ref = inputRefs.current[paperStudents[0]?.id];
+      if (ref) {ref.focus();ref.select();}
+    }, 80);
+  }, [aid]);
+
+  const doneCount = allStudents.filter((s) => {
+    const v = scores[s.id + '|' + aid];
+    return v != null && v !== '';
+  }).length;
+
+  function handleKeyDown(e, k, sid) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const paper = paperStudentsRef.current;
+      const idx = paper.findIndex((s) => s.id === sid);
+      if (idx >= 0 && idx < paper.length - 1) {
+        focusStudent(paper[idx + 1].id);
+      } else if (idx === paper.length - 1 && onlineStudentsRef.current.length > 0) {
+        focusOnlineCard(onlineStudentsRef.current[0].id);
+      } else if (idx === paper.length - 1) {
+        goNextAssignment();
+      }
+    } else if ((e.key === 'a' || e.key === 'A') && scores[k] === '') {
+      e.preventDefault();
+      setScores((prev) => ({ ...prev, [k]: 'Abs' }));
+      const paper = paperStudentsRef.current;
+      const idx = paper.findIndex((s) => s.id === sid);
+      if (idx >= 0 && idx < paper.length - 1) focusStudent(paper[idx + 1].id);
+    }
+  }
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Top bar */}
+      <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: '#6d6d6f', fontSize: 14, fontWeight: 500, padding: '4px 0' }}>
+          <RRIcon name="chevLeft" size={16} />Students
+        </button>
+        <RRIcon name="chevRight" size={14} color="#c0c0c2" />
+        <span style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>Enter scores</span>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#016a36', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <RRIcon name="check" size={14} color="#016a36" />All changes saved
+        </span>
+        <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
+      </header>
+
+      {/* Body */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <AssignmentSidebar selected={aid} scores={scores}
+        onSelect={selectAssignment}
+        filter={filter} onFilter={setFilter} />
+
+        {/* Scoring panel */}
+        <div style={{ flex: 1, overflowY: 'auto', background: '#f4f4f6', padding: "16px 24px 24px" }}>
+          {/* Combined card: lesson header + student rows */}
+          <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1px solid #e8e8ea', boxShadow: '0 1px 3px rgba(29,29,31,0.04), 0 6px 24px rgba(29,29,31,0.05)', marginBottom: 16 }}>
+          {(() => {
+              const meta = getAssignmentMeta(asg?.name || '');
+              const subjectColor = (SUBJECT_CFG[meta.subject] || SUBJECT_CFG.math).color;
+              const topic = getTopicName(asg?.name);
+              return (
+                <div style={{ display: 'flex', overflow: 'hidden', minHeight: 140, borderBottom: '1px solid #e1e1e3' }}>
+                {/* Thumbnail placeholder */}
+                <div style={{
+                    width: 160, flexShrink: 0,
+                    padding: '16px 0 16px 16px',
+                    background: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                  <div style={{
+                      width: '100%', height: '100%',
+                      background: '#f0f0f2', borderRadius: 12,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 100
+                    }}>
+                  <svg width={48} height={48} viewBox="0 0 24 24" fill="none"
+                      stroke="#c0c0c4" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  </div>
+                </div>
+                <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  {/* Badge + grade/unit */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <SubjectBadge subject={meta.subject} size={28} />
+                    <span style={{ fontSize: 15, fontWeight: 700, color: subjectColor }}>
+                      1. Unit {meta.unit}
+                    </span>
+                  </div>
+
+                  {/* Topic */}
+                  <div style={{ fontSize: 14, color: '#6d6d6f', marginBottom: 4, fontWeight: 400 }}>
+                    {topic}
+                  </div>
+
+                  {/* Lesson title */}
+                  <div style={{ fontSize: 22, color: '#1d1d1f', lineHeight: 1.2, marginBottom: 'auto', fontWeight: "700" }}>
+                    {asg?.name}
+                  </div>
+
+                  {/* Footer: progress + date + trash — single row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, paddingTop: 12, borderTop: '1px solid #e1e1e3', borderWidth: "0px", borderTopStyle: "solid", borderTopColor: "rgb(225, 225, 227)" }}>
+                    <span style={{ fontSize: 13, color: '#9a9a9c', flexShrink: 0 }}>Available {asg?.available}</span>
+                    <span style={{ color: '#d0d0d2', fontSize: 13 }}>·</span>
+                    <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e1e1e3', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.round(doneCount / Math.max(allStudents.length, 1) * 100)}%`, height: '100%', background: '#5a58ff', transition: 'width .3s' }} />
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', flexShrink: 0 }}>{doneCount}/{allStudents.length}</span>
+                    <button title="Delete" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', borderRadius: 8, color: '#b0b0b2', flexShrink: 0 }}>
+                      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" style={{ color: 'inherit' }}>
+                        <g transform="translate(3, 3)">
+                          <path d="M 6 -1 C 5.448 -1 5 -0.552 5 0 C 5 0.552 5.448 1 6 1 L 6 0 L 6 -1 Z M 12 1 C 12.552 1 13 0.552 13 0 C 13 -0.552 12.552 -1 12 -1 L 12 0 L 12 1 Z M 0 2 C -0.552 2 -1 2.448 -1 3 C -1 3.552 -0.552 4 0 4 L 0 3 L 0 2 Z M 18 4 C 18.552 4 19 3.552 19 3 C 19 2.448 18.552 2 18 2 L 18 3 L 18 4 Z M 16.998 3.067 C 17.035 2.515 16.618 2.039 16.067 2.002 C 15.515 1.965 15.039 2.382 15.002 2.933 L 16 3 L 16.998 3.067 Z M 15.299 13.519 L 14.301 13.453 L 14.301 13.453 L 15.299 13.519 Z M 2.701 13.519 L 1.704 13.586 L 1.704 13.586 L 2.701 13.519 Z M 2.998 2.933 C 2.961 2.382 2.485 1.965 1.933 2.002 C 1.382 2.039 0.965 2.515 1.002 3.067 L 2 3 L 2.998 2.933 Z M 4.498 17.7 L 4.062 18.6 L 4.062 18.6 L 4.498 17.7 Z M 3.2 16.485 L 4.069 15.99 L 4.069 15.99 L 3.2 16.485 Z M 14.8 16.485 L 15.669 16.98 L 15.669 16.98 L 14.8 16.485 Z M 13.502 17.7 L 13.938 18.6 L 13.938 18.6 L 13.502 17.7 Z M 6 0 L 6 1 L 12 1 L 12 0 L 12 -1 L 6 -1 L 6 0 Z M 0 3 L 0 4 L 18 4 L 18 3 L 18 2 L 0 2 L 0 3 Z M 16 3 L 15.002 2.933 L 14.301 13.453 L 15.299 13.519 L 16.296 13.586 L 16.998 3.067 L 16 3 Z M 10.509 18 L 10.509 17 L 7.491 17 L 7.491 18 L 7.491 19 L 10.509 19 L 10.509 18 Z M 2.701 13.519 L 3.699 13.453 L 2.998 2.933 L 2 3 L 1.002 3.067 L 1.704 13.586 L 2.701 13.519 Z M 7.491 18 L 7.491 17 C 6.684 17 6.137 16.999 5.713 16.966 C 5.301 16.933 5.087 16.874 4.934 16.8 L 4.498 17.7 L 4.062 18.6 C 4.53 18.826 5.021 18.917 5.555 18.959 C 6.076 19.001 6.716 19 7.491 19 L 7.491 18 Z M 2.701 13.519 L 1.704 13.586 C 1.755 14.359 1.797 14.997 1.873 15.515 C 1.951 16.045 2.074 16.529 2.331 16.98 L 3.2 16.485 L 4.069 15.99 C 3.985 15.843 3.912 15.633 3.852 15.224 C 3.79 14.803 3.753 14.258 3.699 13.453 L 2.701 13.519 Z M 4.498 17.7 L 4.934 16.8 C 4.571 16.624 4.269 16.341 4.069 15.99 L 3.2 16.485 L 2.331 16.98 C 2.731 17.682 3.335 18.247 4.062 18.6 L 4.498 17.7 Z M 15.299 13.519 L 14.301 13.453 C 14.247 14.258 14.21 14.803 14.148 15.224 C 14.088 15.633 14.015 15.843 13.931 15.99 L 14.8 16.485 L 15.669 16.98 C 15.926 16.529 16.049 16.045 16.127 15.515 C 16.203 14.997 16.245 14.359 16.296 13.586 L 15.299 13.519 Z M 10.509 18 L 10.509 19 C 11.284 19 11.924 19.001 12.445 18.959 C 12.979 18.917 13.47 18.826 13.938 18.6 L 13.502 17.7 L 13.066 16.8 C 12.913 16.874 12.699 16.933 12.287 16.966 C 11.863 16.999 11.316 17 10.509 17 L 10.509 18 Z M 14.8 16.485 L 13.931 15.99 C 13.731 16.341 13.429 16.624 13.066 16.8 L 13.502 17.7 L 13.938 18.6 C 14.665 18.247 15.269 17.682 15.669 16.98 L 14.8 16.485 Z" fill="currentColor" fillRule="nonzero" />
+                        </g>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>);
+
+            })()}
+
+            {/* Student rows */}
+            <div>
+            {paperStudents.map((s, idx) =>
+              <StudentRow key={s.id} s={s} aid={aid}
+              scores={scores} prompts={prompts} notes={notes}
+              expanded={expanded === s.id}
+              isFirst={idx === 0}
+              onExpand={setExpanded}
+              onScore={(k, v) => setScores((p) => ({ ...p, [k]: v }))}
+              onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))}
+              onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
+              inputRef={(el) => inputRefs.current[s.id] = el}
+              onKeyDown={handleKeyDown}
+              onChipEnter={handleChipEnter} />
+              )}
+
+            {onlineStudents.length > 0 &&
+              <>
+                {onlineStudents.map((s) =>
+                <StudentRow key={s.id} s={s} aid={aid}
+                scores={scores} prompts={prompts} notes={notes}
+                expanded={expanded === s.id} isFirst={false} onExpand={setExpanded}
+                onScore={() => {}} onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))} onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
+                inputRef={() => {}} onKeyDown={() => {}} onChipEnter={handleChipEnter} />
+                )}
+              </>
+              }
+            </div>
+          </div>
+
+          {/* Keyboard hints */}
+          <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#9a9a9c' }}>
+            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12 }}>Enter</kbd> next student</span>
+            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12 }}>A</kbd> mark absent</span>
+            <span>· Autosaves</span>
+          </div>
+        </div>
+      </div>
+    </div>);
+
+}
+
+/* ── Root App ─────────────────────────────────────────────────── */
+function App() {
+  const [screen, setScreen] = React.useState('students');
+  return (
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: '#f4f4f6' }}>
+      <RRAppRail active="users" />
+      <div className="rr-screen" key={screen} style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+        {screen === 'students' ?
+        <StudentsScreen onAddScores={() => setScreen('roster')} /> :
+        <RosterRunScreen onDone={() => setScreen('students')} />}
+      </div>
+    </div>);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
