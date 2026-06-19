@@ -19,5 +19,9 @@ app.use((req, res, next) => {
   res.status(401).send('Unauthorised');
 });
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Roster Run HiFi v2.html'));
+});
+
 app.use(express.static(path.join(__dirname)));
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
