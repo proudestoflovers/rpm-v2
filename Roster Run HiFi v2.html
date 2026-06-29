@@ -734,13 +734,21 @@ Object.assign(window, {
 /* rr-students.jsx — Students grid, component-based */
 
 const STUDENTS_SCREEN_DATA = [
-  { id:'s1', name:'Mia Brown',      grade:'Grade 1', emoji:'👩🏾', inProgress:2, notStarted:3 },
-  { id:'s2', name:'Leo Smith',      grade:'Grade 1', emoji:'🧑🏽', inProgress:2, notStarted:3 },
-  { id:'s3', name:'Sophia Millet',  grade:'Grade 1', emoji:'👩🏽', inProgress:2, notStarted:3 },
-  { id:'s4', name:'Chloe McKim',    grade:'Grade 1', emoji:'👱🏻‍♀️', inProgress:2, notStarted:3 },
-  { id:'s5', name:'Noah Stevenson', grade:'Grade 1', emoji:'👦🏼', inProgress:2, notStarted:3 },
-  { id:'s6', name:'Elijah Wright',  grade:'Grade 1', emoji:'👦🏿', inProgress:2, notStarted:3 },
+  { id:'s1', name:'Mia Brown',      grade:'Grade 1', emoji:'👩🏾', latest:'Counting & Numbers to 10', date:'Jun 28', pct:92, band:'Proficient',    trend:'up',     nextStep:'Ready to advance — move to Addition to 5.' },
+  { id:'s2', name:'Leo Smith',      grade:'Grade 1', emoji:'🧑🏽', latest:'Addition to 5',            date:'Jun 27', pct:61, band:'Instructional', trend:'steady', nextStep:'Keep practicing — repeat with new examples.' },
+  { id:'s3', name:'Sophia Millet',  grade:'Grade 1', emoji:'👩🏽', latest:'Number Sense',             date:'Jun 26', pct:45, band:'Emerging',      trend:'down',   nextStep:'Reteach using manipulatives, then re-assess.' },
+  { id:'s4', name:'Chloe McKim',    grade:'Grade 1', emoji:'👱🏻‍♀️', latest:'Shapes & Patterns',        date:'Jun 25', pct:50, band:'Emerging',      trend:'up',     nextStep:'Reteach the key concept with visual support.' },
+  { id:'s5', name:'Noah Stevenson', grade:'Grade 1', emoji:'👦🏼', latest:'Number Bonds to 10',       date:'Jun 21', pct:28, band:'Pre-emerging',  trend:'down',   nextStep:'Try a lower level — drop to Number Bonds to 5.' },
+  { id:'s6', name:'Elijah Wright',  grade:'Grade 1', emoji:'👦🏿', latest:'Counting & Numbers to 10', date:'Jun 28', pct:78, band:'Instructional', trend:'up',     nextStep:'Keep practicing — close to mastery.' },
 ];
+
+// Band → color tint + sort priority (lowest band floats to top for triage)
+const BAND_STYLES = {
+  'Proficient':    { bg:'#e3f5ec', fg:'#018143', accent:'#018143', rank:3 },
+  'Instructional': { bg:'#e5eef8', fg:'#0053a0', accent:'#0053a0', rank:2 },
+  'Emerging':      { bg:'#fbedde', fg:'#d15e00', accent:'#d15e00', rank:1 },
+  'Pre-emerging':  { bg:'#fce8e7', fg:'#e0241a', accent:'#e0241a', rank:0 },
+};
 
 // ─── StudentAvatar ────────────────────────────────────────────────────────────
 function StudentAvatar({ emoji, size = 58 }) {
@@ -803,8 +811,36 @@ function CardDivider() {
 }
 
 // ─── StudentCard ──────────────────────────────────────────────────────────────
+function TrendIndicator({ trend }) {
+  const map = {
+    up:     { color:'#018143' },
+    steady: { color:'#9a9a9c' },
+    down:   { color:'#d15e00' },
+  };
+  const t = map[trend] || map.steady;
+  const labels = { up:'Improving', steady:'Steady', down:'Slipping' };
+  const icons = {
+    up:     <path d="M 6 14 L 10 9 L 13 12 L 18 6" />,
+    steady: <line x1="6" y1="12" x2="18" y2="12" />,
+    down:   <path d="M 6 6 L 10 11 L 13 8 L 18 14" />
+  };
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:2, color:t.color }}>
+      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {icons[trend]}
+      </svg>
+      <div style={{ display:'flex', flexDirection:'column' }}>
+        <span style={{ fontSize:12, fontWeight:600, lineHeight:1 }}>{labels[trend]}</span>
+        <span style={{ fontSize:10, color:'#9a9a9c', lineHeight:1 }}>last 4 weeks</span>
+      </div>
+    </div>
+  );
+}
+
 function StudentCard({ s }) {
   const [hov, setHov] = React.useState(false);
+  const [showStep, setShowStep] = React.useState(false);
+  const band = BAND_STYLES[s.band] || BAND_STYLES['Instructional'];
 
   function openProfile() {
     const p = new URLSearchParams({
@@ -825,6 +861,7 @@ function StudentCard({ s }) {
         background: '#ffffff',
         borderRadius: 16,
         border: '1px solid #ebebeb',
+        borderLeft: `4px solid ${band.accent}`,
         boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)',
         padding: '16px 18px',
         display: 'flex', flexDirection: 'column',
@@ -849,26 +886,58 @@ function StudentCard({ s }) {
 
       <CardDivider style={{ marginBottom: 12 }} />
 
-      {/* Assignments */}
+      {/* Latest result */}
       <div>
         <div style={{
           fontSize: 11, fontWeight: 600, color: 'rgb(109,109,111)',
-          letterSpacing: '0.02em', marginBottom: 8,
-        }}>Assignments</div>
+          letterSpacing: '0.02em', marginBottom: 6,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
+          <span>Latest result</span>
+          <span style={{ fontWeight: 400, fontSize: 10 }}>{s.date}</span>
+        </div>
 
-        <AssignmentRow
-          icon={<IconInProgress />}
-          count={s.inProgress}
-          label="In progress"
-          countColor="#1e40af"
-          style={{ marginBottom: 5 }}
-        />
-        <AssignmentRow
-          icon={<IconNotStarted />}
-          count={s.notStarted}
-          label="Not started"
-          countColor="#92400e"
-        />
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+          <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={24} />
+          <div style={{ fontSize: 13, color: '#1d1d1f', fontWeight: 500, flex:1,
+            whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.latest}</div>
+        </div>
+
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: 12 }}>
+          <span style={{ fontSize: 22, fontWeight: 700, color:'#1d1d1f', lineHeight:1, letterSpacing:'-0.02em' }}>{s.pct}%</span>
+          <span style={{ background: band.bg, color: band.fg, borderRadius:99, padding:'3px 10px', fontSize:12, fontWeight:600 }}>{s.band}</span>
+          <div style={{ flex:1 }} />
+          <TrendIndicator trend={s.trend} />
+        </div>
+
+        {/* Next step — revealed on click */}
+        {!showStep ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowStep(true); }}
+            style={{
+              width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+              border:'1px solid #e1e1e3', background:'#fff', borderRadius:10, padding:'8px 12px',
+              fontSize:13, fontWeight:600, color:'#5a58ff', cursor:'pointer', transition:'background .12s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#f7f7ff'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+            </svg>
+            Show next step
+          </button>
+        ) : (
+          <div onClick={(e) => e.stopPropagation()}
+            style={{ border:`1px solid ${band.accent}33`, background: band.bg, borderRadius:10, padding:'10px 12px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+              <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={band.fg} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+              </svg>
+              <span style={{ fontSize:11, fontWeight:700, color: band.fg, textTransform:'uppercase', letterSpacing:'0.06em' }}>Next step</span>
+            </div>
+            <div style={{ fontSize:13, color:'#1d1d1f', lineHeight:1.4 }}>{s.nextStep}</div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -920,7 +989,9 @@ function StudentsScreen({ onAddScores }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}
       >
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-          {STUDENTS_SCREEN_DATA.map(s => <StudentCard key={s.id} s={s} />)}
+          {[...STUDENTS_SCREEN_DATA]
+            .sort((a, b) => (BAND_STYLES[a.band]?.rank ?? 9) - (BAND_STYLES[b.band]?.rank ?? 9))
+            .map(s => <StudentCard key={s.id} s={s} />)}
         </div>
       </div>
     </div>
