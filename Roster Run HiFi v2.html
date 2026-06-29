@@ -14,6 +14,8 @@
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d0d0d2; border-radius: 99px; }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; width: 0; padding: 0; margin: 0; }
 
   /* Score input */
   .rr-score-input {
@@ -899,7 +901,7 @@ function StudentsScreen({ onAddScores }) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <RRButton variant="secondary" size="md" leading="plus" onClick={onAddScores}>
-            Add scores
+            Offline scores
           </RRButton>
           <button style={{
             height: 36, padding: '0 16px',
@@ -1136,7 +1138,7 @@ function RosterRunScreen({ onDone }) {
           <RRIcon name="chevLeft" size={16} />Students
         </button>
         <RRIcon name="chevRight" size={14} color="#c0c0c2" />
-        <span style={{ font:'var(--eds-title-default)',color:'#1d1d1f' }}>Enter scores</span>
+        <span style={{ font:'var(--eds-title-default)',color:'#1d1d1f' }}>Offline scores</span>
         <div style={{ flex:1 }} />
         <span style={{ font:'var(--eds-body-sm)',color:'#016a36',display:'flex',alignItems:'center',gap:5 }}>
           <RRIcon name="check" size={14} color="#016a36" />All changes saved
@@ -1262,7 +1264,7 @@ function SubjectBadge({ subject = 'math', size = 32 }) {
 }
 
 /* ── Assignment sidebar ───────────────────────────────────────── */
-function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
+function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, removedIds }) {
   const [sidebarW, setSidebarW] = React.useState(360);
   const dragging = React.useRef(false);
   const startX = React.useRef(0);
@@ -1341,6 +1343,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
   }
   const TODAY = new Date(2026, 5, 12);
   const filtered = ASSIGNMENTS.filter((a) => {
+    if (removedIds && removedIds.has(a.id)) return false;
     if (filter && !a.name.toLowerCase().includes(filter.toLowerCase())) return false;
     if (subjectFilter) {const m = getAssignmentMeta(a.name);if (m.subject !== subjectFilter) return false;}
     if (dateFilter) {
@@ -1521,7 +1524,257 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
 }
 
 /* ── Student row ──────────────────────────────────────────────── */
-function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScore, onPrompt, onNote, inputRef, onKeyDown, onChipEnter, isFirst }) {
+const ACCOMMODATION_PRESETS = [
+  { label: 'Extended time',           group: 'Time & Setting' },
+  { label: 'Separate setting',        group: 'Time & Setting' },
+  { label: 'Small group',             group: 'Time & Setting' },
+  { label: 'Preferential seating',    group: 'Time & Setting' },
+  { label: 'Frequent breaks',         group: 'Time & Setting' },
+  { label: 'Read aloud',              group: 'Presentation' },
+  { label: 'Large print',             group: 'Presentation' },
+  { label: 'Simplified instructions', group: 'Presentation' },
+  { label: 'Braille',                 group: 'Presentation' },
+  { label: 'Scribe',                  group: 'Response' },
+  { label: 'Verbal responses',        group: 'Response' },
+  { label: 'Calculator',              group: 'Response' },
+  { label: 'Manipulatives',           group: 'Response' },
+  { label: 'Word bank',               group: 'Supports' },
+  { label: 'Graphic organizer',       group: 'Supports' },
+  { label: 'Chunked tasks',           group: 'Supports' },
+];
+
+const PROMPT_LEVEL_PRESETS = [
+  { label: 'Independent',   group: 'Prompt level' },
+  { label: 'Verbal',        group: 'Prompt level' },
+  { label: 'Gestural',      group: 'Prompt level' },
+  { label: 'Model',         group: 'Prompt level' },
+  { label: 'Physical',      group: 'Prompt level' },
+  { label: 'Hand-over-hand', group: 'Prompt level' },
+];
+
+/* Generic tag-select field: chips with a grouped dropdown + custom entry.
+   Mirrors the Accommodations UI; reused for Prompt level. */
+function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLabel = 'Add' }) {
+  const [selected, setSelected] = React.useState([]);
+  const [open, setOpen] = React.useState(false);
+  const [customInput, setCustomInput] = React.useState('');
+  const wrapRef = React.useRef(null);
+  const customRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function close(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  function remove(item) { setSelected(prev => prev.filter(x => x !== item)); }
+
+  function toggle(item) {
+    setSelected(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item]);
+  }
+
+  function addCustom() {
+    const val = customInput.trim();
+    if (!val || selected.includes(val)) return;
+    setSelected(prev => [...prev, val]);
+    setCustomInput('');
+    if (customRef.current) customRef.current.focus();
+  }
+
+  const groups = [...new Set(presets.map(p => p.group))];
+  const available = presets.filter(p => !selected.includes(p.label));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{label}</span>
+      <div ref={wrapRef} style={{ position: 'relative' }}>
+        {/* Tag display + trigger */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '7px 10px', minHeight: 40, cursor: 'text' }}
+          onClick={() => setOpen(true)}>
+          {selected.map(item => (
+            <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eaeaff', color: '#3d33cc', border: '1px solid #c8c6ff', borderRadius: 99, padding: '2px 8px 2px 10px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {item}
+              <button onClick={(e) => { e.stopPropagation(); remove(item); }}
+                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#7b78ee', lineHeight: 1 }}>
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </span>
+          ))}
+          <button onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
+            style={{ border: '1px dashed #c0c0c2', borderRadius: 99, padding: '2px 8px', background: 'transparent', color: '#9a9a9c', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+            <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            {addLabel}
+          </button>
+        </div>
+
+        {/* Dropdown */}
+        {open && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 50, overflow: 'hidden' }}>
+            <div style={{ maxHeight: 280, overflowY: 'auto', padding: '8px 0' }}>
+              {available.map(p => (
+                <button key={p.label} onClick={() => toggle(p.label)}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', font: '400 13px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', cursor: 'pointer', textAlign: 'left', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f4f4f6'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {/* Custom input */}
+            <div style={{ borderTop: '1px solid #f0f0f2', padding: '8px 10px', display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input ref={customRef} value={customInput} onChange={e => setCustomInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
+                placeholder={customPlaceholder}
+                style={{ flex: 1, border: 'none', outline: 'none', font: '400 13px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', background: 'transparent' }} />
+              {customInput.trim() && (
+                <button onClick={addCustom} style={{ border: 'none', background: '#5a58ff', color: '#fff', borderRadius: 99, padding: '4px 12px', font: '600 12px var(--eds-font-family, \'Figtree\', sans-serif)', cursor: 'pointer', whiteSpace: 'nowrap' }}>Add</button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AccommodationsField() {
+  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} customPlaceholder="Custom accommodation…" />;
+}
+
+function PromptLevelField() {
+  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} customPlaceholder="Custom prompt…" />;
+}
+
+function DatePickerField({ label, defaultDate }) {
+  function parseAvailable(str) {
+    if (!str) return new Date();
+    const months = { Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6, Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12 };
+    const [mon, day] = str.split(' ');
+    const m = months[mon];
+    if (!m) return new Date();
+    const year = new Date().getFullYear();
+    return new Date(year, m - 1, parseInt(day));
+  }
+
+  function formatDisplay(date) {
+    if (!date) return '';
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${m}/${d}/${y}`;
+  }
+
+  const defaultDate_obj = parseAvailable(defaultDate);
+  const [selected, setSelected] = React.useState(defaultDate_obj);
+  const [viewMonth, setViewMonth] = React.useState(new Date(defaultDate_obj));
+  const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function close(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  function getDaysInMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  }
+
+  function getFirstDayOfMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  }
+
+  function pickDate(day) {
+    const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    setSelected(newDate);
+    setOpen(false);
+  }
+
+  function prevMonth() {
+    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1));
+  }
+
+  function nextMonth() {
+    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1));
+  }
+
+  const daysInMonth = getDaysInMonth(viewMonth);
+  const firstDay = getFirstDayOfMonth(viewMonth);
+  const days = [];
+  for (let i = 0; i < firstDay; i++) days.push(null);
+  for (let i = 1; i <= daysInMonth; i++) days.push(i);
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthYear = `${monthNames[viewMonth.getMonth()]} ${viewMonth.getFullYear()}`;
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '0 12px', height: 40, cursor: 'pointer' }}
+        onClick={() => setOpen(!open)}>
+        <input type="text" placeholder="mm/dd/yyyy" value={formatDisplay(selected)} readOnly
+          style={{ flex: 1, border: 'none', background: 'transparent', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none', cursor: 'pointer', pointerEvents: 'none' }} />
+        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#9a9a9c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 50, padding: 12, minWidth: 240 }}>
+          {/* Month/year header with nav */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <button onClick={prevMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{monthYear}</span>
+            <button onClick={nextMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          {/* Day labels */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8, textAlign: 'center' }}>
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
+              <div key={d} style={{ fontSize: 11, fontWeight: 600, color: '#b0b0b2', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Days grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+            {days.map((day, i) => {
+              const isSelected = day && selected.getDate() === day && selected.getMonth() === viewMonth.getMonth() && selected.getFullYear() === viewMonth.getFullYear();
+              return (
+                <button key={i} onClick={() => day && pickDate(day)}
+                  disabled={!day}
+                  style={{
+                    border: isSelected ? '1.5px solid #5a58ff' : '1px solid transparent',
+                    background: isSelected ? '#eaeaff' : 'transparent',
+                    color: isSelected ? '#3d33cc' : day ? '#1d1d1f' : '#e1e1e3',
+                    borderRadius: 6,
+                    padding: '6px 0',
+                    font: `${isSelected ? 600 : 400} 12px var(--eds-font-family, 'Figtree', sans-serif)`,
+                    cursor: day ? 'pointer' : 'default',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all .12s'
+                  }}
+                  onMouseEnter={e => { if (day && !isSelected) e.currentTarget.style.background = '#f4f4f6'; }}
+                  onMouseLeave={e => { if (day && !isSelected) e.currentTarget.style.background = 'transparent'; }}>
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand, onScore, onPrompt, onNote, onLevel, inputRef, onKeyDown, onChipEnter, isFirst, inputVariant, asgAvailable }) {
   const k = s.id + '|' + aid;
   const score = scores[k] ?? '';
   const prompt = prompts[k] || '';
@@ -1547,7 +1800,7 @@ function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScor
             onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#1d1d1f'; e.currentTarget.style.textDecoration = 'none'; }}
           >{s.name}</a>
-          <RRTag tone="default">Level {s.level}</RRTag>
+          {isOnline ? <RRTag tone="default">Level {s.level}</RRTag> : expanded ? <LevelDropdown studentId={s.id} currentLevel={levels[s.id] ?? s.level} onChange={onLevel} /> : <RRTag tone="default">Level {levels[s.id] ?? s.level}</RRTag>}
           {isOnline && <RRTag tone="success">Online ✓</RRTag>}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
@@ -1573,7 +1826,7 @@ function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScor
         </div>
       </div>
 
-      {expanded &&
+      {expanded && inputVariant === 'default' &&
       <div style={{ padding: '12px 20px 16px', borderTop: '1px solid #efefef', background: '#fafafe' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#6d6d6f', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Prompting level</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
@@ -1614,11 +1867,166 @@ function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScor
           </div>
         </div>
       }
+      {expanded && inputVariant === 'detailed' &&
+      <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #efefef', background: '#fafafe' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+          {/* Left column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DatePickerField label="Date completed" defaultDate={asgAvailable} />
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Time Taken</span>
+              <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '0 12px', height: 40, transition: 'border-color .12s' }}
+                onFocusCapture={(e) => e.currentTarget.style.borderColor = '#5a58ff'}
+                onBlurCapture={(e) => e.currentTarget.style.borderColor = '#e1e1e3'}>
+                <input type="text" placeholder="e.g. 12 mins" style={{ flex: 1, border: 'none', background: 'transparent', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none' }} />
+                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#9a9a9c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </label>
+            <AccommodationsField />
+          </div>
+          {/* Right column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Notes</span>
+              <textarea placeholder="Add observational notes…"
+                style={{ flex: 1, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '8px 12px', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none', resize: 'none', transition: 'border-color .12s' }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#5a58ff'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#e1e1e3'} />
+            </label>
+          </div>
+        </div>
+      </div>
+      }
+      {expanded && inputVariant === 'detailed2' &&
+      <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #efefef', background: '#fafafe' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+          {/* Left column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DatePickerField label="Date completed" defaultDate={asgAvailable} />
+            <PromptLevelField />
+            <AccommodationsField />
+          </div>
+          {/* Right column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Notes</span>
+              <textarea placeholder="Add observational notes…"
+                style={{ flex: 1, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '8px 12px', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none', resize: 'none', transition: 'border-color .12s' }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#5a58ff'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#e1e1e3'} />
+            </label>
+          </div>
+        </div>
+      </div>
+      }
     </div>);
 
 }
 
 /* ── Roster Run screen ────────────────────────────────────────── */
+/* Level dropdown — custom styled with Everway design system */
+function LevelDropdown({ studentId, currentLevel, onChange }) {
+  const [open, setOpen] = React.useState(false);
+  const dropRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function close(e) {
+      if (dropRef.current && !dropRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  const levels = [1, 2, 3];
+  return (
+    <div ref={dropRef} style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          background: open ? '#eaeaff' : '#fff',
+          color: open ? '#3d33cc' : '#49494b',
+          border: open ? '1.5px solid #5a58ff' : '1.5px solid #e1e1e3',
+          borderRadius: 112,
+          font: '600 13px/1.43 var(--eds-font-family, \'Figtree\', sans-serif)',
+          padding: '3px 10px 3px 10px',
+          letterSpacing: '0.02em',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          whiteSpace: 'nowrap',
+          transition: 'border-color .12s, background .12s, color .12s'
+        }}
+        onMouseEnter={(e) => { if (!open) e.currentTarget.style.borderColor = '#5a58ff'; }}
+        onMouseLeave={(e) => { if (!open) e.currentTarget.style.borderColor = '#e1e1e3'; }}>
+        Level {currentLevel}
+        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 4px)',
+          left: 0,
+          background: '#fff',
+          border: '1px solid #e1e1e3',
+          borderRadius: 8,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          zIndex: 40,
+          minWidth: '100%',
+          overflow: 'hidden'
+        }}>
+          {levels.map((level) => (
+            <button
+              key={level}
+              onClick={() => { onChange(studentId, level); setOpen(false); }}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '10px 12px',
+                background: currentLevel === level ? '#eaeaff' : '#fff',
+                color: currentLevel === level ? '#3d33cc' : '#49494b',
+                border: 'none',
+                font: currentLevel === level ? '600 13px var(--eds-font-family, \'Figtree\', sans-serif)' : '400 13px var(--eds-font-family, \'Figtree\', sans-serif)',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'background .12s'
+              }}
+              onMouseEnter={(e) => { if (currentLevel !== level) e.currentTarget.style.background = '#f4f4f6'; }}
+              onMouseLeave={(e) => { if (currentLevel !== level) e.currentTarget.style.background = '#fff'; }}>
+              Level {level}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Dismiss-from-view button with a clarifying tooltip */
+function DismissButton({ onClick }) {
+  const [hov, setHov] = React.useState(false);
+  return (
+    <div style={{ position: 'relative', flexShrink: 0, marginTop: -2, marginRight: -4 }}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
+      <button aria-label="Dismiss from this view" onClick={onClick}
+        style={{ border: 'none', background: hov ? '#f4f4f6' : 'transparent', cursor: 'pointer', padding: 4, display: 'flex', borderRadius: 8, color: hov ? '#1d1d1f' : '#b0b0b2', transition: 'background .12s, color .12s' }}>
+        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+      {hov && (
+        <div role="tooltip" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#1d1d1f', color: '#fff', padding: '7px 11px', borderRadius: 9, whiteSpace: 'nowrap', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', zIndex: 60, pointerEvents: 'none', fontSize: 13, fontWeight: 600 }}>
+          Dismiss from this view
+        </div>)}
+    </div>);
+}
+
 function RosterRunScreen({ onDone }) {
   const [aid, setAid] = React.useState(ASSIGNMENTS[0].id);
   const [scores, setScores] = React.useState({});
@@ -1626,6 +2034,11 @@ function RosterRunScreen({ onDone }) {
   const [notes, setNotes] = React.useState({});
   const [expanded, setExpanded] = React.useState(null);
   const [filter, setFilter] = React.useState('');
+  const [removedIds, setRemovedIds] = React.useState(() => new Set());
+  const [toast, setToast] = React.useState(null);
+  const [levels, setLevels] = React.useState({});
+  const [inputVariant, setInputVariant] = React.useState('default'); // 'default' | 'detailed'
+  const toastTimer = React.useRef(null);
   const inputRefs = React.useRef({});
 
   // Stable refs for use inside effects
@@ -1636,6 +2049,27 @@ function RosterRunScreen({ onDone }) {
 
   function selectAssignment(newAid) {
     setAid(newAid);setExpanded(null);setFilter('');
+  }
+
+  // Remove the currently shown assignment from this view (non-destructive, undoable)
+  function removeFromView(id) {
+    const visible = ASSIGNMENTS.filter((a) => !removedIds.has(a.id));
+    const idx = visible.findIndex((a) => a.id === id);
+    const next = visible[idx + 1] || visible[idx - 1];
+    setRemovedIds((prev) => new Set(prev).add(id));
+    if (next) selectAssignment(next.id);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ id });
+    toastTimer.current = setTimeout(() => setToast(null), 6000);
+  }
+
+  function undoRemove(id) {
+    setRemovedIds((prev) => {
+      const n = new Set(prev);n.delete(id);return n;
+    });
+    selectAssignment(id);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(null);
   }
   const selectRef = React.useRef(selectAssignment);
   selectRef.current = selectAssignment;
@@ -1763,26 +2197,39 @@ function RosterRunScreen({ onDone }) {
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
       {/* Top bar */}
-      <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: '#6d6d6f', fontSize: 14, fontWeight: 500, padding: '4px 0' }}>
-          <RRIcon name="chevLeft" size={16} />Students
-        </button>
-        <RRIcon name="chevRight" size={14} color="#c0c0c2" />
-        <span style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>Enter scores</span>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#016a36', display: 'flex', alignItems: 'center', gap: 5 }}>
-          <RRIcon name="check" size={14} color="#016a36" />All changes saved
-        </span>
-        <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
+      <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: '#6d6d6f', fontSize: 14, fontWeight: 500, padding: '4px 0' }}>
+            <RRIcon name="chevLeft" size={16} />Students
+          </button>
+          <RRIcon name="chevRight" size={14} color="#c0c0c2" />
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>Offline scores</span>
+        </div>
+
+        {/* Variant switcher — centered */}
+        <div title="Switch input variant" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 2, background: '#f4f4f6', borderRadius: 8, padding: 3 }}>
+          {[['default','A'], ['detailed','B'], ['detailed2','C']].map(([v, lbl]) => (
+            <button key={v} onClick={() => setInputVariant(v)} style={{ border: 'none', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer', background: inputVariant === v ? '#fff' : 'transparent', color: inputVariant === v ? '#1d1d1f' : '#9a9a9c', boxShadow: inputVariant === v ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all .12s' }}>
+              {lbl}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: '#016a36', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <RRIcon name="check" size={14} color="#016a36" />All changes saved
+          </span>
+          <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
+        </div>
       </header>
 
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <AssignmentSidebar selected={aid} scores={scores}
         onSelect={selectAssignment}
-        filter={filter} onFilter={setFilter} />
+        filter={filter} onFilter={setFilter} removedIds={removedIds} />
 
         {/* Scoring panel */}
         <div style={{ flex: 1, overflowY: 'auto', background: '#f4f4f6', padding: "16px 24px 24px" }}>
@@ -1815,12 +2262,14 @@ function RosterRunScreen({ onDone }) {
                   </div>
                 </div>
                 <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                  {/* Badge + grade/unit */}
+                  {/* Badge + grade/unit + remove-from-view */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <SubjectBadge subject={meta.subject} size={28} />
                     <span style={{ fontSize: 15, fontWeight: 700, color: subjectColor }}>
                       1. Unit {meta.unit}
                     </span>
+                    <div style={{ flex: 1 }} />
+                    <DismissButton onClick={() => removeFromView(aid)} />
                   </div>
 
                   {/* Topic */}
@@ -1833,7 +2282,7 @@ function RosterRunScreen({ onDone }) {
                     {asg?.name}
                   </div>
 
-                  {/* Footer: progress + date + trash — single row */}
+                  {/* Footer: progress + date — single row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, paddingTop: 12, borderTop: '1px solid #e1e1e3', borderWidth: "0px", borderTopStyle: "solid", borderTopColor: "rgb(225, 225, 227)" }}>
                     <span style={{ fontSize: 13, color: '#9a9a9c', flexShrink: 0 }}>Available {asg?.available}</span>
                     <span style={{ color: '#d0d0d2', fontSize: 13 }}>·</span>
@@ -1841,13 +2290,6 @@ function RosterRunScreen({ onDone }) {
                       <div style={{ width: `${Math.round(doneCount / Math.max(allStudents.length, 1) * 100)}%`, height: '100%', background: '#5a58ff', transition: 'width .3s' }} />
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', flexShrink: 0 }}>{doneCount}/{allStudents.length}</span>
-                    <button title="Delete" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', borderRadius: 8, color: '#b0b0b2', flexShrink: 0 }}>
-                      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" style={{ color: 'inherit' }}>
-                        <g transform="translate(3, 3)">
-                          <path d="M 6 -1 C 5.448 -1 5 -0.552 5 0 C 5 0.552 5.448 1 6 1 L 6 0 L 6 -1 Z M 12 1 C 12.552 1 13 0.552 13 0 C 13 -0.552 12.552 -1 12 -1 L 12 0 L 12 1 Z M 0 2 C -0.552 2 -1 2.448 -1 3 C -1 3.552 -0.552 4 0 4 L 0 3 L 0 2 Z M 18 4 C 18.552 4 19 3.552 19 3 C 19 2.448 18.552 2 18 2 L 18 3 L 18 4 Z M 16.998 3.067 C 17.035 2.515 16.618 2.039 16.067 2.002 C 15.515 1.965 15.039 2.382 15.002 2.933 L 16 3 L 16.998 3.067 Z M 15.299 13.519 L 14.301 13.453 L 14.301 13.453 L 15.299 13.519 Z M 2.701 13.519 L 1.704 13.586 L 1.704 13.586 L 2.701 13.519 Z M 2.998 2.933 C 2.961 2.382 2.485 1.965 1.933 2.002 C 1.382 2.039 0.965 2.515 1.002 3.067 L 2 3 L 2.998 2.933 Z M 4.498 17.7 L 4.062 18.6 L 4.062 18.6 L 4.498 17.7 Z M 3.2 16.485 L 4.069 15.99 L 4.069 15.99 L 3.2 16.485 Z M 14.8 16.485 L 15.669 16.98 L 15.669 16.98 L 14.8 16.485 Z M 13.502 17.7 L 13.938 18.6 L 13.938 18.6 L 13.502 17.7 Z M 6 0 L 6 1 L 12 1 L 12 0 L 12 -1 L 6 -1 L 6 0 Z M 0 3 L 0 4 L 18 4 L 18 3 L 18 2 L 0 2 L 0 3 Z M 16 3 L 15.002 2.933 L 14.301 13.453 L 15.299 13.519 L 16.296 13.586 L 16.998 3.067 L 16 3 Z M 10.509 18 L 10.509 17 L 7.491 17 L 7.491 18 L 7.491 19 L 10.509 19 L 10.509 18 Z M 2.701 13.519 L 3.699 13.453 L 2.998 2.933 L 2 3 L 1.002 3.067 L 1.704 13.586 L 2.701 13.519 Z M 7.491 18 L 7.491 17 C 6.684 17 6.137 16.999 5.713 16.966 C 5.301 16.933 5.087 16.874 4.934 16.8 L 4.498 17.7 L 4.062 18.6 C 4.53 18.826 5.021 18.917 5.555 18.959 C 6.076 19.001 6.716 19 7.491 19 L 7.491 18 Z M 2.701 13.519 L 1.704 13.586 C 1.755 14.359 1.797 14.997 1.873 15.515 C 1.951 16.045 2.074 16.529 2.331 16.98 L 3.2 16.485 L 4.069 15.99 C 3.985 15.843 3.912 15.633 3.852 15.224 C 3.79 14.803 3.753 14.258 3.699 13.453 L 2.701 13.519 Z M 4.498 17.7 L 4.934 16.8 C 4.571 16.624 4.269 16.341 4.069 15.99 L 3.2 16.485 L 2.331 16.98 C 2.731 17.682 3.335 18.247 4.062 18.6 L 4.498 17.7 Z M 15.299 13.519 L 14.301 13.453 C 14.247 14.258 14.21 14.803 14.148 15.224 C 14.088 15.633 14.015 15.843 13.931 15.99 L 14.8 16.485 L 15.669 16.98 C 15.926 16.529 16.049 16.045 16.127 15.515 C 16.203 14.997 16.245 14.359 16.296 13.586 L 15.299 13.519 Z M 10.509 18 L 10.509 19 C 11.284 19 11.924 19.001 12.445 18.959 C 12.979 18.917 13.47 18.826 13.938 18.6 L 13.502 17.7 L 13.066 16.8 C 12.913 16.874 12.699 16.933 12.287 16.966 C 11.863 16.999 11.316 17 10.509 17 L 10.509 18 Z M 14.8 16.485 L 13.931 15.99 C 13.731 16.341 13.429 16.624 13.066 16.8 L 13.502 17.7 L 13.938 18.6 C 14.665 18.247 15.269 17.682 15.669 16.98 L 14.8 16.485 Z" fill="currentColor" fillRule="nonzero" />
-                        </g>
-                      </svg>
-                    </button>
                   </div>
                 </div>
               </div>);
@@ -1858,13 +2300,16 @@ function RosterRunScreen({ onDone }) {
             <div>
             {paperStudents.map((s, idx) =>
               <StudentRow key={s.id} s={s} aid={aid}
-              scores={scores} prompts={prompts} notes={notes}
+              scores={scores} prompts={prompts} notes={notes} levels={levels}
               expanded={expanded === s.id}
               isFirst={idx === 0}
+              inputVariant={inputVariant}
+              asgAvailable={asg ? asg.available : ''}
               onExpand={setExpanded}
               onScore={(k, v) => setScores((p) => ({ ...p, [k]: v }))}
               onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))}
               onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
+              onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
               inputRef={(el) => inputRefs.current[s.id] = el}
               onKeyDown={handleKeyDown}
               onChipEnter={handleChipEnter} />
@@ -1874,9 +2319,10 @@ function RosterRunScreen({ onDone }) {
               <>
                 {onlineStudents.map((s) =>
                 <StudentRow key={s.id} s={s} aid={aid}
-                scores={scores} prompts={prompts} notes={notes}
+                scores={scores} prompts={prompts} notes={notes} levels={levels}
                 expanded={expanded === s.id} isFirst={false} onExpand={setExpanded}
                 onScore={() => {}} onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))} onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
+                onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
                 inputRef={() => {}} onKeyDown={() => {}} onChipEnter={handleChipEnter} />
                 )}
               </>
@@ -1886,12 +2332,24 @@ function RosterRunScreen({ onDone }) {
 
           {/* Keyboard hints */}
           <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#9a9a9c' }}>
+            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12 }}>↑↓</kbd> change assignment</span>
             <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12 }}>Enter</kbd> next student</span>
-            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12 }}>A</kbd> mark absent</span>
-            <span>· Autosaves</span>
           </div>
         </div>
       </div>
+
+      {/* Undo toast for remove-from-view */}
+      {toast && (() => {
+        const removed = ASSIGNMENTS.find((a) => a.id === toast.id);
+        return (
+          <div style={{ position: 'absolute', left: '50%', bottom: 28, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, background: '#1d1d1f', color: '#fff', padding: '12px 16px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', fontSize: 14, zIndex: 50 }}>
+            <span>Dismissed “{removed ? getTopicName(removed.name) || removed.name : 'assignment'}” from this view</span>
+            <button onClick={() => undoRemove(toast.id)}
+              style={{ border: 'none', background: 'transparent', color: '#a9a7ff', fontWeight: 700, fontSize: 14, cursor: 'pointer', padding: 0 }}>
+              Undo
+            </button>
+          </div>);
+      })()}
     </div>);
 
 }
