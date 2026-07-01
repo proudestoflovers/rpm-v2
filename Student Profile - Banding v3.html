@@ -1135,13 +1135,6 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
               <div style={{ fontSize: 12, color: '#9a9a9c' }}>Average over <b style={{ color: '#6d6d6f' }}>{doneRows.length}</b> activities</div>
             </div>
           }
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end' }}>
-              <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
-              <span style={{ fontSize: 16, fontWeight: 700, color: '#018143' }}>Improving</span>
-            </div>
-            <div style={{ fontSize: 12, color: '#9a9a9c', marginTop: 4 }}>over last 4 weeks</div>
-          </div>
           <button onClick={() => setOpen(false)} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Chevron open={true} />
           </button>
@@ -1169,11 +1162,20 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
   const [open, setOpen] = React.useState(true);
   const unitNum = (u) => {const m = u.match(/Unit\s+(\d+)/);return m ? +m[1] : 99;};
   const unitKeys = Object.keys(units).sort((a, b) => unitNum(a) - unitNum(b));
+  const allRows = unitKeys.flatMap((u) => units[u]);
+  const doneRows = allRows.filter((r) => r.st === 'done');
   return (
     <section style={{ marginBottom: 28 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
         <SubjBadge subj={subj} size={32} />
         <span style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f' }}>{subj}</span>
+        {doneRows.length > 0 &&
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#018143' }}>Improving</span>
+            <span style={{ fontSize: 12, color: '#9a9a9c' }}>over last 4 weeks</span>
+          </div>
+        }
         <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
         <button onClick={() => setOpen(!open)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
           <Chevron open={open} />
