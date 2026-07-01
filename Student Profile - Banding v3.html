@@ -976,34 +976,6 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
             </div>
           </div>
 
-          {/* Stat card — summary + scatter, floated right */}
-          <div style={{ background: '#f8f8fe', border: '1px solid #ddddfb', borderRadius: 14, padding: '18px 18px 24px', display: 'flex', flexDirection: 'column', gap: "13px", height: "300px", flex: '1 1 0', minWidth: 0, maxWidth: 820, opacity: collapsed ? 0 : 1, transform: collapsed ? 'scale(0.98)' : 'scale(1)', transition: 'opacity .26s, transform .26s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, flexShrink: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: "600", color: "rgb(109, 109, 111)", display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Ico n="bars" size={14} stroke={avgBand.bar} sw={2.2} />
-                <span style={{ fontWeight: "600", color: "rgb(109, 109, 111)" }}>Not started</span> • {nsCount}
-                <span style={{ color: '#d1d5db', margin: '0 7px' }}>·</span>
-                <span style={{ fontWeight: "600" }}>In progress</span> • {ipCount}
-                <span style={{ color: '#d1d5db', margin: '0 7px' }}>·</span>
-                <span style={{ fontWeight: "600", color: "rgb(109, 109, 111)" }}>Complete</span> • {doneRows.length}
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                {['Last 7 days', 'All subjects'].map((l) =>
-                <FilterPill key={l} label={l} />
-                )}
-              </div>
-            </div>
-
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-              <ScatterStrip rows={rows} onView={onView} />
-            </div>
-
-            {doneRows.length > 0 &&
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600, color: '#6d6d6f', fontSize: "14px" }}>
-                Average • <span style={{ ...{ color: avgBand.fg }, color: "rgb(29, 29, 31)" }}>{avgBand.label}</span>
-              </div>
-            }
-          </div>
         </div>
       </div>
       }
