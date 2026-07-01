@@ -1166,7 +1166,7 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
   const doneRows = allRows.filter((r) => r.st === 'done');
   return (
     <section style={{ marginBottom: 28 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: open ? 18 : 0 }}>
         <SubjBadge subj={subj} size={32} />
         <span style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f' }}>{subj}</span>
         <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
