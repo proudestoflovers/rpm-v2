@@ -1169,14 +1169,16 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
         <SubjBadge subj={subj} size={32} />
         <span style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f' }}>{subj}</span>
+        <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
         {doneRows.length > 0 &&
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#018143' }}>Improving</span>
-            <span style={{ fontSize: 12, color: '#9a9a9c' }}>over last 4 weeks</span>
+        <div style={{ textAlign: 'right' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end' }}>
+              <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#018143' }}>Improving</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#9a9a9c', marginTop: 2 }}>over last 4 weeks</div>
           </div>
         }
-        <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
         <button onClick={() => setOpen(!open)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
           <Chevron open={open} />
         </button>
