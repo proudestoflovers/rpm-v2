@@ -1152,12 +1152,12 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, boxShadow: '0 1px 4px rgba(29,29,31,.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 600 }}>
       {/* Card header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 19, fontWeight: 700, color: cfg.color }}>{unit}</span>
           <span style={{ fontSize: 19, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 30, flexShrink: 0 }}>
           {avg !== null &&
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1 }}>{avg}%</div>
