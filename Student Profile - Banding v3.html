@@ -696,6 +696,7 @@ function SubjectUnitLabel({ subj, unit, level, showLevel = false }) {
 /* ── Icon helper ─────────────────────────────────────────────────────── */
 const ICO = {
   chevLeft: ['M15 18l-6-6 6-6'],
+  chevRight: ['M9 18l6-6-6-6'],
   chevDown: ['M6 9l6 6 6-6'],
   check: ['M20 6 9 17l-5-5'],
   x: ['M18 6 6 18', 'M6 6l12 12'],
@@ -1438,14 +1439,14 @@ function OrDivider() {
 /* ── NextStepStepper — carousel navigation for multiple next steps ──── */
 function NextStepStepper({ currentIdx, totalCount, onPrev, onNext }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <button onClick={onPrev} disabled={!onPrev} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onPrev ? 'pointer' : 'default', padding: 0, opacity: onPrev ? 1 : 0.4 }}>
-        <Ico n="arrowUp" size={16} stroke="#49494b" sw={2.5} />
+        <Ico n="chevLeft" size={16} stroke="#49494b" sw={2.5} />
       </button>
+      <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, minWidth: '28px', textAlign: 'center' }}>{currentIdx + 1} / {totalCount}</span>
       <button onClick={onNext} disabled={!onNext} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onNext ? 'pointer' : 'default', padding: 0, opacity: onNext ? 1 : 0.4 }}>
-        <Ico n="arrowDown" size={16} stroke="#49494b" sw={2.5} />
+        <Ico n="chevRight" size={16} stroke="#49494b" sw={2.5} />
       </button>
-      <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, marginLeft: 4 }}>{currentIdx + 1} / {totalCount}</span>
     </div>
   );
 }
