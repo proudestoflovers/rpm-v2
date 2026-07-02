@@ -1436,6 +1436,41 @@ function OrDivider() {
 
 }
 
+/* ── ReteachIdeasCard ───────────────────────────────────────────────── */
+function ReteachIdeasCard() {
+  return (
+    <div style={{ display: 'flex', gap: 16, background: '#fff', borderRadius: 16, border: '1px solid #e8e8ea', padding: '20px 20px 16px', boxShadow: '0 1px 3px rgba(29,29,31,.06)', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ width: 80, height: 80, borderRadius: 12, background: '#f0f0f2', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width={36} height={32} viewBox="0 0 36 32" fill="none">
+            <rect x="1" y="1" width="34" height="30" rx="4" stroke="#c5c5c7" strokeWidth="1.5" fill="#e8e8ea" />
+            <circle cx="12" cy="12" r="4" fill="#c5c5c7" />
+            <path d="M1 22l8-6 6 5 5-4 15 10" stroke="#c5c5c7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 400 }}>Instructional strategies</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.2 }}>Reteach ideas</div>
+          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: '8px 0 0 0', fontSize: 13, color: '#6d6d6f' }}>
+            {[0, 1, 2].map((i) => (
+              <li key={i} style={{ display: 'flex', gap: 6, marginBottom: 4, alignItems: 'flex-start', fontSize: 12 }}>
+                <span style={{ width: 4, height: 4, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 4 }} />
+                <span>Strategy {i + 1}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div style={{ height: '1px', background: '#e8e8ea', margin: '0 -20px' }} />
+      <div style={{ textAlign: 'center' }}>
+        <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: '#1d1d1f', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
+          Re-assign <Ico n="arrowR" size={16} stroke="#1d1d1f" sw={2.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── NextStepStepper — carousel navigation for multiple next steps ──── */
 function NextStepStepper({ currentIdx, totalCount, onPrev, onNext }) {
   return (
@@ -1512,14 +1547,7 @@ function NextStepSection({ row }) {
         </div>
         <SuggestionLabel label={current.label} />
         {current.isReteach ? (
-          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
-            {[0, 1, 2].map((i) =>
-            <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
-                <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
-                <div style={{ height: 14, background: '#d1d5db', borderRadius: 3, flex: 1 }} />
-              </li>
-            )}
-          </ul>
+          <ReteachIdeasCard />
         ) : (
           <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Read Aloud" title={name} />
         )}
