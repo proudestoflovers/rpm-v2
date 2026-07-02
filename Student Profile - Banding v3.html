@@ -1221,12 +1221,12 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
       </div>
       {/* Body: full-width accordion */}
       <div style={{ flex: 1, minHeight: 0, padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', border: '1px solid #ececef', borderRadius: 8 }}>
           {doneRows.map((r, i) => {
             const isExpanded = sel && sel.id === r.id;
             return (
-              <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', borderBottom: '1px solid #f0f0f2', marginBottom: i === doneRows.length - 1 ? 0 : 0 }}>
-                <button onClick={() => setSel(isExpanded ? null : r)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 16px', background: isExpanded ? '#f5f5ff' : 'transparent', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+              <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
+                <button onClick={() => setSel(isExpanded ? null : r)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 16px', background: isExpanded ? '#f5f5ff' : '#f0f0f5', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
                     <span style={{ fontSize: 14, fontWeight: isExpanded ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                   </span>
