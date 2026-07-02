@@ -924,7 +924,7 @@ function AnnotatedBar({ sc, band, subj }) {
   const fill = band ? BAND[band].bar : '#d1d5db';
   const track = band && sc ? BAND[band].bg : '#e8e8ea';
   return (
-    <div style={{ position: 'relative', height: 15, borderRadius: 4, overflow: 'hidden', background: track }}>
+    <div style={{ position: 'relative', height: 12, borderRadius: 4, overflow: 'hidden', background: track }}>
       {sc !== null && sc > 0 &&
       <div style={{ width: `${sc}%`, height: '100%', background: fill, borderRadius: 4 }} />
       }
