@@ -1451,11 +1451,11 @@ function ReteachIdeasCard() {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 400 }}>Instructional strategies</div>
           <div style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.2 }}>Reteach ideas</div>
-          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: '8px 0 0 0', fontSize: 13, color: '#6d6d6f' }}>
+          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: '8px 0 0 0' }}>
             {[0, 1, 2].map((i) => (
-              <li key={i} style={{ display: 'flex', gap: 6, marginBottom: 4, alignItems: 'flex-start', fontSize: 12 }}>
-                <span style={{ width: 4, height: 4, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 4 }} />
-                <span>Strategy {i + 1}</span>
+              <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
+                <div style={{ height: 14, background: '#d1d5db', borderRadius: 3, flex: 1 }} />
               </li>
             ))}
           </ul>
