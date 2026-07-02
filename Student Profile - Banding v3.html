@@ -649,6 +649,40 @@ const STS_CFG = {
   ns: { color: '#c05a00', label: 'Not started' }
 };
 
+/* ── TYPE SYSTEM ─────────────────────────────────────────────────────────
+   Canonical text colours + type scale. Spread a TYPE token into a style
+   object, then add layout/overrides after it, e.g.
+   style={{ ...TYPE.detailLabel, marginTop: 8 }} or
+   style={{ ...TYPE.metric, color: b.fg }}                                  */
+const TEXT = {
+  primary: '#1d1d1f',   // near-black — headings, values, primary labels
+  secondary: '#6d6d6f', // supporting text, eyebrows, detail labels
+  metaGray: '#49494b',  // emphasis meta / secondary buttons
+  muted: '#9a9a9c',     // row meta, captions
+  disabled: '#d1d5db',  // placeholders, empty state
+  brand: '#5a58ff',     // fills + icons
+  brandText: '#3d33cc', // link/active text on white (contrast-safe)
+  success: '#018143',
+  accent: '#a56c00',    // subject accent (Math amber)
+  accentEla: '#7135ac', // subject accent (ELA purple)
+  onDark: '#fff'
+};
+
+const TYPE = {
+  display:     { fontSize: 26, fontWeight: 800, lineHeight: 1.2, letterSpacing: '-.02em', color: TEXT.primary },
+  metric:      { fontSize: 22, fontWeight: 800, lineHeight: 1, letterSpacing: '-.02em', color: TEXT.primary },
+  headingXl:   { fontSize: 22, fontWeight: 700, lineHeight: 1.25, color: TEXT.primary },
+  headingLg:   { fontSize: 20, fontWeight: 700, lineHeight: 1.3, letterSpacing: '-.01em', color: TEXT.primary },
+  headingMd:   { fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: TEXT.primary },
+  titleRow:    { fontSize: 14, fontWeight: 600, lineHeight: 1.4, color: TEXT.primary },
+  body:        { fontSize: 14, fontWeight: 400, lineHeight: 1.5, color: TEXT.secondary },
+  label:       { fontSize: 13, fontWeight: 600, color: TEXT.secondary },
+  meta:        { fontSize: 13, fontWeight: 500, color: TEXT.muted },
+  detailLabel: { fontSize: 12.5, fontWeight: 500, color: TEXT.secondary },
+  detailValue: { fontSize: 12.5, fontWeight: 500, color: TEXT.primary },
+  overline:    { fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }
+};
+
 /* ── ATOMIC COMPONENTS ───────────────────────────────────────────────── */
 
 function StatusIcon({ type }) {
@@ -798,7 +832,7 @@ function ScatterTooltip({ row, xPct }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: '#1d1d1f', marginBottom: 8, lineHeight: 1.3 }}>{row.name}</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <BandPill band={row.band} sm={true} />
-          <span style={{ fontSize: 22, fontWeight: 800, color: b.fg, letterSpacing: '-.02em' }}>{row.sc}%</span>
+          <span style={{ ...TYPE.metric, color: b.fg }}>{row.sc}%</span>
         </div>
         <div style={{ position: 'absolute', bottom: -6, left: caretLeft, right: caretRight, transform: nearRight || nearLeft ? 'none' : 'translateX(-50%)', width: 10, height: 10, background: '#fff', border: '1px solid #e8e8ea', borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />
       </div>
@@ -834,7 +868,7 @@ function ScatterStrip({ rows, onView }) {
         <div style={{ width: 84, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           {BAND_ORDER.map((b) =>
           <div key={b} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8 }}>
-              <span style={{ fontSize: 12, color: '#9a9a9c', fontWeight: 600, whiteSpace: 'nowrap' }}>{YLABELS[b]}</span>
+              <span style={{ fontSize: 11, color: '#9a9a9c', fontWeight: 600, whiteSpace: 'nowrap' }}>{YLABELS[b]}</span>
             </div>
           )}
         </div>
@@ -864,8 +898,8 @@ function ScatterStrip({ rows, onView }) {
       {/* X-axis */}
       {done.length > 0 &&
       <div style={{ display: 'flex', justifyContent: 'space-between', marginLeft: 84, marginTop: 3, margin: "6px 0px 0px 84px" }}>
-          <span style={{ fontSize: 12, color: '#9a9a9c' }}>{done[0]?.date}</span>
-          {done.length > 1 && <span style={{ fontSize: 12, color: '#9a9a9c' }}>{done[done.length - 1]?.date}</span>}
+          <span style={{ fontSize: 11, color: '#9a9a9c' }}>{done[0]?.date}</span>
+          {done.length > 1 && <span style={{ fontSize: 11, color: '#9a9a9c' }}>{done[done.length - 1]?.date}</span>}
         </div>
       }
     </div>);
@@ -875,7 +909,7 @@ function ScatterStrip({ rows, onView }) {
 /* ── Atoms ───────────────────────────────────────────────────────────── */
 function FilterPill({ label }) {
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', fontSize: 13.5, fontWeight: 500, color: '#49494b', cursor: 'pointer', userSelect: 'none' }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', fontSize: 13, fontWeight: 500, color: '#49494b', cursor: 'pointer', userSelect: 'none' }}>
       {label} <Ico n="chevDown" size={12} stroke="#9a9a9c" sw={2.5} />
     </div>);
 
@@ -884,7 +918,7 @@ function FilterPill({ label }) {
 function StatusPill({ st }) {
   const s = STS_CFG[st] || STS_CFG.ns;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F9F9FA', color: s.color, borderRadius: 100, padding: '5px 12px', fontSize: 13.5, fontWeight: 400, whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F9F9FA', color: s.color, borderRadius: 100, padding: '5px 12px', fontSize: 13, fontWeight: 400, whiteSpace: 'nowrap' }}>
       <StatusIcon type={st} />
       {s.label}
     </span>);
@@ -895,7 +929,7 @@ function BandPill({ band, sm = true }) {
   if (!band) return null;
   const b = BAND[band];
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, color: b.fg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', fontSize: sm ? 12.5 : 14, fontWeight: 600, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, color: b.fg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', ...TYPE.overline, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
       {b.label}
     </span>);
 
@@ -904,7 +938,7 @@ function BandPill({ band, sm = true }) {
 function ScoreBar({ sc, band }) {
   const fill = band ? BAND[band].bar : '#d1d5db';
   const track = band && sc ? BAND[band].bg : '#e8e8ea';
-  const color = band ? BAND[band].fg : '#9ca3af';
+  const color = band ? BAND[band].fg : TEXT.muted;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 150 }}>
       <div style={{ flex: 1, height: 10, background: track, borderRadius: 2, overflow: 'hidden' }}>
@@ -912,7 +946,7 @@ function ScoreBar({ sc, band }) {
         <div style={{ width: `${sc}%`, height: '100%', background: fill }} />
         }
       </div>
-      <span style={{ fontSize: 13.5, fontWeight: 700, color: sc ? color : '#9ca3af', width: 40, textAlign: 'right' }}>
+      <span style={{ fontSize: 13, fontWeight: 700, color: sc ? color : TEXT.muted, width: 40, textAlign: 'right' }}>
         {sc !== null ? `${sc}%` : '0%'}
       </span>
     </div>);
@@ -973,7 +1007,7 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
       {collapsed ?
       /* Compact — breadcrumb + avatar + name condensed to one line */
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, height: 58, opacity: collapsed ? 1 : 0, transform: collapsed ? 'translateY(0)' : 'translateY(-20px)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13.5, fontWeight: 600, color: '#6d6d6f', cursor: 'pointer', flexShrink: 0 }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#6d6d6f', cursor: 'pointer', flexShrink: 0 }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#6d6d6f" />
           All students
         </button>
@@ -985,13 +1019,13 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, minWidth: 0 }}>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>{student.name}</span>
-          <span style={{ fontSize: 13.5, color: '#6d6d6f', fontWeight: 500, whiteSpace: 'nowrap' }}>{student.grade}</span>
+          <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, whiteSpace: 'nowrap' }}>{student.grade}</span>
         </div>
       </div> :
 
       /* Expanded — breadcrumb on its own line, full-size avatar + name lockup with chart floated right */
       <div style={{ paddingTop: 14, marginBottom: 18, opacity: collapsed ? 0 : 1, transform: collapsed ? 'translateY(20px)' : 'translateY(0)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13.5, fontWeight: 600, color: '#49494b', marginBottom: 16, cursor: 'pointer' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#49494b', marginBottom: 16, cursor: 'pointer' }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#49494b" />
           All students
         </button>
@@ -1005,7 +1039,7 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
             </div>
             <div>
               <div style={{ fontSize: 26, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1.2 }}>{student.name}</div>
-              <div style={{ fontSize: 13.5, color: '#6d6d6f', fontWeight: 500, marginTop: 2 }}>{student.grade}</div>
+              <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, marginTop: 2 }}>{student.grade}</div>
             </div>
           </div>
 
@@ -1016,7 +1050,7 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
       {/* Tabs */}
       <div style={{ display: 'flex' }}>
         {['Results', 'Assignments', 'Settings'].map((t, i) =>
-        <div key={t} style={{ padding: '0 0 12px', marginRight: 26, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', color: i === 0 ? '#1d1d1f' : '#6d6d6f', borderBottom: i === 0 ? `2.5px solid ${accentColor}` : '2.5px solid transparent', transition: 'color .15s' }}>
+        <div key={t} style={{ padding: '0 0 12px', marginRight: 26, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: i === 0 ? '#1d1d1f' : '#6d6d6f', borderBottom: i === 0 ? `2.5px solid ${accentColor}` : '2.5px solid transparent', transition: 'color .15s' }}>
             {t}
           </div>
         )}
@@ -1048,7 +1082,7 @@ function SegmentToggle({ options, active, onChange }) {
   return (
     <div style={{ display: 'inline-flex', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 100, padding: 3 }}>
       {options.map((o) =>
-      <button key={o} onClick={() => onChange && onChange(o)} style={{ padding: '8px 20px', borderRadius: 100, fontSize: 13.5, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: o === active ? '1px solid #c7c6ff' : '1px solid transparent', background: o === active ? '#f5f5ff' : 'transparent', color: o === active ? '#4340e0' : '#6d6d6f', transition: 'all .12s' }}>
+      <button key={o} onClick={() => onChange && onChange(o)} style={{ padding: '8px 20px', borderRadius: 100, fontSize: 13, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: o === active ? '1px solid #c7c6ff' : '1px solid transparent', background: o === active ? '#f5f5ff' : 'transparent', color: o === active ? TEXT.brandText : TEXT.secondary, transition: 'all .12s' }}>
           {o}
         </button>
       )}
@@ -1070,7 +1104,7 @@ function AssignmentListRow({ row, selected, onSelect }) {
       <span style={{ fontSize: 14, fontWeight: selected ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{row.name}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
         <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap', width: 64, textAlign: 'left', display: 'inline-block' }}>Level {row.lv}</span>
-        <span style={{ fontSize: 13.5, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right', display: 'inline-block' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right', display: 'inline-block' }}>
           {row.date}
         </span>
       </span>
@@ -1094,7 +1128,7 @@ function NotesModal({ isOpen, onClose }) {
   return (
     <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 500, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', marginBottom: 16 }}>Notes</div>
+        <div style={{ ...TYPE.headingMd, marginBottom: 16 }}>Notes</div>
         <p style={{ fontSize: 14, color: '#6d6d6f', lineHeight: 1.6, marginBottom: 24 }}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
@@ -1130,29 +1164,29 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
       <div style={{ display: 'flex', gap: 20, padding: '20px 20px 28px', maxWidth: '1440px', margin: '0 auto' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-            <div style={{ fontWeight: 800, color: '#1d1d1f', fontSize: 22, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{row.sc}%</div>
+            <div style={{ ...TYPE.metric, whiteSpace: 'nowrap' }}>{row.sc}%</div>
             <div style={{ flex: 1 }}><AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} /></div>
             <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={true} /></div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+            <div><span style={{ ...TYPE.detailLabel }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
             <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
+            <div><span style={{ ...TYPE.detailLabel }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-            <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Verbal</span>
+            <span style={{ ...TYPE.detailLabel }}>Prompt level</span>
+            <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-            <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
+            <span style={{ ...TYPE.detailLabel }}>Accommodations</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Word bank</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>+1</span>
             </div>
           </div>
-          <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-            Notes <Ico n="arrowR" size={14} stroke="rgb(29, 29, 31)" sw={2} />
+          <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+            Notes <Ico n="arrowR" size={14} stroke={TEXT.brandText} sw={2} />
           </button>
         </div>
         <div style={{ borderLeft: '1px solid #f0f0f2' }} />
@@ -1166,8 +1200,8 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
             <span style={{ color: STS_CFG[row.st].color, display: 'flex' }}><StatusIcon type={row.st} /></span>
             <span style={{ color: STS_CFG[row.st].color, fontWeight: 600, fontSize: 14 }}>{STS_CFG[row.st].label}</span>
           </div>
-          <div style={{ fontSize: 13.5, fontWeight: 600, color: '#6d6d6f', marginBottom: 10 }}>Level {row.lv} · {row.date}</div>
-          <p style={{ fontSize: 13.5, lineHeight: 1.55, color: '#6d6d6f', maxWidth: 300, textWrap: 'pretty' }}>Results and next-step suggestions will appear here once {PROFILE_STUDENT.name.split(' ')[0]} completes this assignment.</p>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 10 }}>Level {row.lv} · {row.date}</div>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: '#6d6d6f', maxWidth: 300, textWrap: 'pretty' }}>Results and next-step suggestions will appear here once {PROFILE_STUDENT.name.split(' ')[0]} completes this assignment.</p>
         </div>
       }
     </div>);
@@ -1188,8 +1222,8 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} style={{ width: '100%', background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(29,29,31,.04)' }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: cfg.color }}>{unit.replace(/\.$/, ':')}</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
+        <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit.replace(/\.$/, ':')}</span>
+        <span style={{ ...TYPE.headingMd }}>{title}</span>
         <span style={{ flex: 1 }} />
         {avg !== null &&
         <span style={{ fontSize: 13, color: '#9a9a9c', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ color: '#1d1d1f', fontWeight: 700 }}>{avg}%</b> <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> · {doneRows.length} activities</span>
@@ -1204,13 +1238,13 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
       {/* Card header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 19, fontWeight: 700, color: cfg.color }}>{unit}</span>
-          <span style={{ fontSize: 19, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
+          <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit}</span>
+          <span style={{ ...TYPE.headingMd }}>{title}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30, flexShrink: 0 }}>
           {avg !== null &&
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1 }}>{avg}%</div>
+              <div style={{ ...TYPE.metric }}>{avg}%</div>
               <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
               <InfoTip text={`Average over ${doneRows.length} activities`} />
             </div>
@@ -1229,11 +1263,11 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
               <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
                 <button onClick={() => setSel(isExpanded ? null : r)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 24px', background: isExpanded ? 'rgb(245, 245, 255)' : '#fff', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 14, fontWeight: isExpanded ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+                    <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
-                    <span style={{ fontSize: 13.5, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
+                    <span style={{ ...TYPE.meta, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
+                    <span style={{ ...TYPE.meta, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
                     <Chevron open={isExpanded} />
                   </span>
                 </button>
@@ -1241,29 +1275,29 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                   <div style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                        <div style={{ fontWeight: 800, color: '#1d1d1f', fontSize: 22, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{r.sc}%</div>
+                        <div style={{ ...TYPE.metric, whiteSpace: 'nowrap' }}>{r.sc}%</div>
                         <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
                         <div style={{ flexShrink: 0 }}><BandPill band={r.band} sm={true} /></div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-                        <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+                        <div><span style={{ ...TYPE.detailLabel }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
                         <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-                        <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
+                        <div><span style={{ ...TYPE.detailLabel }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Verbal</span>
+                        <span style={{ ...TYPE.detailLabel }}>Prompt level</span>
+                        <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
+                        <span style={{ ...TYPE.detailLabel }}>Accommodations</span>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Word bank</span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>+1</span>
                         </div>
                       </div>
-                      <button onClick={() => setSel(r)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        Notes <Ico n="arrowR" size={14} stroke="rgb(29, 29, 31)" sw={2} />
+                      <button onClick={() => setSel(r)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+                        Notes <Ico n="arrowR" size={14} stroke={TEXT.brandText} sw={2} />
                       </button>
                     </div>
                     <div style={{ borderLeft: '1px solid #f0f0f2' }} />
@@ -1292,12 +1326,12 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
     <section style={{ marginBottom: 28 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: open ? 18 : 0 }}>
         <SubjBadge subj={subj} size={32} />
-        <span style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f' }}>{subj}</span>
+        <span style={{ ...TYPE.headingXl }}>{subj}</span>
         <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
         {doneRows.length > 0 &&
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#018143' }}>Improving</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: TEXT.success }}>Improving</span>
             <InfoTip text="Trend over last 4 weeks" />
           </div>
         }
@@ -1333,7 +1367,7 @@ function TableRow({ row, selected, onSelect, onView }) {
         </div>
       </td>
       <td style={{ padding: '14px 16px', width: 70, fontSize: 14, fontWeight: 600, color: '#49494b', verticalAlign: 'middle' }}>{row.lv}</td>
-      <td style={{ padding: '14px 16px', width: 145, fontSize: 13.5, color: '#49494b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{row.date}</td>
+      <td style={{ padding: '14px 16px', width: 145, fontSize: 13, color: '#49494b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{row.date}</td>
       <td style={{ padding: '14px 16px', width: 148, verticalAlign: 'middle' }}>
         <StatusPill st={row.st} />
       </td>
@@ -1344,14 +1378,14 @@ function TableRow({ row, selected, onSelect, onView }) {
         {b ?
         <div>
             <BandPill band={row.band} />
-            <div style={{ fontSize: 11.5, color: '#6d6d6f', fontWeight: 500, marginTop: 4, paddingLeft: 2, lineHeight: 1.4, textWrap: 'pretty' }}>
+            <div style={{ fontSize: 11, color: '#6d6d6f', fontWeight: 500, marginTop: 4, paddingLeft: 2, lineHeight: 1.4, textWrap: 'pretty' }}>
               {BAND_NEXT[row.band]?.(row.lv)}
             </div>
           </div> :
-        <span style={{ color: '#d1d5db', fontSize: 16 }}>—</span>}
+        <span style={{ color: '#d1d5db', fontSize: 14 }}>—</span>}
       </td>
       <td style={{ padding: '14px 16px', width: 60, verticalAlign: 'middle' }}>
-        <button onClick={() => onView(row)} style={{ fontSize: 13.5, fontWeight: 600, color: '#5a58ff', cursor: 'pointer', background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0 }}>
+        <button onClick={() => onView(row)} style={{ ...TYPE.label, color: TEXT.brandText, cursor: 'pointer', background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0 }}>
           View
         </button>
       </td>
@@ -1399,7 +1433,7 @@ function AssignmentsTable({ rows, onView }) {
 /* ── NextStepLabel — lightbulb + label inline with "Next step" ──── */
 function NextStepLabel() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#6d6d6f' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, ...TYPE.label }}>
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><Ico n="bulb" size={14} stroke="#6d6d6f" sw={2} /></div>
       <span>Recommended next steps</span>
     </div>);
@@ -1430,7 +1464,7 @@ function OrDivider() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, alignSelf: 'stretch', flexShrink: 0 }}>
       <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
-      <span style={{ fontSize: 12, fontWeight: 600, color: '#9a9a9c' }}>or</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: '#9a9a9c' }}>or</span>
       <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
     </div>);
 
@@ -1451,7 +1485,7 @@ function ReteachIdeasCard() {
         </ul>
       </div>
       <div style={{ textAlign: 'center', padding: 12 }}>
-        <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: '#1d1d1f', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
+        <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.titleRow, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
           Re-assign <Ico n="arrowR" size={16} stroke="#1d1d1f" sw={2.5} />
         </button>
       </div>
@@ -1466,7 +1500,7 @@ function NextStepStepper({ currentIdx, totalCount, onPrev, onNext }) {
       <button onClick={onPrev} disabled={!onPrev} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onPrev ? 'pointer' : 'default', padding: 0, opacity: onPrev ? 1 : 0.4 }}>
         <Ico n="chevLeft" size={16} stroke="#49494b" sw={2.5} />
       </button>
-      <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, minWidth: '28px', textAlign: 'center' }}>{currentIdx + 1} / {totalCount}</span>
+      <span style={{ ...TYPE.meta, color: TEXT.secondary, minWidth: '28px', textAlign: 'center' }}>{currentIdx + 1} / {totalCount}</span>
       <button onClick={onNext} disabled={!onNext} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onNext ? 'pointer' : 'default', padding: 0, opacity: onNext ? 1 : 0.4 }}>
         <Ico n="chevRight" size={16} stroke="#49494b" sw={2.5} />
       </button>
@@ -1567,13 +1601,13 @@ function LessonPreviewCard({ subj, unit, level, lessonType, title }) {
         </div>
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#9a5d00' }}>[G#]. Unit [#]</div>
+          <div style={{ ...TYPE.label, color: TEXT.accent }}>[G#]. Unit [#]</div>
           <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 400 }}>Topic Title</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.2 }}>{title}</div>
+          <div style={{ ...TYPE.headingMd }}>{title}</div>
         </div>
       </div>
       <div style={{ textAlign: 'center', padding: 12 }}>
-        <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: '#1d1d1f', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
+        <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.titleRow, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
           Assign level {level} <Ico n="arrowR" size={16} stroke="#1d1d1f" sw={2.5} />
         </button>
       </div>
@@ -1623,7 +1657,7 @@ function SidePanel({ row, onClose, onPrev, onNext, idx, total }) {
                 <div style={{ flex: 1 }}>
                   <AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} />
                 </div>
-                <div style={{ fontWeight: 800, color: b.fg, letterSpacing: '-.02em', lineHeight: 1, flexShrink: 0, fontSize: "24px" }}>{row.sc}%</div>
+                <div style={{ ...TYPE.metric, color: b.fg, flexShrink: 0 }}>{row.sc}%</div>
               </div>
 
               {/* Band and threshold together at bottom */}
@@ -1633,7 +1667,7 @@ function SidePanel({ row, onClose, onPrev, onNext, idx, total }) {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9a9a9c' }}>Math threshold</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#9a9a9c' }}>Math threshold</span>
                     <span style={{ fontWeight: 800, color: b.fg, fontSize: "11px" }}>{THRESHOLDS[row.band]?.[row.subj]}</span>
                   </div>
                 </div>
