@@ -1127,8 +1127,8 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
       </div>
 
       {b ?
-      <div style={{ display: 'flex', gap: 0, padding: '20px 20px 28px' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 20 }}>
+      <div style={{ display: 'flex', gap: 20, padding: '20px 20px 28px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
             <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
             <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
@@ -1156,7 +1156,7 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
           </button>
         </div>
         <div style={{ borderLeft: '1px solid #f0f0f2' }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 20 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
           <NextStepSection row={row} />
         </div>
       </div> :
