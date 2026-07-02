@@ -1219,57 +1219,61 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
           </button>
         </div>
       </div>
-      {/* Body: two columns */}
-      <div style={{ display: 'flex', gap: 24, padding: '0 24px 24px', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
-        <div style={{ flex: '2 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {/* Selected assignment details at top */}
-          {sel && (
-            <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid #ececef' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, margin: '0px 0px 12px' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.25 }}>{sel.name}</div>
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap' }}>Level {sel.lv}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, marginBottom: 12 }}>
-                <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
-                <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-                <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{sel.date}</span></div>
-              </div>
-              {sel.band && (
-                <>
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
-                    <div style={{ fontWeight: 800, color: BAND[sel.band].fg, fontSize: 26, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{sel.sc}%</div>
-                    <div style={{ flex: 1 }}><AnnotatedBar sc={sel.sc} band={sel.band} subj={sel.subj} /></div>
-                    <div style={{ flexShrink: 0 }}><BandPill band={sel.band} sm={false} /></div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
-                    <span style={{ color: '#1d1d1f', fontWeight: 600, fontSize: 13 }}>Verbal</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Word bank</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
+      {/* Body: full-width accordion */}
+      <div style={{ flex: 1, minHeight: 0, padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+          {doneRows.map((r, i) => {
+            const isExpanded = sel && sel.id === r.id;
+            return (
+              <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', borderBottom: '1px solid #f0f0f2', marginBottom: i === doneRows.length - 1 ? 0 : 0 }}>
+                <button onClick={() => setSel(isExpanded ? null : r)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 16px', background: isExpanded ? '#f5f5ff' : 'transparent', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 14, fontWeight: isExpanded ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
+                    <Chevron open={isExpanded} />
+                  </span>
+                </button>
+                {isExpanded && r.band && (
+                  <div style={{ display: 'flex', gap: 20, padding: '20px 20px 28px', background: '#f5f5ff' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 20 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
+                        <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+                        <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
+                        <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                        <div style={{ fontWeight: 800, color: BAND[r.band].fg, fontSize: 26, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{r.sc}%</div>
+                        <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
+                        <div style={{ flexShrink: 0 }}><BandPill band={r.band} sm={false} /></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
+                        <span style={{ color: '#1d1d1f', fontWeight: 600, fontSize: 13 }}>Verbal</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Word bank</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
+                        </div>
+                      </div>
+                      <button onClick={() => setSel(r)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2 }}>
+                        Notes <Ico n="arrowR" size={14} stroke="rgb(29, 29, 31)" sw={2} />
+                      </button>
+                    </div>
+                    <div style={{ borderLeft: '1px solid #f0f0f2' }} />
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 20 }}>
+                      <NextStepSection row={r} />
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-          )}
-          {/* Assignment list below */}
-          <div style={{ flex: 1, minHeight: 0, border: '1px solid #ececef', borderRadius: 8, overflow: 'hidden' }}>
-            <div style={{ overflowY: 'auto', height: '100%' }}>
-              {doneRows.map((r, i) =>
-              <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none' }}>
-                  <AssignmentListRow row={r} selected={sel && sel.id === r.id} onSelect={setSel} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div style={{ flex: '3 1 0', minWidth: 0, borderLeft: '1px solid #ececef', paddingLeft: 24, paddingRight: 24, overflowY: 'auto', overflowX: 'hidden' }}>
-          {sel && <NextStepSection row={sel} />}
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>);
