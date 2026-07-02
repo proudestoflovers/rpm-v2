@@ -1077,11 +1077,42 @@ function AssignmentListRow({ row, selected, onSelect }) {
 
 }
 
+/* ── NotesModal ──────────────────────────────────────────────────────── */
+function NotesModal({ isOpen, onClose }) {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleBackdropClick = (e) => {
+      if (e.target === e.currentTarget) onClose();
+    };
+    document.addEventListener('mousedown', handleBackdropClick);
+    return () => document.removeEventListener('mousedown', handleBackdropClick);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 500, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', marginBottom: 16 }}>Notes</div>
+        <p style={{ fontSize: 14, color: '#6d6d6f', lineHeight: 1.6, marginBottom: 24 }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </p>
+        <button onClick={onClose} style={{ height: 44, borderRadius: 100, background: '#141415', color: '#fff', fontFamily: "'Figtree',sans-serif", fontSize: 14, fontWeight: 600, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', width: '100%' }}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── Inline detail panel (right column of expanded unit) ────────────── */
 function InlineDetail({ row, onClose, onPrev, onNext }) {
   const b = row?.band ? BAND[row.band] : null;
+  const [notesOpen, setNotesOpen] = React.useState(false);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', alignItems: "stretch" }}>
+      <NotesModal isOpen={notesOpen} onClose={() => setNotesOpen(false)} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, margin: '0px 0px 4px' }}>
         <SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1095,21 +1126,39 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
       </div>
 
       {b ?
-      <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, fontSize: 13 }}>
+      <div style={{ display: 'flex', gap: 0, padding: '20px 20px 28px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
             <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
             <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
             <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
           </div>
-          <div style={{ display: 'flex', gap: 14, alignItems: "center", paddingBottom: "22px", borderBottom: '1px solid #e8e8ea', marginBottom: 22 }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <div style={{ fontWeight: 800, color: b.fg, fontSize: 26, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{row.sc}%</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, whiteSpace: 'nowrap', flexShrink: 0, alignItems: "flex-start" }}>
-              <BandPill band={row.band} sm={false} />
-            </div>
             <div style={{ flex: 1 }}><AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} /></div>
+            <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={false} /></div>
           </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
+            <span style={{ color: '#1d1d1f', fontWeight: 600, fontSize: 13 }}>Verbal</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Word bank</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
+            </div>
+          </div>
+          <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2 }}>
+            Notes <Ico n="arrowR" size={14} stroke="rgb(29, 29, 31)" sw={2} />
+          </button>
+        </div>
+        <div style={{ borderLeft: '1px solid #f0f0f2' }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 20 }}>
           <NextStepSection row={row} />
-        </> :
+        </div>
+      </div> :
 
       <div style={{ padding: '22px 0 0px', margin: 0, borderTop: '1px solid #e8e8ea' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -1152,12 +1201,12 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, boxShadow: '0 1px 4px rgba(29,29,31,.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 600 }}>
       {/* Card header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 19, fontWeight: 700, color: cfg.color }}>{unit}</span>
           <span style={{ fontSize: 19, fontWeight: 700, color: '#1d1d1f' }}>{title}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 30, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30, flexShrink: 0 }}>
           {avg !== null &&
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1 }}>{avg}%</div>
@@ -1307,7 +1356,7 @@ function NextStepLabel() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 12 }}>
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}><Ico n="bulb" size={14} stroke="#6d6d6f" sw={2} /></div>
-      <span>Next step</span>
+      <span>Recommended next steps</span>
     </div>);
 
 }
@@ -1342,69 +1391,87 @@ function OrDivider() {
 
 }
 
+/* ── NextStepStepper — carousel navigation for multiple next steps ──── */
+function NextStepStepper({ currentIdx, totalCount, onPrev, onNext }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <button onClick={onPrev} disabled={!onPrev} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onPrev ? 'pointer' : 'default', padding: 0, opacity: onPrev ? 1 : 0.4 }}>
+        <Ico n="arrowUp" size={16} stroke="#49494b" sw={2.5} />
+      </button>
+      <button onClick={onNext} disabled={!onNext} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onNext ? 'pointer' : 'default', padding: 0, opacity: onNext ? 1 : 0.4 }}>
+        <Ico n="arrowDown" size={16} stroke="#49494b" sw={2.5} />
+      </button>
+      <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, marginLeft: 4 }}>{currentIdx + 1} / {totalCount}</span>
+    </div>
+  );
+}
+
 /* ── NextStepSection ─────────────────────────────────────────────────── */
 function NextStepSection({ row }) {
   const { band, lv, subj, unit, name } = row;
+  const [currentIdx, setCurrentIdx] = React.useState(0);
 
   if (band === 'prof') {
     if (lv <= 2) {
-      return (
-        <section style={{ marginBottom: 24 }}>
-          <NextStepLabel />
-          <div style={{ display: 'flex', gap: 20, alignItems: 'stretch' }}>
-            {/* Move to next skill */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-              <SuggestionLabel label="Move to next skill" />
-              <div style={{ marginBottom: 12 }}>
-                <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
-              </div>
-              <div style={{ marginTop: 'auto' }}><AssignButton label="Assign next skill" primary={true} /></div>
-            </div>
-            <OrDivider />
-            {/* Move up a level */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-              <SuggestionLabel label="Move up a level" />
-              <div style={{ marginBottom: 12 }}>
-                <LessonPreviewCard subj={subj} unit={unit} level={lv + 1} lessonType="Lesson" title={name} />
-              </div>
-              <div style={{ marginTop: 'auto' }}><AssignButton label={`Assign Level ${lv + 1}`} primary={false} /></div>
-            </div>
-          </div>
-        </section>);
+      const options = [
+        { label: 'Move to next skill', level: lv, buttonLabel: 'Assign next skill' },
+        { label: 'Move up a level', level: lv + 1, buttonLabel: `Assign Level ${lv + 1}` }
+      ];
+      const current = options[currentIdx];
+      const onPrev = currentIdx > 0 ? () => setCurrentIdx(currentIdx - 1) : null;
+      const onNext = currentIdx < options.length - 1 ? () => setCurrentIdx(currentIdx + 1) : null;
 
+      return (
+        <section style={{ margin: 0 }}>
+          <NextStepLabel />
+          <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+          <SuggestionLabel label={current.label} />
+          <div style={{ marginBottom: 12 }}>
+            <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Lesson" title={name} />
+          </div>
+          <AssignButton label={current.buttonLabel} primary={currentIdx === 0} />
+        </section>
+      );
     }
-    // Proficient Level 3
     return (
-      <section style={{ marginBottom: 24 }}>
+      <section style={{ margin: 0 }}>
         <NextStepLabel />
         <SuggestionLabel label="Move to next skill" />
         <div style={{ marginBottom: 12 }}>
           <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
         </div>
         <AssignButton label="Assign next skill" primary={true} />
-      </section>);
-
+      </section>
+    );
   }
 
   if (band === 'i') {
     return (
-      <section style={{ marginBottom: 24 }}>
+      <section style={{ margin: 0 }}>
         <NextStepLabel />
         <SuggestionLabel label="Continue at current level with routine instruction and practice." />
         <AssignButton label="Re-assign" primary={true} />
-      </section>);
-
+      </section>
+    );
   }
 
   if (band === 'e') {
+    const options = [
+      { label: 'Reteach ideas', isReteach: true },
+      { label: 'Try lower level', isReteach: false, level: Math.max(1, lv - 1) }
+    ];
+    const current = options[currentIdx];
+    const onPrev = currentIdx > 0 ? () => setCurrentIdx(currentIdx - 1) : null;
+    const onNext = currentIdx < options.length - 1 ? () => setCurrentIdx(currentIdx + 1) : null;
+
     return (
-      <section style={{ marginBottom: 24, margin: "0px 0px 24px" }}>
+      <section style={{ margin: 0 }}>
         <NextStepLabel />
-        <div style={{ display: 'flex', gap: 20, alignItems: 'stretch' }}>
-          {/* Reteach ideas */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <SuggestionLabel label="Reteach ideas" />
-            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+        <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+        <SuggestionLabel label={current.label} />
+        {current.isReteach ? (
+          <>
+            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: '0 0 12px 0' }}>
               {[0, 1, 2].map((i) =>
               <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
                   <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
@@ -1412,32 +1479,30 @@ function NextStepSection({ row }) {
                 </li>
               )}
             </ul>
-          </div>
-          <OrDivider />
-          {/* Try lower level */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <SuggestionLabel label="Try lower level" />
+            <AssignButton label="Re-assign" primary={true} />
+          </>
+        ) : (
+          <>
             <div style={{ marginBottom: 12 }}>
-              <LessonPreviewCard subj={subj} unit={unit} level={Math.max(1, lv - 1)} lessonType="Read Aloud" title={name} />
+              <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Read Aloud" title={name} />
             </div>
-            <div style={{ marginTop: 'auto' }}><AssignButton label={`Assign Level ${Math.max(1, lv - 1)}`} primary={true} /></div>
-          </div>
-        </div>
-      </section>);
-
+            <AssignButton label={`Assign Level ${current.level}`} primary={true} />
+          </>
+        )}
+      </section>
+    );
   }
 
-  // Pre-emerging
   return (
-    <section style={{ marginBottom: 24 }}>
+    <section style={{ margin: 0 }}>
       <NextStepLabel />
       <SuggestionLabel label="Teach prerequisite skills before continuing this skill." />
       <div style={{ marginBottom: 12 }}>
         <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
       </div>
       <AssignButton label="Assign previous skill" primary={true} />
-    </section>);
-
+    </section>
+  );
 }
 
 /* ── LessonPreviewCard ──────────────────────────────────────────────── */
