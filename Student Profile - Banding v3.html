@@ -1467,8 +1467,10 @@ function NextStepSection({ row }) {
 
       return (
         <section style={{ margin: 0 }}>
-          <NextStepLabel />
-          <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <NextStepLabel />
+            <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+          </div>
           <SuggestionLabel label={current.label} />
           <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Lesson" title={name} />
         </section>
@@ -1503,8 +1505,10 @@ function NextStepSection({ row }) {
 
     return (
       <section style={{ margin: 0 }}>
-        <NextStepLabel />
-        <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <NextStepLabel />
+          <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
+        </div>
         <SuggestionLabel label={current.label} />
         {current.isReteach ? (
           <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
