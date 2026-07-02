@@ -1129,15 +1129,15 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
       {b ?
       <div style={{ display: 'flex', gap: 20, padding: '20px 20px 28px' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
-            <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
-          </div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <div style={{ fontWeight: 800, color: '#1d1d1f', fontSize: 22, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>{row.sc}%</div>
             <div style={{ flex: 1 }}><AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} /></div>
             <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={true} /></div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
+            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+            <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
+            <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
