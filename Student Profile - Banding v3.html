@@ -840,7 +840,7 @@ function ScatterStrip({ rows, onView }) {
         </div>
         {/* Wrapper — observed for height, chart sized to match */}
         <div ref={wrapperRef} style={{ flex: 1, minHeight: 0, overflow: 'visible' }}>
-          <div style={{ position: 'relative', height: chartH, borderRadius: 7, borderTop: '1px solid #e8e8ea', borderBottom: '1px solid #e8e8ea', overflow: 'visible' }}>
+          <div style={{ position: 'relative', height: chartH, borderRadius: 7, borderTop: '1px solid #f0f0f2', borderBottom: '1px solid #e8e8ea', overflow: 'visible' }}>
             {BAND_ORDER.map((b, i) =>
             <div key={b} style={{ position: 'absolute', left: 0, right: 0, top: i * rowH, height: rowH, borderBottom: i < 3 ? '1px solid #e8e8ea' : 'none' }} />
             )}
@@ -1139,11 +1139,11 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
             <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
             <div><span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f2', paddingTop: 12 }}>
             <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Prompt level</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Verbal</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f2', paddingTop: 12 }}>
             <span style={{ color: '#6d6d6f', fontWeight: 500, fontSize: 12.5 }}>Accommodations</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>Small group</span>
@@ -1151,7 +1151,7 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', color: '#1d1d1f', borderRadius: 100, padding: '3px 10px', fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap' }}>+1</span>
             </div>
           </div>
-          <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+          <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'rgb(29, 29, 31)', fontSize: 13, fontWeight: 500, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #f0f0f2', paddingTop: 12 }}>
             Notes <Ico n="arrowR" size={14} stroke="rgb(29, 29, 31)" sw={2} />
           </button>
         </div>
@@ -1161,7 +1161,7 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
         </div>
       </div> :
 
-      <div style={{ padding: '22px 0 0px', margin: 0, borderTop: '1px solid #e8e8ea' }}>
+      <div style={{ padding: '22px 0 0px', margin: 0, borderTop: '1px solid #f0f0f2' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ color: STS_CFG[row.st].color, display: 'flex' }}><StatusIcon type={row.st} /></span>
             <span style={{ color: STS_CFG[row.st].color, fontWeight: 600, fontSize: 14 }}>{STS_CFG[row.st].label}</span>
