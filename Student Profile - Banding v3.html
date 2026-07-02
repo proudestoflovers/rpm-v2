@@ -1470,10 +1470,7 @@ function NextStepSection({ row }) {
           <NextStepLabel />
           <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
           <SuggestionLabel label={current.label} />
-          <div style={{ marginBottom: 12 }}>
-            <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Lesson" title={name} />
-          </div>
-          <AssignButton label={current.buttonLabel} primary={currentIdx === 0} />
+          <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Lesson" title={name} />
         </section>
       );
     }
@@ -1481,10 +1478,7 @@ function NextStepSection({ row }) {
       <section style={{ margin: 0 }}>
         <NextStepLabel />
         <SuggestionLabel label="Move to next skill" />
-        <div style={{ marginBottom: 12 }}>
-          <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
-        </div>
-        <AssignButton label="Assign next skill" primary={true} />
+        <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
       </section>
     );
   }
@@ -1494,7 +1488,6 @@ function NextStepSection({ row }) {
       <section style={{ margin: 0 }}>
         <NextStepLabel />
         <SuggestionLabel label="Continue at current level with routine instruction and practice." />
-        <AssignButton label="Re-assign" primary={true} />
       </section>
     );
   }
@@ -1514,24 +1507,16 @@ function NextStepSection({ row }) {
         <NextStepStepper currentIdx={currentIdx} totalCount={options.length} onPrev={onPrev} onNext={onNext} />
         <SuggestionLabel label={current.label} />
         {current.isReteach ? (
-          <>
-            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: '0 0 12px 0' }}>
-              {[0, 1, 2].map((i) =>
-              <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
-                  <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
-                  <div style={{ height: 14, background: '#d1d5db', borderRadius: 3, flex: 1 }} />
-                </li>
-              )}
-            </ul>
-            <AssignButton label="Re-assign" primary={true} />
-          </>
+          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+            {[0, 1, 2].map((i) =>
+            <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                <span style={{ width: 6, height: 6, background: '#9a9a9c', borderRadius: '50%', flexShrink: 0, marginTop: 6 }} />
+                <div style={{ height: 14, background: '#d1d5db', borderRadius: 3, flex: 1 }} />
+              </li>
+            )}
+          </ul>
         ) : (
-          <>
-            <div style={{ marginBottom: 12 }}>
-              <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Read Aloud" title={name} />
-            </div>
-            <AssignButton label={`Assign Level ${current.level}`} primary={true} />
-          </>
+          <LessonPreviewCard subj={subj} unit={unit} level={current.level} lessonType="Read Aloud" title={name} />
         )}
       </section>
     );
@@ -1541,10 +1526,7 @@ function NextStepSection({ row }) {
     <section style={{ margin: 0 }}>
       <NextStepLabel />
       <SuggestionLabel label="Teach prerequisite skills before continuing this skill." />
-      <div style={{ marginBottom: 12 }}>
-        <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
-      </div>
-      <AssignButton label="Assign previous skill" primary={true} />
+      <LessonPreviewCard subj={subj} unit={unit} level={lv} lessonType="Lesson" title={name} />
     </section>
   );
 }
@@ -1570,7 +1552,7 @@ function LessonPreviewCard({ subj, unit, level, lessonType, title }) {
         </div>
       </div>
       <div style={{ height: '1px', background: '#e8e8ea', margin: '0 -20px' }} />
-      <div style={{ textAlign: 'center', paddingTop: 8 }}>
+      <div style={{ textAlign: 'center' }}>
         <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: '#1d1d1f', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '0 auto' }}>
           Assign level {level} <Ico n="arrowR" size={16} stroke="#1d1d1f" sw={2.5} />
         </button>
