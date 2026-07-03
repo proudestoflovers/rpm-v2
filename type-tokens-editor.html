@@ -127,7 +127,6 @@ const TYPE = {
   meta:        { fontSize:13,   fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'muted' },
   detailLabel: { fontSize:12.5, fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'secondary' },
   detailValue: { fontSize:12.5, fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'primary' },
-  badge:       { fontSize:11,   fontWeight:700, lineHeight:'',   letterSpacing:'',       textTransform:'', color:null },
 };
 
 // specimen: token -> {text, ctx?} ; ctx supplies a fallback colour for tokens with color:null
@@ -140,8 +139,7 @@ const SPECIMEN = {
   label:       { text:'Recommended next steps' },
   meta:        { text:'Level 1 · Jan 5, 2026' },
   detailLabel: { text:'Prompt level', kv:'Verbal', kvTok:'detailValue' },
-  detailValue: { text:'—', skip:true },
-  badge:       { text:'Emerging', ctx:'#9a3412', bg:'#fff7ed', border:'#fed7aa', pill:true },
+  detailValue: { text:'Emerging', ctx:'#9a3412', bg:'#fff7ed', border:'#fed7aa', pill:true },
 };
 
 const WEIGHTS = [400,500,600,700,800];

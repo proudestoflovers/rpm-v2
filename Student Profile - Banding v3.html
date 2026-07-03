@@ -677,8 +677,7 @@ const TYPE = {
   label:       { fontSize: 13, fontWeight: 600, color: TEXT.secondary },
   meta:        { fontSize: 13, fontWeight: 500, color: TEXT.muted },
   detailLabel: { fontSize: 12.5, fontWeight: 500, color: TEXT.secondary },
-  detailValue: { fontSize: 12.5, fontWeight: 500, color: TEXT.primary },
-  badge:       { fontSize: 11, fontWeight: 700 }  // performance band pill — sentence case
+  detailValue: { fontSize: 12.5, fontWeight: 500, color: TEXT.primary }
 };
 
 /* ── ATOMIC COMPONENTS ───────────────────────────────────────────────── */
@@ -927,7 +926,7 @@ function BandPill({ band, sm = true }) {
   if (!band) return null;
   const b = BAND[band];
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, color: b.fg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', ...TYPE.badge, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', ...TYPE.detailValue, color: b.fg, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
       {b.label}
     </span>);
 
