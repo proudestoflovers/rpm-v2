@@ -404,13 +404,13 @@ function RRButton({ variant = 'primary', size = 'md', children, leading, onClick
     onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
     style={{
       height: h, padding: `0 ${p}px`,
+      ...TYPE.titleRow,
       background: v.bg, color: v.color, border: v.border || 'none',
       borderRadius: 112,
-      font: `600 16px/1.5 var(--eds-font-family, 'Figtree', sans-serif)`,
       display: 'inline-flex', alignItems: 'center', gap: 6,
       cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background .12s',
 
-      ...style, fontSize: "14px", letterSpacing: "0px"
+      ...style
     }}>
       {leading && <RRIcon name={leading} size={iSz} />}
       {children}
@@ -429,8 +429,8 @@ function RRTag({ tone = 'default', dot, children }) {
   const [bg, fg] = RR_TAG_COLORS[tone] || RR_TAG_COLORS.default;
   return (
     <span style={{
+      ...TYPE.label,
       background: bg, color: fg, borderRadius: 112,
-      font: `600 13px/1.43 var(--eds-font-family, 'Figtree', sans-serif)`,
       padding: '3px 10px', letterSpacing: '0.02em',
       display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap'
     }}>
@@ -448,7 +448,7 @@ function RRProgressBar({ done, total, style }) {
       <div style={{ flex: 1, height: 6, borderRadius: 99, background: '#e1e1e3', overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: '#5a58ff', transition: 'width .3s' }} />
       </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', flexShrink: 0 }}>
+      <span style={{ ...TYPE.label, color: TEXT.secondary, flexShrink: 0 }}>
         {done}/{total}
       </span>
     </div>);
@@ -518,7 +518,7 @@ function RRAppRail({ active = 'users' }) {
             width: '100%', height: '100%', borderRadius: '50%',
             background: '#2e2e32',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13, fontWeight: 700, color: '#fff'
+            ...TYPE.titleRow, color: TEXT.onDark
           }}>P</div>
         </div>
       </div>
@@ -550,8 +550,7 @@ function ChromeTab({ label, faviconColor = '#5a58ff', active = false, showClose 
         </div>
         <span style={{
           flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          fontSize: 12.5, fontWeight: 500, color: active ? '#1d1d1f' : '#6d6d6f',
-          fontFamily: "'Figtree', sans-serif"
+          ...TYPE.detailValue, color: active ? TEXT.primary : TEXT.secondary
         }}>{label}</span>
         {showClose &&
         <div style={{
@@ -651,8 +650,7 @@ function ChromeWrapper({ children }) {
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
             <span style={{
-              fontSize: 12.5, color: TEXT.secondary, fontFamily: "'Figtree', sans-serif",
-              fontWeight: 400, letterSpacing: 0
+              ...TYPE.body
             }}>www.everway.com/member123/students</span>
             {/* Star */}
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#6d6d6f" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0 }}>
@@ -673,8 +671,7 @@ function ChromeWrapper({ children }) {
               width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', cursor: 'default',
               background: 'linear-gradient(135deg, #ffd970, #5a58ff)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#fff',
-              fontFamily: "'Figtree', sans-serif"
+              ...TYPE.titleRow, color: TEXT.onDark
             }}>P</div>
             {/* Menu */}
             <div style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6d6d6f', cursor: 'default', flexDirection: 'column', gap: 3 }}>
@@ -802,7 +799,7 @@ function AssignmentRow({ icon, count, label, countColor, style }) {
       ...style,
     }}>
       {icon}
-      <span style={{ fontSize: 14, fontWeight: 700, color: countColor, marginRight: 2, minWidth: 16 }}>
+      <span style={{ ...TYPE.titleRow, color: countColor, marginRight: 2, minWidth: 16 }}>
         {count}
       </span>
       <span style={{ ...TYPE.titleRow, fontWeight: 500, color: TEXT.metaGray }}>
@@ -858,8 +855,8 @@ function TrendIndicator({ trend }) {
         {icons[trend]}
       </svg>
       <div style={{ display:'flex', flexDirection:'column' }}>
-        <span style={{ fontSize:11, fontWeight:600, lineHeight:1 }}>{labels[trend]}</span>
-        <span style={{ fontSize:11, color: TEXT.muted, lineHeight:1 }}>last 4 weeks</span>
+        <span style={{ ...TYPE.label, color: 'inherit' }}>{labels[trend]}</span>
+        <span style={{ ...TYPE.body, color: TEXT.muted }}>last 4 weeks</span>
       </div>
     </div>
   );
@@ -901,8 +898,8 @@ function StudentCard({ s }) {
         <StudentAvatar emoji={s.emoji} size={46} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 14, fontWeight: 700, color: TEXT.primary,
-            lineHeight: 1.2, letterSpacing: '-0.01em',
+            ...TYPE.titleRow,
+            letterSpacing: '-0.01em',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{s.name}</div>
           <div style={{ ...TYPE.body, marginTop: 3 }}>
@@ -916,17 +913,17 @@ function StudentCard({ s }) {
       {/* Latest result */}
       <div>
         <div style={{
-          fontSize: 11, fontWeight: 600, color: TEXT.secondary,
+          ...TYPE.label, color: TEXT.secondary,
           letterSpacing: '0.02em', marginBottom: 6,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <span>Latest result</span>
-          <span style={{ fontWeight: 400, fontSize: 11 }}>{s.date}</span>
+          <span style={{ fontWeight: 400 }}>{s.date}</span>
         </div>
 
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
           <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={24} />
-          <div style={{ fontSize: 13, color: '#1d1d1f', fontWeight: 500, flex:1,
+          <div style={{ ...TYPE.detailValue, flex:1,
             whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.latest}</div>
         </div>
 
@@ -944,7 +941,7 @@ function StudentCard({ s }) {
             style={{
               width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:6,
               border:'1px solid #e1e1e3', background:'#fff', borderRadius:10, padding:'8px 12px',
-              fontSize:13, fontWeight:600, color:'#5a58ff', cursor:'pointer', transition:'background .12s',
+              ...TYPE.label, color:TEXT.brand, cursor:'pointer', transition:'background .12s',
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#f7f7ff'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
@@ -962,7 +959,7 @@ function StudentCard({ s }) {
               </svg>
               <span style={{ ...TYPE.label, color: band.fg }}>Suggested next step</span>
             </div>
-            <div style={{ fontSize:13, color:'#1d1d1f', lineHeight:1.4 }}>{s.nextStep}</div>
+            <div style={{ ...TYPE.body, color: TEXT.primary }}>{s.nextStep}</div>
           </div>
         )}
       </div>
@@ -1003,9 +1000,9 @@ function StudentsScreen({ onAddScores }) {
             height: 36, padding: '0 16px',
             background: '#fff', color: '#1d1d1f',
             border: '1.5px solid #1d1d1f', borderRadius: 112,
-            fontSize: 14, fontWeight: 600, letterSpacing: '0.01em',
+            ...TYPE.titleRow, letterSpacing: '0.01em',
             display: 'inline-flex', alignItems: 'center', gap: 7,
-            cursor: 'pointer', fontFamily: "'Figtree', sans-serif",
+            cursor: 'pointer',
           }}>
             <RRIcon name="settings" size={15} color="#1d1d1f" sw={1.8} />
             Manage
@@ -1073,7 +1070,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
           <RRIcon name="search" size={15} color="#6d6d6f" />
           <input value={filter} onChange={e => onFilter(e.target.value)}
             placeholder="Search assignments"
-            style={{ flex:1,border:'none',background:'transparent',font:'var(--eds-body-sm)',color:'#1d1d1f',outline:'none' }} />
+            style={{ flex:1,border:'none',background:'transparent',...TYPE.body,color:TEXT.primary,outline:'none' }} />
           {filter && (
             <button onClick={() => onFilter('')} style={{ border:'none',background:'transparent',cursor:'pointer',color:'#6d6d6f',padding:0,display:'flex' }}>
               <RRIcon name="x" size={14} />
@@ -1084,7 +1081,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
       {/* List */}
       <div ref={listRef} style={{ flex:1,overflowY:'auto',padding:'0 8px 16px' }}>
         {visible.length === 0 && (
-          <div style={{ padding:'20px 12px',font:'var(--eds-body-sm)',color:'#6d6d6f',textAlign:'center' }}>No results</div>
+          <div style={{ padding:'20px 12px',...TYPE.body,textAlign:'center' }}>No results</div>
         )}
         {visible.map(a => {
           const active = a.id === selected;
@@ -1099,11 +1096,11 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter }) {
               style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 10px',borderRadius:10,cursor:'pointer',background:active?'#eaeaff':'transparent',marginBottom:1,position:'relative',transition:'background .1s' }}>
               {active && <span style={{ position:'absolute',left:0,top:4,bottom:4,width:3,background:'#5a58ff',borderRadius:'0 3px 3px 0' }} />}
               {subjDot(a.id)}
-              <span style={{ flex:1,font:'var(--eds-body-sm)',color:active?'#3d33cc':'#1d1d1f',lineHeight:1.4,minWidth:0,textWrap:'pretty' }}>{a.name}</span>
+              <span style={{ flex:1,...TYPE.body,color:active?TEXT.brandText:TEXT.primary,minWidth:0,textWrap:'pretty' }}>{a.name}</span>
               {done
                 ? <RRIcon name="check" size={13} color="#016a36" />
                 : cnt > 0
-                  ? <span style={{ font:'var(--eds-body-sm)',color:'#6d6d6f',flexShrink:0,fontSize:12.5 }}>{cnt}/{tot}</span>
+                  ? <span style={{ ...TYPE.body,flexShrink:0 }}>{cnt}/{tot}</span>
                   : null}
             </div>
           );
@@ -1127,13 +1124,13 @@ function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScor
       <div style={{ display:'flex',alignItems:'center',gap:14,padding:'14px 20px',background:expanded?'#fafafe':'#fff' }}>
         <RRAvatar initials={s.init} accent={s.accent} size={36} />
         <div style={{ flex:1,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap' }}>
-          <span style={{ font:'var(--eds-title-default)',color:'#1d1d1f' }}>{s.name}</span>
+          <span style={{ ...TYPE.titleRow }}>{s.name}</span>
           <RRTag tone="default">Level {s.level}</RRTag>
           {isOnline && <RRTag tone="success">Online ✓</RRTag>}
         </div>
         <div style={{ display:'flex',alignItems:'center',gap:6,flexShrink:0 }}>
           {isOnline
-            ? <span style={{ fontFamily:"'Figtree',sans-serif",fontWeight:600,fontSize:20,color:'#6d6d6f' }}>{score}</span>
+            ? <span style={{ ...TYPE.headingXl,color:TEXT.secondary }}>{score}</span>
             : <input ref={inputRef}
                 className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
                 inputMode="numeric"
@@ -1144,13 +1141,13 @@ function StudentRow({ s, aid, scores, prompts, notes, expanded, onExpand, onScor
                 data-sid={s.id}
               />
           }
-          <span style={{ font:'var(--eds-title-sm)',color:'#6d6d6f' }}>/{s.max}</span>
+          <span style={{ ...TYPE.titleRow,color:TEXT.secondary }}>/{s.max}</span>
         </div>
       </div>
 
       {expanded && !isOnline && (
         <div style={{ padding:'12px 20px 16px',borderTop:'1px solid #efefef',background:'#fafafe' }}>
-          <div style={{ font:'var(--eds-body-sm)',color:'#6d6d6f',textTransform:'uppercase',letterSpacing:'0.05em',fontSize:11,marginBottom:8,fontWeight:600 }}>Prompting level</div>
+          <div style={{ ...TYPE.label,color:TEXT.secondary,marginBottom:8 }}>Prompting level</div>
           <div style={{ display:'flex',flexWrap:'wrap',gap:6,marginBottom:12 }}>
             {RR_PROMPTS.map(p => (
               <button key={p} className={'rr-prompt-chip' + (prompt === p ? ' rr-chip-on' : '')}
@@ -1338,7 +1335,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             <RRIcon name="search" size={15} color="#6d6d6f" />
             <input value={filter} onChange={(e) => onFilter(e.target.value)}
             placeholder="Search assignments"
-            style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: '#1d1d1f', outline: 'none' }} />
+            style={{ flex: 1, border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, outline: 'none' }} />
             {filter &&
             <button onClick={() => onFilter('')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#6d6d6f', padding: 0, display: 'flex' }}>
               <RRIcon name="x" size={14} />
@@ -1363,23 +1360,23 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
         <div style={{ background: '#f9f9fb', border: '1px solid #e8e8ea', borderRadius: 10, display: 'flex', flexDirection: 'column', gap: "16px", padding: "16px 12px 20px" }}>
             {/* Header row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', lineHeight: 1.43, letterSpacing: '0.056px' }}>Filters</span>
+              <span style={{ ...TYPE.titleRow }}>Filters</span>
               <button onClick={() => {setSubjectFilter('');setDateFilter('');setStudentFilter([]);setStudentDropOpen(false);}}
-            style={{ height: 28, padding: '0 12px', borderRadius: 99, background: '#fff', fontSize: 14, fontWeight: 600, color: '#1d1d1f', lineHeight: 1.43, letterSpacing: '0.056px', cursor: 'pointer', transition: 'background .1s', visibility: filtersActive ? 'visible' : 'hidden', border: "1.5px solid rgb(225, 225, 227)" }}
+            style={{ height: 28, padding: '0 12px', borderRadius: 99, background: '#fff', ...TYPE.titleRow, cursor: 'pointer', transition: 'background .1s', visibility: filtersActive ? 'visible' : 'hidden', border: "1.5px solid rgb(225, 225, 227)" }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
               Clear all</button>
             </div>
             {/* Subject */}
             <div>
-              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Subject</div>
+              <div style={{ ...TYPE.body, marginBottom: 7 }}>Subject</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: "8px" }}>
                 {[['math', 'Math'], ['ela', 'ELA'], ['sci', 'Science'], ['ss', 'Social studies']].map(([val, label]) => {
                 const on = subjectFilter === val;
                 const cfg = SUBJECT_CFG[val] || SUBJECT_CFG.math;
                 return (
                   <button key={val} onClick={() => setSubjectFilter(on ? '' : val)}
-                  style={{ padding: '0 13px 0 7px', border: '1.5px solid ' + (on ? '#5a58ff' : '#e1e1e3'), borderRadius: 99, background: on ? '#eaeaff' : '#fff', fontSize: 13, fontWeight: 600, color: on ? '#3d33cc' : '#49494b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all .1s', height: '38px' }}>
+                  style={{ padding: '0 13px 0 7px', border: '1.5px solid ' + (on ? '#5a58ff' : '#e1e1e3'), borderRadius: 99, background: on ? '#eaeaff' : '#fff', ...TYPE.label, color: on ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all .1s', height: '38px' }}>
                       <SubjectBadge subject={val} size={24} />{label}
                     </button>);
 
@@ -1388,10 +1385,10 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             </div>
             {/* Date available */}
             <div>
-              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Date available</div>
+              <div style={{ ...TYPE.body, marginBottom: 7 }}>Date available</div>
               <div style={{ position: 'relative', display: 'inline-block' }}>
                 <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
-              style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (dateFilter ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, fontSize: 13, fontWeight: 600, color: dateFilter ? '#3d33cc' : '#49494b', background: dateFilter ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}>
+              style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (dateFilter ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, ...TYPE.label, color: dateFilter ? TEXT.brandText : TEXT.metaGray, background: dateFilter ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}>
                   <option value="">All time</option>
                   <option value="d7">Last 7 days</option>
                   <option value="d30">Last 30 days</option>
@@ -1402,10 +1399,10 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             </div>
             {/* Assigned to */}
             <div>
-              <div style={{ fontSize: 14, fontWeight: 400, color: '#6d6d6f', lineHeight: 1.43, letterSpacing: '0.056px', marginBottom: 7 }}>Assigned to</div>
+              <div style={{ ...TYPE.body, marginBottom: 7 }}>Assigned to</div>
               <div ref={studentDropRef} style={{ position: 'relative' }}>
                 <button onClick={() => setStudentDropOpen((v) => !v)}
-              style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', fontSize: 13, fontWeight: 600, color: studentFilter.length ? '#3d33cc' : '#49494b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+              style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', ...TYPE.label, color: studentFilter.length ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                   <span>{studentFilter.length ? studentFilter.length + ' student' + (studentFilter.length > 1 ? 's' : '') : 'All students'}</span>
                   <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: studentDropOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><polyline points="6 9 12 15 18 9" /></svg>
                 </button>
@@ -1424,7 +1421,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
                             {checked && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                           </div>
                           <span style={{ fontSize: 18, lineHeight: 1 }}>{s.emoji}</span>
-                          <span style={{ fontSize: 13, fontWeight: 500, color: '#1d1d1f' }}>{s.name}</span>
+                          <span style={{ ...TYPE.detailValue }}>{s.name}</span>
                         </div>);
 
                 })}
@@ -1437,7 +1434,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
       </div>
       <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '0 8px 16px' }}>
         {visible.length === 0 &&
-        <div style={{ padding: '20px 12px', fontSize: 14, color: '#6d6d6f', textAlign: 'center' }}>No results</div>
+        <div style={{ padding: '20px 12px', ...TYPE.body, textAlign: 'center' }}>No results</div>
         }
         {visible.map((a) => {
           const active = a.id === selected;
@@ -1458,14 +1455,14 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
               transition: 'background .1s' }}>
               {active && <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#5a58ff', borderRadius: '0 2px 2px 0' }} />}
               <SubjectBadge subject={meta.subject} size={28} />
-              <span style={{ flex: 1, fontSize: 14, lineHeight: 1.4, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <span style={{ color: (SUBJECT_CFG[meta.subject] || SUBJECT_CFG.math).color, fontWeight: 700 }}>1. Unit {meta.unit}.</span>
-                {' '}<span style={{ color: '#1d1d1f', fontWeight: 400 }}>{a.name}</span>
+              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ ...TYPE.titleRow, color: (SUBJECT_CFG[meta.subject] || SUBJECT_CFG.math).color }}>1. Unit {meta.unit}.</span>
+                {' '}<span style={{ ...TYPE.body, color: TEXT.primary }}>{a.name}</span>
               </span>
               {done ?
               <RRIcon name="check" size={13} color="#016a36" /> :
               cnt > 0 ?
-              <span style={{ fontSize: 12.5, color: '#6d6d6f', flexShrink: 0 }}>{cnt}/{tot}</span> :
+              <span style={{ ...TYPE.body, flexShrink: 0 }}>{cnt}/{tot}</span> :
               null}
             </div>);
 
@@ -1473,7 +1470,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
         {hasMore &&
         <div style={{ padding: '12px 12px 4px', display: 'flex', justifyContent: 'center' }}>
             <RRButton variant="ghost" size="sm" onClick={() => setVisibleCount((c) => c + 30)}>
-              Load more <span style={{ color: '#9a9a9c', fontWeight: 500, fontSize: "14px", letterSpacing: "0.1px" }}>({filtered.length - visibleCount})</span>
+              Load more <span style={{ ...TYPE.detailValue, color: TEXT.muted, letterSpacing: "0.1px" }}>({filtered.length - visibleCount})</span>
             </RRButton>
           </div>
         }
@@ -1593,13 +1590,13 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{label}</span>
+      <span style={{ ...TYPE.titleRow }}>{label}</span>
       <div ref={wrapRef} style={{ position: 'relative' }}>
         {/* Tag display + trigger */}
         <div ref={triggerRef} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '7px 10px', minHeight: 40, cursor: 'text' }}
           onClick={() => setOpen(true)}>
           {selected.map(item => (
-            <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eaeaff', color: '#3d33cc', border: '1px solid #c8c6ff', borderRadius: 99, padding: '2px 8px 2px 10px', fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap' }}>
+            <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eaeaff', border: '1px solid #c8c6ff', borderRadius: 99, padding: '2px 8px 2px 10px', ...TYPE.label, color: TEXT.brandText, whiteSpace: 'nowrap' }}>
               {item}
               <button onClick={(e) => { e.stopPropagation(); remove(item); }}
                 style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#7b78ee', lineHeight: 1 }}>
@@ -1608,7 +1605,7 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
             </span>
           ))}
           <button onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-            style={{ border: '1px dashed #c0c0c2', borderRadius: 99, padding: '2px 8px', background: 'transparent', color: '#9a9a9c', fontSize: 12.5, fontWeight: 500, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+            style={{ border: '1px dashed #c0c0c2', borderRadius: 99, padding: '2px 8px', background: 'transparent', ...TYPE.detailValue, color: TEXT.muted, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
             <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
             {addLabel}
           </button>
@@ -1620,10 +1617,10 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
             <div style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', padding: '8px 0' }}>
               {recentAvailable.length > 0 &&
               <div style={{ borderBottom: '1px solid #f0f0f2', marginBottom: 4, paddingBottom: 4 }}>
-                  <div style={{ padding: '4px 14px 2px', fontSize: 11, fontWeight: 700, color: '#9a9a9c', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Used previously</div>
+                  <div style={{ padding: '4px 14px 2px', ...TYPE.label, color: TEXT.muted }}>Used previously</div>
                   {recentAvailable.map(item => (
                   <button key={'recent-' + item} onClick={() => toggle(item)}
-                    style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', font: '400 13px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', cursor: 'pointer', textAlign: 'left', gap: 8 }}
+                    style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left', gap: 8 }}
                     onMouseEnter={e => e.currentTarget.style.background = '#f4f4f6'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#9a9a9c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1634,7 +1631,7 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
               }
               {available.map(p => (
                 <button key={p.label} onClick={() => toggle(p.label)}
-                  style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', font: '400 13px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', cursor: 'pointer', textAlign: 'left', gap: 8 }}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left', gap: 8 }}
                   onMouseEnter={e => e.currentTarget.style.background = '#f4f4f6'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   {p.label}
@@ -1646,9 +1643,9 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
               <input ref={customRef} value={customInput} onChange={e => setCustomInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
                 placeholder={customPlaceholder}
-                style={{ flex: 1, border: 'none', outline: 'none', font: '400 13px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', background: 'transparent' }} />
+                style={{ flex: 1, border: 'none', outline: 'none', ...TYPE.body, color: TEXT.primary, background: 'transparent' }} />
               {customInput.trim() && (
-                <button onClick={addCustom} style={{ border: 'none', background: '#5a58ff', color: '#fff', borderRadius: 99, padding: '4px 12px', font: '600 12px var(--eds-font-family, \'Figtree\', sans-serif)', cursor: 'pointer', whiteSpace: 'nowrap' }}>Add</button>
+                <button onClick={addCustom} style={{ border: 'none', background: '#5a58ff', borderRadius: 99, padding: '4px 12px', ...TYPE.label, color: TEXT.onDark, cursor: 'pointer', whiteSpace: 'nowrap' }}>Add</button>
               )}
             </div>
           </div>,
@@ -1733,11 +1730,11 @@ function DatePickerField({ label, defaultDate }) {
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{label}</span>
+      <span style={{ ...TYPE.titleRow }}>{label}</span>
       <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '0 12px', height: 40, cursor: 'pointer' }}
         onClick={() => setOpen(!open)}>
         <input type="text" placeholder="mm/dd/yyyy" value={formatDisplay(selected)} readOnly
-          style={{ flex: 1, border: 'none', background: 'transparent', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none', cursor: 'pointer', pointerEvents: 'none' }} />
+          style={{ flex: 1, border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, outline: 'none', cursor: 'pointer', pointerEvents: 'none' }} />
         <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#9a9a9c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
@@ -1750,7 +1747,7 @@ function DatePickerField({ label, defaultDate }) {
             <button onClick={prevMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{monthYear}</span>
+            <span style={{ ...TYPE.titleRow }}>{monthYear}</span>
             <button onClick={nextMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="9 18 15 12 9 6"/></svg>
             </button>
@@ -1759,7 +1756,7 @@ function DatePickerField({ label, defaultDate }) {
           {/* Day labels */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8, textAlign: 'center' }}>
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-              <div key={d} style={{ fontSize: 11, fontWeight: 600, color: TEXT.muted, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{d}</div>
+              <div key={d} style={{ ...TYPE.label, color: TEXT.muted, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{d}</div>
             ))}
           </div>
 
@@ -1771,12 +1768,12 @@ function DatePickerField({ label, defaultDate }) {
                 <button key={i} onClick={() => day && pickDate(day)}
                   disabled={!day}
                   style={{
+                    ...(isSelected ? TYPE.titleRow : TYPE.body),
                     border: isSelected ? '1.5px solid #5a58ff' : '1px solid transparent',
                     background: isSelected ? '#eaeaff' : 'transparent',
-                    color: isSelected ? '#3d33cc' : day ? '#1d1d1f' : '#e1e1e3',
+                    color: isSelected ? TEXT.brandText : day ? TEXT.primary : TEXT.disabled,
                     borderRadius: 6,
                     padding: '6px 0',
-                    font: `${isSelected ? 600 : 400} 12px var(--eds-font-family, 'Figtree', sans-serif)`,
                     cursor: day ? 'pointer' : 'default',
                     display: 'flex',
                     alignItems: 'center',
@@ -1818,7 +1815,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
           <a
             href={`Student Profile - Banding v3.html?name=${encodeURIComponent(s.name)}&emoji=${encodeURIComponent(s.emoji || '')}&level=${s.level}&grade=${encodeURIComponent('Grade 1')}`}
             onClick={e => e.stopPropagation()}
-            style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', textDecoration: 'none', transition: 'color .1s' }}
+            style={{ ...TYPE.titleRow, textDecoration: 'none', transition: 'color .1s' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#1d1d1f'; e.currentTarget.style.textDecoration = 'none'; }}
           >{s.name}</a>
@@ -1827,7 +1824,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           {isOnline ?
-          <span style={{ fontSize: 20, fontWeight: 700, color: '#6d6d6f' }}>{score}</span> :
+          <span style={{ ...TYPE.headingXl, color: TEXT.secondary }}>{score}</span> :
           <input ref={inputRef}
           className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
           inputMode="numeric"
@@ -1844,7 +1841,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
           data-sid={s.id} />
 
           }
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#6d6d6f' }}>/{s.max}</span>
+          <span style={{ ...TYPE.titleRow, color: TEXT.secondary }}>/{s.max}</span>
         </div>
       </div>
 
@@ -1860,9 +1857,9 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
           {/* Right column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Notes</span>
+              <span style={{ ...TYPE.titleRow }}>Notes</span>
               <textarea placeholder="Add observational notes…"
-                style={{ flex: 1, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '8px 12px', font: '400 14px var(--eds-font-family, \'Figtree\', sans-serif)', color: '#1d1d1f', outline: 'none', resize: 'none', transition: 'border-color .12s' }}
+                style={{ flex: 1, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '8px 12px', ...TYPE.body, color: TEXT.primary, outline: 'none', resize: 'none', transition: 'border-color .12s' }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#5a58ff'}
                 onBlur={(e) => e.currentTarget.style.borderColor = '#e1e1e3'} />
             </label>
@@ -1895,11 +1892,11 @@ function LevelDropdown({ studentId, currentLevel, onChange }) {
       <button
         onClick={() => setOpen(!open)}
         style={{
+          ...TYPE.label,
           background: open ? '#eaeaff' : '#fff',
-          color: open ? '#3d33cc' : '#49494b',
+          color: open ? TEXT.brandText : TEXT.metaGray,
           border: open ? '1.5px solid #5a58ff' : '1.5px solid #e1e1e3',
           borderRadius: 112,
-          font: '600 13px/1.43 var(--eds-font-family, \'Figtree\', sans-serif)',
           padding: '3px 10px 3px 10px',
           letterSpacing: '0.02em',
           cursor: 'pointer',
@@ -1937,10 +1934,10 @@ function LevelDropdown({ studentId, currentLevel, onChange }) {
                 display: 'block',
                 width: '100%',
                 padding: '10px 12px',
+                ...(currentLevel === level ? TYPE.titleRow : TYPE.body),
                 background: currentLevel === level ? '#eaeaff' : '#fff',
-                color: currentLevel === level ? '#3d33cc' : '#49494b',
+                color: currentLevel === level ? TEXT.brandText : TEXT.metaGray,
                 border: 'none',
-                font: currentLevel === level ? '600 13px var(--eds-font-family, \'Figtree\', sans-serif)' : '400 13px var(--eds-font-family, \'Figtree\', sans-serif)',
                 textAlign: 'left',
                 cursor: 'pointer',
                 transition: 'background .12s'
@@ -1970,7 +1967,7 @@ function DismissButton({ onClick }) {
         </svg>
       </button>
       {hov && (
-        <div role="tooltip" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#1d1d1f', color: '#fff', padding: '7px 11px', borderRadius: 9, whiteSpace: 'nowrap', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', zIndex: 60, pointerEvents: 'none', fontSize: 13, fontWeight: 600 }}>
+        <div role="tooltip" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#1d1d1f', padding: '7px 11px', borderRadius: 9, whiteSpace: 'nowrap', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', zIndex: 60, pointerEvents: 'none', ...TYPE.titleRow, color: TEXT.onDark }}>
           Dismiss from this view
         </div>)}
     </div>);
@@ -2150,7 +2147,7 @@ function RosterRunScreen({ onDone }) {
       {/* Top bar */}
       <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: '#6d6d6f', fontSize: 14, fontWeight: 500, padding: '4px 0' }}>
+          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, ...TYPE.detailValue, color: TEXT.secondary, padding: '4px 0' }}>
             <RRIcon name="chevLeft" size={16} />Students
           </button>
           <RRIcon name="chevRight" size={14} color="#c0c0c2" />
@@ -2159,7 +2156,7 @@ function RosterRunScreen({ onDone }) {
 
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: '#016a36', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ ...TYPE.detailValue, color: TEXT.success, display: 'flex', alignItems: 'center', gap: 5 }}>
             <RRIcon name="check" size={14} color="#016a36" />All changes saved
           </span>
           <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
@@ -2206,7 +2203,7 @@ function RosterRunScreen({ onDone }) {
                   {/* Badge + grade/unit + remove-from-view */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <SubjectBadge subject={meta.subject} size={28} />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: subjectColor }}>
+                    <span style={{ ...TYPE.titleRow, color: subjectColor }}>
                       1. Unit {meta.unit}
                     </span>
                     <div style={{ flex: 1 }} />
@@ -2214,7 +2211,7 @@ function RosterRunScreen({ onDone }) {
                   </div>
 
                   {/* Topic */}
-                  <div style={{ fontSize: 14, color: '#6d6d6f', marginBottom: 4, fontWeight: 400 }}>
+                  <div style={{ ...TYPE.body, marginBottom: 4 }}>
                     {topic}
                   </div>
 
@@ -2225,12 +2222,12 @@ function RosterRunScreen({ onDone }) {
 
                   {/* Footer: progress + date — single row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, paddingTop: 12, borderTop: '1px solid #e1e1e3', borderWidth: "0px", borderTopStyle: "solid", borderTopColor: "rgb(225, 225, 227)" }}>
-                    <span style={{ fontSize: 13, color: '#9a9a9c', flexShrink: 0 }}>Available {asg?.available}</span>
-                    <span style={{ color: TEXT.disabled, fontSize: 13 }}>·</span>
+                    <span style={{ ...TYPE.body, color: TEXT.muted, flexShrink: 0 }}>Available {asg?.available}</span>
+                    <span style={{ ...TYPE.body, color: TEXT.disabled }}>·</span>
                     <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e1e1e3', overflow: 'hidden' }}>
                       <div style={{ width: `${Math.round(doneCount / Math.max(allStudents.length, 1) * 100)}%`, height: '100%', background: '#5a58ff', transition: 'width .3s' }} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', flexShrink: 0 }}>{doneCount}/{allStudents.length}</span>
+                    <span style={{ ...TYPE.titleRow, color: TEXT.secondary, flexShrink: 0 }}>{doneCount}/{allStudents.length}</span>
                   </div>
                 </div>
               </div>);
@@ -2272,9 +2269,9 @@ function RosterRunScreen({ onDone }) {
           </div>
 
           {/* Keyboard hints */}
-          <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#9a9a9c' }}>
-            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12.5 }}>↑↓</kbd> change assignment</span>
-            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', fontSize: 12.5 }}>Enter</kbd> next student</span>
+          <div style={{ display: 'flex', gap: 16, ...TYPE.body, color: TEXT.muted }}>
+            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', ...TYPE.body }}>↑↓</kbd> change assignment</span>
+            <span><kbd style={{ background: '#fff', border: '1px solid #e1e1e3', borderRadius: 6, padding: '2px 7px', fontFamily: 'inherit', ...TYPE.body }}>Enter</kbd> next student</span>
           </div>
         </div>
       </div>
@@ -2283,10 +2280,10 @@ function RosterRunScreen({ onDone }) {
       {toast && (() => {
         const removed = ASSIGNMENTS.find((a) => a.id === toast.id);
         return (
-          <div style={{ position: 'absolute', left: '50%', bottom: 28, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, background: '#1d1d1f', color: '#fff', padding: '12px 16px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', fontSize: 14, zIndex: 50 }}>
+          <div style={{ position: 'absolute', left: '50%', bottom: 28, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, background: '#1d1d1f', padding: '12px 16px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', ...TYPE.body, color: TEXT.onDark, zIndex: 50 }}>
             <span>Dismissed “{removed ? getTopicName(removed.name) || removed.name : 'assignment'}” from this view</span>
             <button onClick={() => undoRemove(toast.id)}
-              style={{ border: 'none', background: 'transparent', color: '#a9a7ff', fontWeight: 700, fontSize: 14, cursor: 'pointer', padding: 0 }}>
+              style={{ border: 'none', background: 'transparent', ...TYPE.titleRow, color: '#a9a7ff', cursor: 'pointer', padding: 0 }}>
               Undo
             </button>
           </div>);
