@@ -1217,7 +1217,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} style={{ width: '100%', background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(29,29,31,.04)' }}>
-        <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit.replace(/\.$/, ':')}</span>
+        <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit}</span>
         <span style={{ ...TYPE.headingMd }}>{title}</span>
         <span style={{ flex: 1 }} />
         {avg !== null &&
