@@ -770,9 +770,7 @@ const TEXT = {
 
 const TYPE = {
   display:     { fontSize: 26, fontWeight: 800, lineHeight: 1.2, letterSpacing: '-.02em', color: TEXT.primary },
-  metric:      { fontSize: 22, fontWeight: 800, lineHeight: 1, letterSpacing: '-.02em', color: TEXT.primary },
   headingXl:   { fontSize: 22, fontWeight: 700, lineHeight: 1.25, color: TEXT.primary },
-  headingLg:   { fontSize: 20, fontWeight: 700, lineHeight: 1.3, letterSpacing: '-.01em', color: TEXT.primary },
   headingMd:   { fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: TEXT.primary },
   titleRow:    { fontSize: 14, fontWeight: 600, lineHeight: 1.4, color: TEXT.primary },
   body:        { fontSize: 14, fontWeight: 400, lineHeight: 1.5, color: TEXT.secondary },
@@ -937,7 +935,7 @@ function StudentCard({ s }) {
         </div>
 
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: 12 }}>
-          <span style={{ ...TYPE.metric }}>{s.pct}%</span>
+          <span style={{ ...TYPE.headingXl }}>{s.pct}%</span>
           <span style={{ background: band.bg, color: band.fg, borderRadius:99, padding:'3px 10px', ...TYPE.badge }}>{s.band}</span>
           <div style={{ flex:1 }} />
           <TrendIndicator trend={s.trend} />
@@ -994,7 +992,7 @@ function StudentsScreen({ onAddScores }) {
             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          <span style={{ ...TYPE.headingLg }}>
+          <span style={{ ...TYPE.headingXl }}>
             Students
           </span>
         </div>
@@ -2160,7 +2158,7 @@ function RosterRunScreen({ onDone }) {
             <RRIcon name="chevLeft" size={16} />Students
           </button>
           <RRIcon name="chevRight" size={14} color="#c0c0c2" />
-          <span style={{ ...TYPE.headingLg }}>Offline scores</span>
+          <span style={{ ...TYPE.headingXl }}>Offline scores</span>
         </div>
 
 
