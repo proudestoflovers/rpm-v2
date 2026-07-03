@@ -780,7 +780,8 @@ const TYPE = {
   meta:        { fontSize: 13, fontWeight: 500, color: TEXT.muted },
   detailLabel: { fontSize: 12.5, fontWeight: 500, color: TEXT.secondary },
   detailValue: { fontSize: 12.5, fontWeight: 500, color: TEXT.primary },
-  overline:    { fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }
+  overline:    { fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' },
+  badge:       { fontSize: 11, fontWeight: 700 }  // performance band pill — sentence case
 };
 
 // ─── StudentAvatar ────────────────────────────────────────────────────────────
@@ -937,7 +938,7 @@ function StudentCard({ s }) {
 
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: 12 }}>
           <span style={{ ...TYPE.metric }}>{s.pct}%</span>
-          <span style={{ background: band.bg, color: band.fg, borderRadius:99, padding:'3px 10px', ...TYPE.overline }}>{s.band}</span>
+          <span style={{ background: band.bg, color: band.fg, borderRadius:99, padding:'3px 10px', ...TYPE.badge }}>{s.band}</span>
           <div style={{ flex:1 }} />
           <TrendIndicator trend={s.trend} />
         </div>
