@@ -778,7 +778,6 @@ const TYPE = {
   meta:        { fontSize: 13, fontWeight: 500, color: TEXT.muted },
   detailLabel: { fontSize: 12.5, fontWeight: 500, color: TEXT.secondary },
   detailValue: { fontSize: 12.5, fontWeight: 500, color: TEXT.primary },
-  overline:    { fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' },
   badge:       { fontSize: 11, fontWeight: 700 }  // performance band pill — sentence case
 };
 
@@ -964,7 +963,7 @@ function StudentCard({ s }) {
               <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={band.fg} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
               </svg>
-              <span style={{ ...TYPE.overline, color: band.fg }}>Suggested next step</span>
+              <span style={{ ...TYPE.label, color: band.fg }}>Suggested next step</span>
             </div>
             <div style={{ fontSize:13, color:'#1d1d1f', lineHeight:1.4 }}>{s.nextStep}</div>
           </div>
