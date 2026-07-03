@@ -431,7 +431,7 @@ function RRTag({ tone = 'default', dot, children }) {
     <span style={{
       ...TYPE.label,
       background: bg, color: fg, borderRadius: 112,
-      padding: '3px 10px', letterSpacing: '0.02em',
+      padding: '4px 12px', letterSpacing: '0.02em',
       display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap'
     }}>
       {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: fg, flexShrink: 0 }} />}
@@ -930,7 +930,7 @@ function StudentCard({ s }) {
 
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: 12 }}>
           <span style={{ ...TYPE.headingXl }}>{s.pct}%</span>
-          <span style={{ background: band.bg, borderRadius:99, padding:'3px 10px', ...TYPE.detailValue, color: band.fg, border: `1px solid ${band.border}` }}>{s.band}</span>
+          <span style={{ background: band.bg, borderRadius:99, padding:'4px 12px', ...TYPE.detailValue, color: band.fg, border: `1px solid ${band.border}` }}>{s.band}</span>
           <div style={{ flex:1 }} />
           <TrendIndicator trend={s.trend} />
         </div>

@@ -925,7 +925,7 @@ function BandPill({ band, sm = true }) {
   if (!band) return null;
   const b = BAND[band];
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, borderRadius: 100, padding: sm ? '3px 10px' : '4px 12px', ...TYPE.detailValue, color: b.fg, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: b.bg, borderRadius: 100, padding: '4px 12px', ...TYPE.detailValue, color: b.fg, whiteSpace: 'nowrap', border: `1px solid ${b.border}` }}>
       {b.label}
     </span>);
 
@@ -1171,14 +1171,14 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
             <span style={{ ...TYPE.body }}>Prompt level</span>
-            <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
+            <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Verbal</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
             <span style={{ ...TYPE.body }}>Accommodations</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
-              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
-              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>+1</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Small group</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Word bank</span>
+              <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>+1</span>
             </div>
           </div>
           <button onClick={() => setNotesOpen(true)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
@@ -1284,14 +1284,14 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         <span style={{ ...TYPE.body }}>Prompt level</span>
-                        <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
+                        <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Verbal</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         <span style={{ ...TYPE.body }}>Accommodations</span>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>+1</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Small group</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>Word bank</span>
+                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap' }}>+1</span>
                         </div>
                       </div>
                       <button onClick={() => setSel(r)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
