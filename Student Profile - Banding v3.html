@@ -675,7 +675,6 @@ const TYPE = {
   titleRow:     { fontSize: 14, fontWeight: 600, lineHeight: 1.5, color: TEXT.primary },
   body:         { fontSize: 14, fontWeight: 400, lineHeight: 1.5, color: TEXT.secondary },
   label:        { fontSize: 14, fontWeight: 600, color: TEXT.primary },
-  meta:         { fontSize: 14, fontWeight: 400, lineHeight: 1.5, color: TEXT.secondary },
   detailLabel:  { fontSize: 14, fontWeight: 400, color: TEXT.primary },
   detailValue:  { fontSize: 14, fontWeight: 500, color: TEXT.primary }
 };
@@ -1263,8 +1262,8 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                     <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
-                    <span style={{ ...TYPE.meta, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
-                    <span style={{ ...TYPE.meta, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
                     <Chevron open={isExpanded} />
                   </span>
                 </button>
@@ -1497,7 +1496,7 @@ function NextStepStepper({ currentIdx, totalCount, onPrev, onNext }) {
       <button onClick={onPrev} disabled={!onPrev} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onPrev ? 'pointer' : 'default', padding: 0, opacity: onPrev ? 1 : 0.4 }}>
         <Ico n="chevLeft" size={16} stroke="#49494b" sw={2.5} />
       </button>
-      <span style={{ ...TYPE.meta, color: TEXT.secondary, minWidth: '28px', textAlign: 'center' }}>{currentIdx + 1} / {totalCount}</span>
+      <span style={{ ...TYPE.body, color: TEXT.secondary, minWidth: '28px', textAlign: 'center' }}>{currentIdx + 1} / {totalCount}</span>
       <button onClick={onNext} disabled={!onNext} style={{ appearance: 'none', background: 'transparent', border: 'none', cursor: onNext ? 'pointer' : 'default', padding: 0, opacity: onNext ? 1 : 0.4 }}>
         <Ico n="chevRight" size={16} stroke="#49494b" sw={2.5} />
       </button>
