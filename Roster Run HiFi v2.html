@@ -1594,7 +1594,7 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
       <span style={{ ...TYPE.titleRow }}>{label}</span>
       <div ref={wrapRef} style={{ position: 'relative' }}>
         {/* Tag display + trigger */}
-        <div ref={triggerRef} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '7px 10px', minHeight: 40, cursor: 'text' }}
+        <div ref={triggerRef} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '7px 12px', minHeight: 40, cursor: 'pointer' }}
           onClick={() => setOpen(true)}>
           {selected.map(item => (
             <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eaeaff', border: '1px solid #c8c6ff', borderRadius: 99, padding: '2px 8px 2px 10px', ...TYPE.label, color: TEXT.brandText, whiteSpace: 'nowrap' }}>
@@ -1605,11 +1605,9 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
               </button>
             </span>
           ))}
-          <button onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-            style={{ border: '1px dashed #c0c0c2', borderRadius: 99, padding: '2px 8px', background: 'transparent', ...TYPE.detailValue, color: TEXT.muted, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-            <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            {addLabel}
-          </button>
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', color: TEXT.muted, pointerEvents: 'none' }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
         </div>
 
         {/* Dropdown — portaled to <body> with fixed positioning so it can't be clipped by an ancestor's overflow:hidden, and repositions/flips to stay inside the viewport. Shrinks to content up to maxHeight, with the custom-entry row pinned outside the scrollable list so it's never scrolled out of view. */}
@@ -1871,11 +1869,11 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
         </div>
         {!isOnline && onAddAttempt &&
         <button onClick={onAddAttempt}
-          style={{ marginTop: 16, width: '100%', border: '1.5px dashed #cfcefb', borderRadius: 10, background: 'transparent', padding: '9px 12px', ...TYPE.label, color: TEXT.brand, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .12s' }}
+          style={{ marginTop: 16, width: '100%', border: 'none', borderRadius: 10, background: 'transparent', padding: '9px 12px', ...TYPE.label, color: TEXT.brand, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .12s' }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5ff'}
           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-          Add another attempt
+          Another attempt
         </button>
         }
       </div>
