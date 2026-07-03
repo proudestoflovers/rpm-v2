@@ -741,10 +741,10 @@ const STUDENTS_SCREEN_DATA = [
 
 // Band → color tint + sort priority (lowest band floats to top for triage)
 const BAND_STYLES = {
-  'Proficient':    { bg:'#e3f5ec', fg:'#018143', accent:'#018143', rank:3 },
-  'Instructional': { bg:'#e5eef8', fg:'#0053a0', accent:'#0053a0', rank:2 },
-  'Emerging':      { bg:'#fbedde', fg:'#d15e00', accent:'#d15e00', rank:1 },
-  'Pre-emerging':  { bg:'#fce8e7', fg:'#e0241a', accent:'#e0241a', rank:0 },
+  'Proficient':    { bg:'#e8fef0', fg:'#016a36', accent:'#018143', border:'#b7f5cc', rank:3 },
+  'Instructional': { bg:'#e8f4fd', fg:'#00547f', accent:'#0375a0', border:'#b3d9f0', rank:2 },
+  'Emerging':      { bg:'#fff7ed', fg:'#9a3412', accent:'#d15e00', border:'#fed7aa', rank:1 },
+  'Pre-emerging':  { bg:'#fff1f0', fg:'#b20203', accent:'#dc2626', border:'#fecaca', rank:0 },
 };
 
 /* ── TYPE SYSTEM ─────────────────────────────────────────────────────────
@@ -760,6 +760,7 @@ const TEXT = {
   brand: '#5a58ff',     // fills + icons
   brandText: '#3d33cc', // link/active text on white (contrast-safe)
   success: '#018143',
+  trendDown: '#d15e00', // declining trend indicator (Slipping)
   accent: '#a56c00',    // subject accent (amber)
   accentEla: '#7135ac', // subject accent (ELA purple)
   onDark: '#fff'
@@ -838,9 +839,9 @@ function CardDivider() {
 // ─── StudentCard ──────────────────────────────────────────────────────────────
 function TrendIndicator({ trend }) {
   const map = {
-    up:     { color:'#018143' },
-    steady: { color:'#9a9a9c' },
-    down:   { color:'#d15e00' },
+    up:     { color: TEXT.success },
+    steady: { color: TEXT.muted },
+    down:   { color: TEXT.trendDown },
   };
   const t = map[trend] || map.steady;
   const labels = { up:'Improving', steady:'Steady', down:'Slipping' };
@@ -929,7 +930,7 @@ function StudentCard({ s }) {
 
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: 12 }}>
           <span style={{ ...TYPE.headingXl }}>{s.pct}%</span>
-          <span style={{ background: band.bg, borderRadius:99, padding:'3px 10px', ...TYPE.detailValue, color: band.fg }}>{s.band}</span>
+          <span style={{ background: band.bg, borderRadius:99, padding:'3px 10px', ...TYPE.detailValue, color: band.fg, border: `1px solid ${band.border}` }}>{s.band}</span>
           <div style={{ flex:1 }} />
           <TrendIndicator trend={s.trend} />
         </div>

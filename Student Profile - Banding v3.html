@@ -663,6 +663,7 @@ const TEXT = {
   brand: '#5a58ff',     // fills + icons
   brandText: '#3d33cc', // link/active text on white (contrast-safe)
   success: '#018143',
+  trendDown: '#d15e00', // declining trend indicator (Slipping)
   accent: '#a56c00',    // subject accent (Math amber)
   accentEla: '#7135ac', // subject accent (ELA purple)
   onDark: '#fff'
@@ -1327,7 +1328,7 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
         <div style={{ flex: 1, height: 1, background: '#e1e1e3' }} />
         {doneRows.length > 0 &&
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
+            <Ico n="arrowUp" size={15} stroke={TEXT.success} sw={2.5} />
             <span style={{ ...TYPE.label, color: TEXT.success }}>Improving</span>
             <InfoTip text="Trend over last 4 weeks" />
           </div>
