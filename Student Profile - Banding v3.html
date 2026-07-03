@@ -652,7 +652,7 @@ const STS_CFG = {
 /* ── TYPE SYSTEM ─────────────────────────────────────────────────────────
    Canonical text colours + type scale. Spread a TYPE token into a style
    object, then add layout/overrides after it, e.g.
-   style={{ ...TYPE.detailLabel, marginTop: 8 }} or
+   style={{ ...TYPE.body, marginTop: 8 }} or
    style={{ ...TYPE.headingXl, color: b.fg }}                                  */
 const TEXT = {
   primary: '#1d1d1f',   // near-black — headings, values, primary labels
@@ -675,7 +675,6 @@ const TYPE = {
   titleRow:     { fontSize: 14, fontWeight: 600, lineHeight: 1.5, color: TEXT.primary },
   body:         { fontSize: 14, fontWeight: 400, lineHeight: 1.5, color: TEXT.secondary },
   label:        { fontSize: 14, fontWeight: 600, color: TEXT.primary },
-  detailLabel:  { fontSize: 14, fontWeight: 400, color: TEXT.primary },
   detailValue:  { fontSize: 14, fontWeight: 500, color: TEXT.primary }
 };
 
@@ -1165,16 +1164,16 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
             <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={true} /></div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-            <div><span style={{ ...TYPE.detailLabel }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+            <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
             <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-            <div><span style={{ ...TYPE.detailLabel }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
+            <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-            <span style={{ ...TYPE.detailLabel }}>Prompt level</span>
+            <span style={{ ...TYPE.body }}>Prompt level</span>
             <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-            <span style={{ ...TYPE.detailLabel }}>Accommodations</span>
+            <span style={{ ...TYPE.body }}>Accommodations</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
               <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
@@ -1276,16 +1275,16 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                         <div style={{ flexShrink: 0 }}><BandPill band={r.band} sm={true} /></div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-                        <div><span style={{ ...TYPE.detailLabel }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
+                        <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
                         <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-                        <div><span style={{ ...TYPE.detailLabel }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
+                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ ...TYPE.detailLabel }}>Prompt level</span>
+                        <span style={{ ...TYPE.body }}>Prompt level</span>
                         <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Verbal</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ ...TYPE.detailLabel }}>Accommodations</span>
+                        <span style={{ ...TYPE.body }}>Accommodations</span>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                           <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Small group</span>
                           <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>Word bank</span>
