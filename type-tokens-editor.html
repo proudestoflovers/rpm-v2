@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Type token editor — Everway</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f4f4f6; color: #1d1d1f;
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 28px 28px 80px; }
+  h1 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: #6d6d6f; margin: 0 0 24px; }
+  .cols { display: grid; grid-template-columns: 1fr 460px; gap: 24px; align-items: start; }
+  @media (max-width: 1080px) { .cols { grid-template-columns: 1fr; } }
+  .card { background: #fff; border: 1px solid #e8e8ea; border-radius: 14px; box-shadow: 0 1px 3px rgba(29,29,31,.05); }
+  .card + .card { margin-top: 20px; }
+  .card-h { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #9a9a9c; padding: 16px 20px 0; }
+  .aside { position: sticky; top: 20px; }
+
+  /* Colour swatches */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; padding: 16px 20px 20px; }
+  .sw { display: flex; align-items: center; gap: 10px; }
+  .sw input[type=color] { width: 34px; height: 34px; border: 1px solid #e1e1e3; border-radius: 8px; padding: 0; background: none; cursor: pointer; flex-shrink: 0; }
+  .sw-meta { min-width: 0; }
+  .sw-key { font-size: 13px; font-weight: 600; }
+  .sw-hex { font-size: 12px; color: #9a9a9c; font-family: ui-monospace, monospace; border: none; background: none; width: 78px; padding: 0; }
+
+  /* Token rows */
+  .tok { padding: 16px 20px; border-top: 1px solid #f0f0f2; }
+  .tok:first-of-type { border-top: none; }
+  .tok-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .tok-name { font-size: 13px; font-weight: 700; font-family: ui-monospace, monospace; color: #1d1d1f; }
+  .tok-sample { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+  .ctrls { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px 12px; }
+  .fld { display: flex; flex-direction: column; gap: 3px; }
+  .fld label { font-size: 11px; font-weight: 600; color: #9a9a9c; letter-spacing: .02em; }
+  .fld input, .fld select {
+    font-family: inherit; font-size: 13px; color: #1d1d1f; height: 32px;
+    border: 1px solid #e1e1e3; border-radius: 8px; padding: 0 8px; background: #fff; outline: none;
+  }
+  .fld input:focus, .fld select:focus { border-color: #5a58ff; box-shadow: 0 0 0 3px rgba(90,88,255,.12); }
+
+  /* Specimen */
+  .specimen { padding: 20px; }
+  .spec-row { padding: 10px 0; border-top: 1px solid #f0f0f2; }
+  .spec-row:first-child { border-top: none; }
+  .spec-tag { font-size: 10.5px; font-weight: 600; color: #b6b6b8; font-family: ui-monospace, monospace; margin-bottom: 3px; }
+  .pill { display: inline-flex; align-items: center; border-radius: 100px; padding: 3px 10px; border: 1px solid; }
+  .kv { display: flex; justify-content: space-between; align-items: center; max-width: 320px; }
+
+  /* Export */
+  .exp-h { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
+  .exp-h .card-h { padding: 0; }
+  .btn { font-family: inherit; font-size: 13px; font-weight: 600; color: #1d1d1f; background: #fff; border: 1px solid #d8d8da; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+  .btn:hover { background: #f7f7f9; }
+  .btn.primary { background: #141415; color: #fff; border-color: #141415; }
+  pre { margin: 12px 20px 20px; background: #1d1d1f; color: #e8e8ea; border-radius: 10px; padding: 14px 16px; font-size: 12px; line-height: 1.5; font-family: ui-monospace, monospace; overflow-x: auto; max-height: 360px; }
+  .row-actions { padding: 0 20px 18px; }
+  .hint { font-size: 12px; color: #9a9a9c; padding: 0 20px 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Type token editor</h1>
+  <p class="sub">Tune the shared <code>TEXT</code> palette and <code>TYPE</code> scale, preview against real specimens, then copy the result into both <code>Student Profile — Banding v3.html</code> and <code>Roster Run HiFi v2.html</code>.</p>
+
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="card-h">Colours — TEXT</div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Type scale — TYPE</div>
+        <div id="tokens"></div>
+      </div>
+    </div>
+
+    <div class="aside">
+      <div class="card">
+        <div class="card-h">Specimen</div>
+        <div class="specimen" id="specimen"></div>
+      </div>
+      <div class="card">
+        <div class="exp-h"><div class="card-h">Export</div><button class="btn primary" id="copyBtn">Copy</button></div>
+        <div class="hint">Replace the <code>const TEXT</code> and <code>const TYPE</code> blocks in both files with the below.</div>
+        <pre id="export"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Token model (mirrors both HTML files) ──────────────────────────────────
+const TEXT = {
+  primary:  '#1d1d1f',
+  secondary:'#6d6d6f',
+  metaGray: '#49494b',
+  muted:    '#9a9a9c',
+  disabled: '#d1d5db',
+  brand:    '#5a58ff',
+  brandText:'#3d33cc',
+  success:  '#018143',
+  accent:   '#a56c00',
+  accentEla:'#7135ac',
+  onDark:   '#ffffff',
+};
+const TEXT_NOTE = {
+  primary:'headings, values', secondary:'supporting, labels', metaGray:'emphasis meta',
+  muted:'row meta, captions', disabled:'placeholders', brand:'fills + icons',
+  brandText:'link/active text', success:'positive trend', accent:'subject (amber)',
+  accentEla:'subject (ELA)', onDark:'text on dark',
+};
+
+// order + fields per token. color = TEXT key or null. ls/tt/lh optional ('' = omit)
+const TYPE = {
+  display:     { fontSize:26,   fontWeight:800, lineHeight:1.2,  letterSpacing:'-.02em', textTransform:'', color:'primary' },
+  metric:      { fontSize:22,   fontWeight:800, lineHeight:1,    letterSpacing:'-.02em', textTransform:'', color:'primary' },
+  headingXl:   { fontSize:22,   fontWeight:700, lineHeight:1.25, letterSpacing:'',       textTransform:'', color:'primary' },
+  headingLg:   { fontSize:20,   fontWeight:700, lineHeight:1.3,  letterSpacing:'-.01em', textTransform:'', color:'primary' },
+  headingMd:   { fontSize:18,   fontWeight:700, lineHeight:1.2,  letterSpacing:'',       textTransform:'', color:'primary' },
+  titleRow:    { fontSize:14,   fontWeight:600, lineHeight:1.4,  letterSpacing:'',       textTransform:'', color:'primary' },
+  body:        { fontSize:14,   fontWeight:400, lineHeight:1.5,  letterSpacing:'',       textTransform:'', color:'secondary' },
+  label:       { fontSize:13,   fontWeight:600, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'secondary' },
+  meta:        { fontSize:13,   fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'muted' },
+  detailLabel: { fontSize:12.5, fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'secondary' },
+  detailValue: { fontSize:12.5, fontWeight:500, lineHeight:'',   letterSpacing:'',       textTransform:'', color:'primary' },
+  overline:    { fontSize:11,   fontWeight:700, lineHeight:'',   letterSpacing:'.06em',  textTransform:'uppercase', color:null },
+  badge:       { fontSize:11,   fontWeight:700, lineHeight:'',   letterSpacing:'',       textTransform:'', color:null },
+};
+
+// specimen: token -> {text, ctx?} ; ctx supplies a fallback colour for tokens with color:null
+const SPECIMEN = {
+  display:     { text:'Sophia Millet' },
+  metric:      { text:'61%' },
+  headingXl:   { text:'Math' },
+  headingLg:   { text:'Students' },
+  headingMd:   { text:'Reteach ideas' },
+  titleRow:    { text:'Addition to 5' },
+  body:        { text:'Reassess after two more practice sessions to confirm.' },
+  label:       { text:'Recommended next steps' },
+  meta:        { text:'Level 1 · Jan 5, 2026' },
+  detailLabel: { text:'Prompt level', kv:'Verbal', kvTok:'detailValue' },
+  detailValue: { text:'—', skip:true },
+  overline:    { text:'Suggested next step', ctx:'#6d6d6f' },
+  badge:       { text:'Emerging', ctx:'#9a3412', bg:'#fff7ed', border:'#fed7aa', pill:true },
+};
+
+const WEIGHTS = [400,500,600,700,800];
+const $ = (s, r=document) => r.querySelector(s);
+
+function styleObj(tok, colorOverride) {
+  const s = { fontSize: tok.fontSize + 'px', fontWeight: tok.fontWeight };
+  if (tok.lineHeight !== '' && tok.lineHeight != null) s.lineHeight = tok.lineHeight;
+  if (tok.letterSpacing) s.letterSpacing = tok.letterSpacing;
+  if (tok.textTransform) s.textTransform = tok.textTransform;
+  const col = tok.color ? TEXT[tok.color] : colorOverride;
+  if (col) s.color = col;
+  return s;
+}
+function applyStyle(el, styleO) { el.style.cssText = ''; for (const k in styleO) el.style[k] = styleO[k]; }
+
+// ── Colours UI ──────────────────────────────────────────────────────────────
+function renderSwatches() {
+  const wrap = $('#swatches'); wrap.innerHTML = '';
+  for (const key in TEXT) {
+    const div = document.createElement('div'); div.className = 'sw';
+    div.innerHTML =
+      '<input type="color" value="' + TEXT[key] + '" data-key="' + key + '">' +
+      '<div class="sw-meta"><div class="sw-key">' + key + '</div>' +
+      '<input class="sw-hex" value="' + TEXT[key] + '" data-hexkey="' + key + '"></div>';
+    wrap.appendChild(div);
+  }
+  wrap.querySelectorAll('input[type=color]').forEach(inp => inp.addEventListener('input', e => {
+    const k = e.target.dataset.key; TEXT[k] = e.target.value;
+    wrap.querySelector('input[data-hexkey="'+k+'"]').value = e.target.value; refresh();
+  }));
+  wrap.querySelectorAll('.sw-hex').forEach(inp => inp.addEventListener('change', e => {
+    const k = e.target.dataset.hexkey; let v = e.target.value.trim();
+    if (/^#?[0-9a-fA-F]{3,6}$/.test(v)) { if (v[0] !== '#') v = '#' + v; TEXT[k] = v;
+      wrap.querySelector('input[data-key="'+k+'"]').value = v; } refresh();
+  }));
+}
+
+// ── Token controls UI ─────────────────────────────────────────────────────────
+function renderTokens() {
+  const wrap = $('#tokens'); wrap.innerHTML = '';
+  for (const name in TYPE) {
+    const tok = TYPE[name];
+    const row = document.createElement('div'); row.className = 'tok';
+    const colorOpts = ['<option value="">(per use)</option>']
+      .concat(Object.keys(TEXT).map(k => '<option value="'+k+'"'+(tok.color===k?' selected':'')+'>'+k+'</option>')).join('');
+    const wOpts = WEIGHTS.map(w => '<option'+(tok.fontWeight===w?' selected':'')+'>'+w+'</option>').join('');
+    row.innerHTML =
+      '<div class="tok-top"><span class="tok-name">'+name+'</span><span class="tok-sample" data-sample="'+name+'">'+ (SPECIMEN[name]?.text||name) +'</span></div>' +
+      '<div class="ctrls">' +
+        fld(name,'fontSize','Size','<input type="number" step="0.5" min="8" value="'+tok.fontSize+'" data-tok="'+name+'" data-f="fontSize">') +
+        fld(name,'fontWeight','Weight','<select data-tok="'+name+'" data-f="fontWeight">'+wOpts+'</select>') +
+        fld(name,'lineHeight','Line height','<input type="text" value="'+tok.lineHeight+'" placeholder="—" data-tok="'+name+'" data-f="lineHeight">') +
+        fld(name,'letterSpacing','Letter spacing','<input type="text" value="'+tok.letterSpacing+'" placeholder="—" data-tok="'+name+'" data-f="letterSpacing">') +
+        fld(name,'textTransform','Transform','<select data-tok="'+name+'" data-f="textTransform"><option value="">none</option><option value="uppercase"'+(tok.textTransform==='uppercase'?' selected':'')+'>uppercase</option></select>') +
+        fld(name,'color','Colour','<select data-tok="'+name+'" data-f="color">'+colorOpts+'</select>') +
+      '</div>';
+    wrap.appendChild(row);
+  }
+  wrap.querySelectorAll('[data-tok]').forEach(inp => inp.addEventListener('input', e => {
+    const t = e.target.dataset.tok, f = e.target.dataset.f; let v = e.target.value;
+    if (f === 'fontSize') v = parseFloat(v) || 0;
+    if (f === 'fontWeight') v = parseInt(v, 10);
+    if (f === 'color') v = v === '' ? null : v;
+    TYPE[t][f] = v; refresh();
+  }));
+}
+function fld(name, f, label, control) {
+  return '<div class="fld"><label>'+label+'</label>'+control+'</div>';
+}
+
+// ── Specimen preview ──────────────────────────────────────────────────────────
+function renderSpecimen() {
+  const wrap = $('#specimen'); wrap.innerHTML = '';
+  for (const name in TYPE) {
+    const spec = SPECIMEN[name]; if (!spec || spec.skip) continue;
+    const row = document.createElement('div'); row.className = 'spec-row';
+    const tag = document.createElement('div'); tag.className = 'spec-tag'; tag.textContent = name;
+    row.appendChild(tag);
+
+    if (spec.pill) {
+      const p = document.createElement('span'); p.className = 'pill';
+      p.textContent = spec.text; p.style.background = spec.bg; p.style.borderColor = spec.border;
+      applyStyle(p, styleObj(TYPE[name], spec.ctx));
+      row.appendChild(p);
+    } else if (spec.kv) {
+      const kv = document.createElement('div'); kv.className = 'kv';
+      const l = document.createElement('span'); l.textContent = spec.text; applyStyle(l, styleObj(TYPE[name]));
+      const v = document.createElement('span'); v.textContent = spec.kv; applyStyle(v, styleObj(TYPE[spec.kvTok]));
+      kv.appendChild(l); kv.appendChild(v); row.appendChild(kv);
+    } else {
+      const el = document.createElement('div'); el.textContent = spec.text;
+      applyStyle(el, styleObj(TYPE[name], spec.ctx)); row.appendChild(el);
+    }
+    wrap.appendChild(row);
+  }
+}
+function refreshSamples() {
+  for (const name in TYPE) {
+    const el = document.querySelector('[data-sample="'+name+'"]');
+    if (el) applyStyle(el, styleObj(TYPE[name], SPECIMEN[name]?.ctx || '#1d1d1f'));
+  }
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function renderExport() {
+  let out = 'const TEXT = {\n';
+  const kw = Math.max(...Object.keys(TEXT).map(k => k.length));
+  for (const k in TEXT) out += '  ' + (k + ':').padEnd(kw + 2) + " '" + TEXT[k] + "',\n";
+  out += '};\n\nconst TYPE = {\n';
+  const tw = Math.max(...Object.keys(TYPE).map(k => k.length));
+  for (const name in TYPE) {
+    const t = TYPE[name]; const parts = ['fontSize: ' + t.fontSize, 'fontWeight: ' + t.fontWeight];
+    if (t.lineHeight !== '' && t.lineHeight != null) parts.push('lineHeight: ' + t.lineHeight);
+    if (t.letterSpacing) parts.push("letterSpacing: '" + t.letterSpacing + "'");
+    if (t.textTransform) parts.push("textTransform: '" + t.textTransform + "'");
+    if (t.color) parts.push('color: TEXT.' + t.color);
+    out += '  ' + (name + ':').padEnd(tw + 2) + ' { ' + parts.join(', ') + ' },\n';
+  }
+  out += '};';
+  $('#export').textContent = out;
+}
+
+function refresh() { renderSpecimen(); refreshSamples(); renderExport(); }
+
+$('#copyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText($('#export').textContent).then(() => {
+    const b = $('#copyBtn'); const old = b.textContent; b.textContent = 'Copied ✓';
+    setTimeout(() => b.textContent = old, 1400);
+  });
+});
+
+renderSwatches(); renderTokens(); refresh();
+</script>
+</body>
+</html>
