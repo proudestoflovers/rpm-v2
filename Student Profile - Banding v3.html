@@ -710,11 +710,11 @@ function SubjectUnitLabel({ subj, unit, level, showLevel = false }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
       <SubjBadge subj={subj} size={28} />
-      <span style={{ fontSize: 14, fontWeight: 700, color: cfg.color, whiteSpace: 'nowrap' }}>
+      <span style={{ ...TYPE.titleRow, color: cfg.color, whiteSpace: 'nowrap' }}>
         {unit.replace(/^[A-Z]\./, '1.')}
       </span>
       {showLevel &&
-      <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap' }}>
+      <span style={{ ...TYPE.body, whiteSpace: 'nowrap' }}>
           Level {level}
         </span>
       }
@@ -772,7 +772,7 @@ function InfoTip({ text }) {
         <Ico n="info" size={15} stroke="currentColor" sw={1.8} />
       </button>
       {open &&
-      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#1d1d1f', color: '#fff', padding: '9px 12px', borderRadius: 9, whiteSpace: 'nowrap', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', zIndex: 60, fontSize: 12.5, fontWeight: 500 }}>
+      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#1d1d1f', padding: '9px 12px', borderRadius: 9, whiteSpace: 'nowrap', boxShadow: '0 6px 22px rgba(0,0,0,0.22)', zIndex: 60, ...TYPE.detailValue, color: TEXT.onDark }}>
           {text}
         </div>
       }
@@ -800,7 +800,7 @@ function NavRail() {
       <div style={{ flex: 1 }} />
       <div style={{ marginBottom: 18 }}>
         <div style={{ width: 36, height: 36, borderRadius: '50%', padding: 2, background: 'linear-gradient(135deg,#ff6b6b 0%,#ffd970 25%,#3c9962 60%,#5a58ff 100%)' }}>
-          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#2e2e32', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>P</div>
+          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#2e2e32', display: 'flex', alignItems: 'center', justifyContent: 'center', ...TYPE.titleRow, color: TEXT.onDark }}>P</div>
         </div>
       </div>
     </nav>);
@@ -824,7 +824,7 @@ function ScatterTooltip({ row, xPct }) {
       <style>{`@keyframes tooltipIn { from { opacity:0; translate:0 6px; scale:0.96; } to { opacity:1; translate:0 0; scale:1; } }`}</style>
       <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', width: 220, background: '#fff', borderRadius: 12, boxShadow: '0 4px 24px rgba(29,29,31,.14)', border: '1px solid #e8e8ea', padding: '12px 14px', zIndex: 999, pointerEvents: 'none', animation: 'tooltipIn 130ms cubic-bezier(0.2,0,0,1.15) both', ...hPos }}>
         <div style={{ marginBottom: 8 }}><SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} /></div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#1d1d1f', marginBottom: 8, lineHeight: 1.3 }}>{row.name}</div>
+        <div style={{ ...TYPE.titleRow, marginBottom: 8 }}>{row.name}</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <BandPill band={row.band} sm={true} />
           <span style={{ ...TYPE.headingXl, color: b.fg }}>{row.sc}%</span>
@@ -863,7 +863,7 @@ function ScatterStrip({ rows, onView }) {
         <div style={{ width: 84, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           {BAND_ORDER.map((b) =>
           <div key={b} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8 }}>
-              <span style={{ fontSize: 11, color: '#9a9a9c', fontWeight: 600, whiteSpace: 'nowrap' }}>{YLABELS[b]}</span>
+              <span style={{ ...TYPE.body, whiteSpace: 'nowrap' }}>{YLABELS[b]}</span>
             </div>
           )}
         </div>
@@ -893,8 +893,8 @@ function ScatterStrip({ rows, onView }) {
       {/* X-axis */}
       {done.length > 0 &&
       <div style={{ display: 'flex', justifyContent: 'space-between', marginLeft: 84, marginTop: 3, margin: "6px 0px 0px 84px" }}>
-          <span style={{ fontSize: 11, color: '#9a9a9c' }}>{done[0]?.date}</span>
-          {done.length > 1 && <span style={{ fontSize: 11, color: '#9a9a9c' }}>{done[done.length - 1]?.date}</span>}
+          <span style={{ ...TYPE.body }}>{done[0]?.date}</span>
+          {done.length > 1 && <span style={{ ...TYPE.body }}>{done[done.length - 1]?.date}</span>}
         </div>
       }
     </div>);
@@ -904,7 +904,7 @@ function ScatterStrip({ rows, onView }) {
 /* ── Atoms ───────────────────────────────────────────────────────────── */
 function FilterPill({ label }) {
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', fontSize: 13, fontWeight: 500, color: '#49494b', cursor: 'pointer', userSelect: 'none' }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', ...TYPE.detailValue, color: TEXT.metaGray, cursor: 'pointer', userSelect: 'none' }}>
       {label} <Ico n="chevDown" size={12} stroke="#9a9a9c" sw={2.5} />
     </div>);
 
@@ -913,7 +913,7 @@ function FilterPill({ label }) {
 function StatusPill({ st }) {
   const s = STS_CFG[st] || STS_CFG.ns;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F9F9FA', color: s.color, borderRadius: 100, padding: '5px 12px', fontSize: 13, fontWeight: 400, whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F9F9FA', borderRadius: 100, padding: '5px 12px', ...TYPE.body, color: s.color, whiteSpace: 'nowrap' }}>
       <StatusIcon type={st} />
       {s.label}
     </span>);
@@ -941,7 +941,7 @@ function ScoreBar({ sc, band }) {
         <div style={{ width: `${sc}%`, height: '100%', background: fill }} />
         }
       </div>
-      <span style={{ fontSize: 13, fontWeight: 700, color: sc ? color : TEXT.muted, width: 40, textAlign: 'right' }}>
+      <span style={{ ...TYPE.titleRow, color: sc ? color : TEXT.muted, width: 40, textAlign: 'right' }}>
         {sc !== null ? `${sc}%` : '0%'}
       </span>
     </div>);
@@ -1002,7 +1002,7 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
       {collapsed ?
       /* Compact — breadcrumb + avatar + name condensed to one line */
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, height: 58, opacity: collapsed ? 1 : 0, transform: collapsed ? 'translateY(0)' : 'translateY(-20px)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#6d6d6f', cursor: 'pointer', flexShrink: 0 }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.secondary, cursor: 'pointer', flexShrink: 0 }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#6d6d6f" />
           All students
         </button>
@@ -1013,14 +1013,14 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
           {student.emoji}
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, minWidth: 0 }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#1d1d1f', letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>{student.name}</span>
-          <span style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, whiteSpace: 'nowrap' }}>{student.grade}</span>
+          <span style={{ ...TYPE.headingMd, letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>{student.name}</span>
+          <span style={{ ...TYPE.detailValue, color: TEXT.secondary, whiteSpace: 'nowrap' }}>{student.grade}</span>
         </div>
       </div> :
 
       /* Expanded — breadcrumb on its own line, full-size avatar + name lockup with chart floated right */
       <div style={{ paddingTop: 14, marginBottom: 18, opacity: collapsed ? 0 : 1, transform: collapsed ? 'translateY(20px)' : 'translateY(0)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#49494b', marginBottom: 16, cursor: 'pointer' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.metaGray, marginBottom: 16, cursor: 'pointer' }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#49494b" />
           All students
         </button>
@@ -1033,8 +1033,8 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
               {student.emoji}
             </div>
             <div>
-              <div style={{ fontSize: 26, fontWeight: 800, color: '#1d1d1f', letterSpacing: '-.02em', lineHeight: 1.2 }}>{student.name}</div>
-              <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 500, marginTop: 2 }}>{student.grade}</div>
+              <div style={{ ...TYPE.display }}>{student.name}</div>
+              <div style={{ ...TYPE.detailValue, color: TEXT.secondary, marginTop: 2 }}>{student.grade}</div>
             </div>
           </div>
 
@@ -1045,7 +1045,7 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
       {/* Tabs */}
       <div style={{ display: 'flex' }}>
         {['Results', 'Assignments', 'Settings'].map((t, i) =>
-        <div key={t} style={{ padding: '0 0 12px', marginRight: 26, fontSize: 14, fontWeight: 600, cursor: 'pointer', color: i === 0 ? '#1d1d1f' : '#6d6d6f', borderBottom: i === 0 ? `2.5px solid ${accentColor}` : '2.5px solid transparent', transition: 'color .15s' }}>
+        <div key={t} style={{ padding: '0 0 12px', marginRight: 26, ...TYPE.titleRow, cursor: 'pointer', color: i === 0 ? TEXT.primary : TEXT.secondary, borderBottom: i === 0 ? `2.5px solid ${accentColor}` : '2.5px solid transparent', transition: 'color .15s' }}>
             {t}
           </div>
         )}
@@ -1077,7 +1077,7 @@ function SegmentToggle({ options, active, onChange }) {
   return (
     <div style={{ display: 'inline-flex', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 100, padding: 3 }}>
       {options.map((o) =>
-      <button key={o} onClick={() => onChange && onChange(o)} style={{ padding: '8px 20px', borderRadius: 100, fontSize: 13, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: o === active ? '1px solid #c7c6ff' : '1px solid transparent', background: o === active ? '#f5f5ff' : 'transparent', color: o === active ? TEXT.brandText : TEXT.secondary, transition: 'all .12s' }}>
+      <button key={o} onClick={() => onChange && onChange(o)} style={{ padding: '8px 20px', borderRadius: 100, ...TYPE.label, fontFamily: 'inherit', cursor: 'pointer', border: o === active ? '1px solid #c7c6ff' : '1px solid transparent', background: o === active ? '#f5f5ff' : 'transparent', color: o === active ? TEXT.brandText : TEXT.secondary, transition: 'all .12s' }}>
           {o}
         </button>
       )}
@@ -1096,10 +1096,10 @@ function AssignmentListRow({ row, selected, onSelect }) {
   return (
     <button onClick={() => onSelect(row)} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
     style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 16px', background: selected ? '#f5f5ff' : hov ? '#fafafa' : '#fff', border: 'none', borderLeft: selected ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
-      <span style={{ fontSize: 14, fontWeight: selected ? 600 : 500, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{row.name}</span>
+      <span style={{ ...(selected ? TYPE.titleRow : TYPE.detailValue), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{row.name}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap', width: 64, textAlign: 'left', display: 'inline-block' }}>Level {row.lv}</span>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#6d6d6f', whiteSpace: 'nowrap', width: 96, textAlign: 'right', display: 'inline-block' }}>
+        <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'left', display: 'inline-block' }}>Level {row.lv}</span>
+        <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right', display: 'inline-block' }}>
           {row.date}
         </span>
       </span>
@@ -1124,10 +1124,10 @@ function NotesModal({ isOpen, onClose }) {
     <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 500, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ ...TYPE.headingMd, marginBottom: 16 }}>Notes</div>
-        <p style={{ fontSize: 14, color: '#6d6d6f', lineHeight: 1.6, marginBottom: 24 }}>
+        <p style={{ ...TYPE.body, marginBottom: 24 }}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
-        <button onClick={onClose} style={{ height: 44, borderRadius: 100, background: '#141415', color: '#fff', fontFamily: "'Figtree',sans-serif", fontSize: 14, fontWeight: 600, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', width: '100%' }}>
+        <button onClick={onClose} style={{ height: 44, borderRadius: 100, background: '#141415', fontFamily: "'Figtree',sans-serif", ...TYPE.titleRow, color: TEXT.onDark, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', width: '100%' }}>
           Close
         </button>
       </div>
@@ -1151,8 +1151,8 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, margin: '0px 0px 12px' }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.25 }}>{row.name}</div>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9c', whiteSpace: 'nowrap' }}>Level {row.lv}</span>
+        <div style={{ ...TYPE.headingXl }}>{row.name}</div>
+        <span style={{ ...TYPE.body, whiteSpace: 'nowrap' }}>Level {row.lv}</span>
       </div>
 
       {b ?
@@ -1163,10 +1163,10 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
             <div style={{ flex: 1 }}><AnnotatedBar sc={row.sc} band={row.band} subj={row.subj} /></div>
             <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={true} /></div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-            <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
-            <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-            <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{row.date}</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
+            <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
+            <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{row.date}</span></div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
             <span style={{ ...TYPE.body }}>Prompt level</span>
@@ -1193,10 +1193,10 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
       <div style={{ padding: '22px 0 0px', margin: 0, borderTop: '1px solid #d1d5db' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ color: STS_CFG[row.st].color, display: 'flex' }}><StatusIcon type={row.st} /></span>
-            <span style={{ color: STS_CFG[row.st].color, fontWeight: 600, fontSize: 14 }}>{STS_CFG[row.st].label}</span>
+            <span style={{ ...TYPE.titleRow, color: STS_CFG[row.st].color }}>{STS_CFG[row.st].label}</span>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 10 }}>Level {row.lv} · {row.date}</div>
-          <p style={{ fontSize: 13, lineHeight: 1.55, color: '#6d6d6f', maxWidth: 300, textWrap: 'pretty' }}>Results and next-step suggestions will appear here once {PROFILE_STUDENT.name.split(' ')[0]} completes this assignment.</p>
+          <div style={{ ...TYPE.label, color: TEXT.secondary, marginBottom: 10 }}>Level {row.lv} · {row.date}</div>
+          <p style={{ ...TYPE.body, maxWidth: 300, textWrap: 'pretty' }}>Results and next-step suggestions will appear here once {PROFILE_STUDENT.name.split(' ')[0]} completes this assignment.</p>
         </div>
       }
     </div>);
@@ -1274,10 +1274,10 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                         <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
                         <div style={{ flexShrink: 0 }}><BandPill band={r.band} sm={true} /></div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-                        <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>Dec 1, 2025</span></div>
-                        <Ico n="arrowR" size={14} stroke="#9a9a9c" sw={2} />
-                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{r.date}</span></div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
+                        <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
+                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         <span style={{ ...TYPE.body }}>Prompt level</span>
@@ -1326,7 +1326,7 @@ function SubjectSection({ subj, units, openFirst, densityMult, accentColor, bord
         {doneRows.length > 0 &&
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <Ico n="arrowUp" size={15} stroke="#018143" sw={2.5} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: TEXT.success }}>Improving</span>
+            <span style={{ ...TYPE.label, color: TEXT.success }}>Improving</span>
             <InfoTip text="Trend over last 4 weeks" />
           </div>
         }
@@ -1358,11 +1358,11 @@ function TableRow({ row, selected, onSelect, onView }) {
       <td style={{ padding: '14px 16px', width: 'auto', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <SubjectUnitLabel subj={row.subj} unit={row.unit} level={row.lv} />
-          <span style={{ fontSize: 14, color: '#1d1d1f', fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
+          <span style={{ ...TYPE.body, color: TEXT.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
         </div>
       </td>
-      <td style={{ padding: '14px 16px', width: 70, fontSize: 14, fontWeight: 600, color: '#49494b', verticalAlign: 'middle' }}>{row.lv}</td>
-      <td style={{ padding: '14px 16px', width: 145, fontSize: 13, color: '#49494b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{row.date}</td>
+      <td style={{ padding: '14px 16px', width: 70, ...TYPE.label, color: TEXT.metaGray, verticalAlign: 'middle' }}>{row.lv}</td>
+      <td style={{ padding: '14px 16px', width: 145, ...TYPE.body, color: TEXT.metaGray, whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{row.date}</td>
       <td style={{ padding: '14px 16px', width: 148, verticalAlign: 'middle' }}>
         <StatusPill st={row.st} />
       </td>
@@ -1373,11 +1373,11 @@ function TableRow({ row, selected, onSelect, onView }) {
         {b ?
         <div>
             <BandPill band={row.band} />
-            <div style={{ fontSize: 11, color: '#6d6d6f', fontWeight: 500, marginTop: 4, paddingLeft: 2, lineHeight: 1.4, textWrap: 'pretty' }}>
+            <div style={{ ...TYPE.body, marginTop: 4, paddingLeft: 2, textWrap: 'pretty' }}>
               {BAND_NEXT[row.band]?.(row.lv)}
             </div>
           </div> :
-        <span style={{ color: '#d1d5db', fontSize: 14 }}>—</span>}
+        <span style={{ ...TYPE.body, color: TEXT.disabled }}>—</span>}
       </td>
       <td style={{ padding: '14px 16px', width: 60, verticalAlign: 'middle' }}>
         <button onClick={() => onView(row)} style={{ ...TYPE.label, color: TEXT.brandText, cursor: 'pointer', background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0 }}>
@@ -1409,9 +1409,9 @@ function AssignmentsTable({ rows, onView }) {
               <div style={{ width: 18, height: 18, borderRadius: 5, border: '1.5px solid #c5c5c7' }} />
             </th>
             {['Assignment', 'Level', 'Date available', 'Status', 'Results'].map((h) =>
-            <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 700, color: '#6d6d6f', letterSpacing: '.02em', whiteSpace: 'nowrap', width: h === 'Assignment' ? 'auto' : undefined }}>{h}</th>
+            <th key={h} style={{ padding: '11px 16px', textAlign: 'left', ...TYPE.label, color: TEXT.secondary, letterSpacing: '.02em', whiteSpace: 'nowrap', width: h === 'Assignment' ? 'auto' : undefined }}>{h}</th>
             )}
-            <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 12.5, fontWeight: 700, color: '#6d6d6f', letterSpacing: '.02em', whiteSpace: 'nowrap', width: '100%' }}>Performance</th>
+            <th style={{ padding: '11px 16px', textAlign: 'left', ...TYPE.label, color: TEXT.secondary, letterSpacing: '.02em', whiteSpace: 'nowrap', width: '100%' }}>Performance</th>
             <th style={{ width: 60 }} /><th style={{ width: 36 }} />
           </tr>
         </thead>
@@ -1439,7 +1439,7 @@ function NextStepLabel() {
 function SuggestionLabel({ label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 12 }}>
-      <span style={{ fontWeight: 500, color: '#1d1d1f', fontSize: "14px" }}>{label}</span>
+      <span style={{ ...TYPE.detailValue }}>{label}</span>
     </div>);
 
 }
@@ -1447,7 +1447,7 @@ function SuggestionLabel({ label }) {
 /* ── AssignButton ───────────────────────────────────────────────────── */
 function AssignButton({ label, primary = true }) {
   return (
-    <button style={{ height: 44, borderRadius: 100, background: primary ? '#141415' : 'transparent', color: primary ? '#fff' : '#1d1d1f', fontFamily: "'Figtree',sans-serif", fontSize: 14, fontWeight: 600, border: primary ? 'none' : '1.5px solid #323234', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', width: 'auto', paddingLeft: 20, paddingRight: 20, whiteSpace: 'nowrap' }}>
+    <button style={{ height: 44, borderRadius: 100, background: primary ? '#141415' : 'transparent', fontFamily: "'Figtree',sans-serif", ...TYPE.titleRow, color: primary ? TEXT.onDark : TEXT.primary, border: primary ? 'none' : '1.5px solid #323234', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', width: 'auto', paddingLeft: 20, paddingRight: 20, whiteSpace: 'nowrap' }}>
       <Ico n="users" size={16} stroke={primary ? '#fff' : 'currentColor'} sw={2.5} />
       {label}
     </button>);
@@ -1459,7 +1459,7 @@ function OrDivider() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, alignSelf: 'stretch', flexShrink: 0 }}>
       <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
-      <span style={{ fontSize: 11, fontWeight: 600, color: '#9a9a9c' }}>or</span>
+      <span style={{ ...TYPE.label, color: TEXT.muted }}>or</span>
       <div style={{ flex: 1, width: 1, background: '#e8e8ea' }} />
     </div>);
 
@@ -1597,7 +1597,7 @@ function LessonPreviewCard({ subj, unit, level, lessonType, title }) {
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ ...TYPE.label, color: TEXT.accent }}>[G#]. Unit [#]</div>
-          <div style={{ fontSize: 13, color: '#6d6d6f', fontWeight: 400 }}>Topic Title</div>
+          <div style={{ ...TYPE.body }}>Topic Title</div>
           <div style={{ ...TYPE.headingMd }}>{title}</div>
         </div>
       </div>
@@ -1637,15 +1637,15 @@ function SidePanel({ row, onClose, onPrev, onNext, idx, total }) {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: "2px 24px 28px" }}>
             {/* Assignment name */}
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#1d1d1f', lineHeight: 1.3, marginBottom: 20 }}>{row.name}</div>
+            <div style={{ ...TYPE.headingXl, marginBottom: 20 }}>{row.name}</div>
             {/* Result section — full width with divider */}
             <section style={{ marginBottom: 20, paddingBottom: 20, borderBottom: '1px solid #e8e8ea', marginLeft: -24, marginRight: -24, paddingLeft: 24, paddingRight: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, fontSize: 11, fontWeight: 700, color: '#9a9a9c', letterSpacing: '.05em' }}>
-                <div><span style={{ color: '#6d6d6f', fontWeight: 500 }}>Date available</span><br /><span style={{ color: '#1d1d1f', fontWeight: 600, marginTop: 2, display: 'block', fontSize: "14px", letterSpacing: "0px" }}>Dec 1, 2025</span></div>
-                <div style={{ textAlign: 'right' }}><span style={{ color: '#6d6d6f', fontWeight: 500 }}>Date completed</span><br /><span style={{ color: '#1d1d1f', fontWeight: 600, marginTop: 2, display: 'block', fontSize: "14px", letterSpacing: "0px" }}>{row.date}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
+                <div><span style={{ ...TYPE.body }}>Date available</span><br /><span style={{ ...TYPE.titleRow, marginTop: 2, display: 'block' }}>Dec 1, 2025</span></div>
+                <div style={{ textAlign: 'right' }}><span style={{ ...TYPE.body }}>Date completed</span><br /><span style={{ ...TYPE.titleRow, marginTop: 2, display: 'block' }}>{row.date}</span></div>
               </div>
-              
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#6d6d6f', marginBottom: 14 }}>Level {row.lv}</div>
+
+              <div style={{ ...TYPE.label, color: TEXT.secondary, marginBottom: 14 }}>Level {row.lv}</div>
 
               {/* Score and bar in horizontal layout — bar left, score right */}
               <div style={{ display: 'flex', gap: 12, marginBottom: 8, alignItems: 'center' }}>
@@ -1662,8 +1662,8 @@ function SidePanel({ row, onClose, onPrev, onNext, idx, total }) {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#9a9a9c' }}>Math threshold</span>
-                    <span style={{ fontWeight: 800, color: b.fg, fontSize: "11px" }}>{THRESHOLDS[row.band]?.[row.subj]}</span>
+                    <span style={{ ...TYPE.label, color: TEXT.muted }}>Math threshold</span>
+                    <span style={{ ...TYPE.titleRow, color: b.fg }}>{THRESHOLDS[row.band]?.[row.subj]}</span>
                   </div>
                 </div>
               </div>
