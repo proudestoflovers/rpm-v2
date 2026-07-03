@@ -1246,6 +1246,37 @@ function AttemptDatesBubble({ group, activeId, onSelect }) {
 
 }
 
+/* ── OverflowTag — "+N" tag chip; click opens a list of the overflowing items ── */
+function OverflowTag({ items }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function onDocClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [open]);
+
+  if (!items.length) return null;
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <button onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        style={{ appearance: 'none', border: '1px solid #e1e1e3', background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', cursor: 'pointer', ...TYPE.detailValue, whiteSpace: 'nowrap' }}>
+        +{items.length}
+      </button>
+      {open &&
+      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 150, overflow: 'hidden', padding: '4px 0' }}>
+        {items.map((item) => (
+          <div key={item} style={{ ...TYPE.detailValue, padding: '8px 12px', whiteSpace: 'nowrap' }}>{item}</div>
+        ))}
+      </div>
+      }
+    </div>);
+
+}
+
 /* ── Unit card (accordion) ──────────────────────────────────────────── */
 function UnitCard({ subj, unit, rows, defaultOpen }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
@@ -1347,7 +1378,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                           <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>Small group</span>
                           <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>Word bank</span>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>+1</span>
+                          <OverflowTag items={['Extended time']} />
                         </div>
                       </div>
                       <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
