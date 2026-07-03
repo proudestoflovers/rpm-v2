@@ -1221,7 +1221,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
         <span style={{ ...TYPE.headingMd }}>{title}</span>
         <span style={{ flex: 1 }} />
         {avg !== null &&
-        <span style={{ fontSize: 13, color: '#9a9a9c', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ color: '#1d1d1f', fontWeight: 700 }}>{avg}%</b> <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> · {doneRows.length} activities</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ ...TYPE.label }}>{avg}%</b> <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> <span style={{ ...TYPE.body }}>· {doneRows.length} activities</span></span>
         }
         <span style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Chevron open={false} /></span>
       </button>);
