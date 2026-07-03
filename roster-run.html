@@ -875,7 +875,7 @@ function StudentCard({ s }) {
       grade: s.grade,
       level: '1',
     });
-    window.location.href = 'Student Profile - Banding v3.html?' + p.toString();
+    window.location.href = 'student-profile.html?' + p.toString();
   }
 
   return (
@@ -1814,7 +1814,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
         <StudentAvatar emoji={s.emoji} size={36} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
           <a
-            href={`Student Profile - Banding v3.html?name=${encodeURIComponent(s.name)}&emoji=${encodeURIComponent(s.emoji || '')}&level=${s.level}&grade=${encodeURIComponent('Grade 1')}`}
+            href={`student-profile.html?name=${encodeURIComponent(s.name)}&emoji=${encodeURIComponent(s.emoji || '')}&level=${s.level}&grade=${encodeURIComponent('Grade 1')}`}
             onClick={e => e.stopPropagation()}
             style={{ ...TYPE.titleRow, textDecoration: 'none', transition: 'color .1s' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}

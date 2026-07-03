@@ -23,8 +23,8 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Roster Run HiFi v2.html'));
+  res.sendFile(path.join(__dirname, 'roster-run.html'));
 });
 
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
