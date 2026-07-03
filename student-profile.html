@@ -1208,20 +1208,61 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
 
 }
 
+/* ── AttemptDatesBubble — "+N" next to Date completed; opens a list of the
+   assignment's other completion dates; clicking one switches to that row ── */
+function AttemptDatesBubble({ group, activeId, onSelect }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function onDocClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [open]);
+
+  const others = group.filter((a) => a.id !== activeId);
+  if (!others.length) return null;
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <button onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        style={{ appearance: 'none', border: '1px solid #e1e1e3', background: '#f0f0f2', borderRadius: 100, padding: '2px 8px', cursor: 'pointer', ...TYPE.detailValue, color: TEXT.secondary, whiteSpace: 'nowrap' }}>
+        +{others.length}
+      </button>
+      {open &&
+      <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 160, overflow: 'hidden' }}>
+        {others.map((att) => (
+          <button key={att.id} onClick={() => { onSelect(att.id); setOpen(false); }}
+            style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: '8px 12px', cursor: 'pointer', ...TYPE.detailValue, whiteSpace: 'nowrap' }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+            {att.date}
+          </button>
+        ))}
+      </div>
+      }
+    </div>);
+
+}
+
 /* ── Unit card (accordion) ──────────────────────────────────────────── */
 function UnitCard({ subj, unit, rows, defaultOpen }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
   const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
   const doneRows = rows.filter((r) => r.st === 'done');
-  // Group completions by assignment name (each group sorted oldest -> newest); one accordion row per group
+  // Group by assignment name only to compute attempt siblings/avg — each attempt still renders as its own row
   const groupMap = {};
-  const groups = [];
-  doneRows.forEach((r) => { if (!groupMap[r.name]) { groupMap[r.name] = []; groups.push(groupMap[r.name]); } groupMap[r.name].push(r); });
-  groups.forEach((g) => g.sort((a, b) => new Date(a.date) - new Date(b.date)));
-  const latestOf = (g) => g[g.length - 1];
-  const avg = groups.length ? Math.round(groups.reduce((s, g) => s + (latestOf(g).sc || 0), 0) / groups.length) : null;
-  const [openName, setOpenName] = React.useState(() => (doneRows[0] ? doneRows[0].name : null));
-  const [viewIdByName, setViewIdByName] = React.useState({});
+  doneRows.forEach((r) => { (groupMap[r.name] = groupMap[r.name] || []).push(r); });
+  Object.values(groupMap).forEach((g) => g.sort((a, b) => new Date(a.date) - new Date(b.date)));
+  const uniqueNames = [...new Set(doneRows.map((r) => r.name))];
+  const avg = uniqueNames.length ? Math.round(uniqueNames.reduce((s, name) => { const g = groupMap[name]; return s + (g[g.length - 1].sc || 0); }, 0) / uniqueNames.length) : null;
+  const [openId, setOpenId] = React.useState(() => (doneRows[0] ? doneRows[0].id : null));
+  const rowRefs = React.useRef({});
+  const goToRow = (id) => {
+    setOpenId(id);
+    requestAnimationFrame(() => rowRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
   const title = unitTitle(subj, unit);
 
   if (!open) {
@@ -1233,7 +1274,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
         </div>
         <span style={{ flex: 1 }} />
         {avg !== null &&
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ ...TYPE.label }}>{avg}%</b> <BandPill band={groups.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> <span style={{ ...TYPE.body }}>· {groups.length} activities</span></span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ ...TYPE.label }}>{avg}%</b> <BandPill band={uniqueNames.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> <span style={{ ...TYPE.body }}>· {uniqueNames.length} activities</span></span>
         }
         <span style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Chevron open={false} /></span>
       </button>);
@@ -1252,8 +1293,8 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
           {avg !== null &&
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
               <div style={{ ...TYPE.headingXl }}>{avg}%</div>
-              <BandPill band={groups.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
-              <InfoTip text={`Average over ${groups.length} activities`} />
+              <BandPill band={uniqueNames.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
+              <InfoTip text={`Average over ${uniqueNames.length} activities`} />
             </div>
           }
           <button onClick={() => setOpen(false)} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -1264,41 +1305,26 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
       {/* Body: full-width accordion */}
       <div style={{ flex: 1, minHeight: 0, padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', border: '1px solid #ececef', borderRadius: 8 }}>
-          {groups.map((group, i) => {
-            const latest = latestOf(group);
-            const isExpanded = openName === latest.name;
-            const viewId = viewIdByName[latest.name] ?? latest.id;
-            const r = group.find((x) => x.id === viewId) || latest;
+          {doneRows.map((r, i) => {
+            const isExpanded = openId === r.id;
+            const group = groupMap[r.name];
             const multi = group.length > 1;
             return (
-              <div key={latest.name} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
-                <button onClick={() => setOpenName(isExpanded ? null : latest.name)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 24px', background: isExpanded ? 'rgb(245, 245, 255)' : '#fff', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+              <div key={r.id} ref={(el) => rowRefs.current[r.id] = el} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
+                <button onClick={() => setOpenId(isExpanded ? null : r.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 24px', background: isExpanded ? 'rgb(245, 245, 255)' : '#fff', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                    <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.name}</span>
+                    <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
                     {multi && <span style={{ ...TYPE.body, color: TEXT.muted, whiteSpace: 'nowrap' }}>· {group.length} attempts</span>}
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {latest.lv}</span>
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{latest.date}</span>
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
                     <Chevron open={isExpanded} />
                   </span>
                 </button>
                 {isExpanded && r.band && (
                   <div style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
-                      {multi &&
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 2 }}>
-                        {group.map((att, ai) => {
-                          const active = att.id === r.id;
-                          return (
-                            <button key={att.id} onClick={() => setViewIdByName((p) => ({ ...p, [latest.name]: att.id }))}
-                              style={{ appearance: 'none', border: active ? '1px solid #c7c6ff' : '1px solid #e8e8ea', background: active ? '#f5f5ff' : '#fff', borderRadius: 100, padding: '5px 12px', cursor: 'pointer', ...TYPE.label, color: active ? TEXT.primary : TEXT.brandText, whiteSpace: 'nowrap' }}>
-                              Attempt {ai + 1} · {att.date.replace(/,?\s*\d{4}$/, '')} · {att.sc}%
-                            </button>
-                          );
-                        })}
-                      </div>
-                      }
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                         <div style={{ ...TYPE.headingXl, whiteSpace: 'nowrap' }}>{r.sc}%</div>
                         <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
@@ -1307,7 +1333,10 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
                         <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
-                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span>
+                          {multi && <AttemptDatesBubble group={group} activeId={r.id} onSelect={goToRow} />}
+                        </div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         <span style={{ ...TYPE.body }}>Prompt level</span>
