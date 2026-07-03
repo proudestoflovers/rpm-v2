@@ -618,7 +618,11 @@ const ROWS = [
 { id: 16, subj: 'Math', unit: 'K. Unit 2.', name: 'Subtraction Within 10', lv: 1, date: 'Jan 15, 2026', st: 'done', sc: 76, band: 'i' },
 // Dummy completed assignments for K. Unit 2 ELA
 { id: 17, subj: 'ELA', unit: 'K. Unit 2.', name: 'Consonant Blends', lv: 2, date: 'Feb 5, 2026', st: 'done', sc: 81, band: 'prof' },
-{ id: 18, subj: 'ELA', unit: 'K. Unit 2.', name: 'Digraphs & Word Patterns', lv: 1, date: 'Jan 22, 2026', st: 'done', sc: 58, band: 'i' }];
+{ id: 18, subj: 'ELA', unit: 'K. Unit 2.', name: 'Digraphs & Word Patterns', lv: 1, date: 'Jan 22, 2026', st: 'done', sc: 58, band: 'i' },
+// Extra attempts (same assignment completed more than once) — demonstrates the attempt switcher
+{ id: 19, subj: 'Math', unit: 'K. Unit 1.', name: 'Number Sense', lv: 1, date: 'Aug 15, 2025', st: 'done', sc: 22, band: 'p' },
+{ id: 20, subj: 'Math', unit: 'K. Unit 1.', name: 'Number Sense', lv: 1, date: 'Oct 12, 2025', st: 'done', sc: 55, band: 'i' },
+{ id: 21, subj: 'Math', unit: 'K. Unit 1.', name: 'Counting & Numbers to 10', lv: 1, date: 'Dec 10, 2025', st: 'done', sc: 40, band: 'e' }];
 
 
 /* ── Band config ─────────────────────────────────────────────────────── */
@@ -1209,10 +1213,15 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
   const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
   const doneRows = rows.filter((r) => r.st === 'done');
-  const [sel, setSel] = React.useState(doneRows[0] || doneRows[0]);
-  const avg = doneRows.length ? Math.round(doneRows.reduce((s, r) => s + (r.sc || 0), 0) / doneRows.length) : null;
-  const selIdx = sel ? doneRows.findIndex((r) => r.id === sel.id) : -1;
-  const goTo = (d) => {const n = doneRows[selIdx + d];if (n) setSel(n);};
+  // Group completions by assignment name (each group sorted oldest -> newest); one accordion row per group
+  const groupMap = {};
+  const groups = [];
+  doneRows.forEach((r) => { if (!groupMap[r.name]) { groupMap[r.name] = []; groups.push(groupMap[r.name]); } groupMap[r.name].push(r); });
+  groups.forEach((g) => g.sort((a, b) => new Date(a.date) - new Date(b.date)));
+  const latestOf = (g) => g[g.length - 1];
+  const avg = groups.length ? Math.round(groups.reduce((s, g) => s + (latestOf(g).sc || 0), 0) / groups.length) : null;
+  const [openName, setOpenName] = React.useState(() => (doneRows[0] ? doneRows[0].name : null));
+  const [viewIdByName, setViewIdByName] = React.useState({});
   const title = unitTitle(subj, unit);
 
   if (!open) {
@@ -1224,7 +1233,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
         </div>
         <span style={{ flex: 1 }} />
         {avg !== null &&
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ ...TYPE.label }}>{avg}%</b> <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> <span style={{ ...TYPE.body }}>· {doneRows.length} activities</span></span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><b style={{ ...TYPE.label }}>{avg}%</b> <BandPill band={groups.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} /> <span style={{ ...TYPE.body }}>· {groups.length} activities</span></span>
         }
         <span style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Chevron open={false} /></span>
       </button>);
@@ -1243,8 +1252,8 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
           {avg !== null &&
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
               <div style={{ ...TYPE.headingXl }}>{avg}%</div>
-              <BandPill band={doneRows.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
-              <InfoTip text={`Average over ${doneRows.length} activities`} />
+              <BandPill band={groups.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
+              <InfoTip text={`Average over ${groups.length} activities`} />
             </div>
           }
           <button onClick={() => setOpen(false)} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -1255,23 +1264,41 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
       {/* Body: full-width accordion */}
       <div style={{ flex: 1, minHeight: 0, padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', border: '1px solid #ececef', borderRadius: 8 }}>
-          {doneRows.map((r, i) => {
-            const isExpanded = sel && sel.id === r.id;
+          {groups.map((group, i) => {
+            const latest = latestOf(group);
+            const isExpanded = openName === latest.name;
+            const viewId = viewIdByName[latest.name] ?? latest.id;
+            const r = group.find((x) => x.id === viewId) || latest;
+            const multi = group.length > 1;
             return (
-              <div key={r.id} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
-                <button onClick={() => setSel(isExpanded ? null : r)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 24px', background: isExpanded ? 'rgb(245, 245, 255)' : '#fff', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+              <div key={latest.name} style={{ borderTop: i ? '1px solid #f0f0f2' : 'none', marginBottom: 0 }}>
+                <button onClick={() => setOpenName(isExpanded ? null : latest.name)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 24px', background: isExpanded ? 'rgb(245, 245, 255)' : '#fff', border: 'none', borderLeft: isExpanded ? '3px solid #5a58ff' : '3px solid transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                    <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+                    <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.name}</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
+                    {multi && <span style={{ ...TYPE.body, color: TEXT.muted, whiteSpace: 'nowrap' }}>· {group.length} attempts</span>}
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {latest.lv}</span>
+                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{latest.date}</span>
                     <Chevron open={isExpanded} />
                   </span>
                 </button>
                 {isExpanded && r.band && (
                   <div style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
+                      {multi &&
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 2 }}>
+                        {group.map((att, ai) => {
+                          const active = att.id === r.id;
+                          return (
+                            <button key={att.id} onClick={() => setViewIdByName((p) => ({ ...p, [latest.name]: att.id }))}
+                              style={{ appearance: 'none', border: active ? '1px solid #c7c6ff' : '1px solid #e8e8ea', background: active ? '#f5f5ff' : '#fff', borderRadius: 100, padding: '5px 12px', cursor: 'pointer', ...TYPE.label, color: active ? TEXT.primary : TEXT.brandText, whiteSpace: 'nowrap' }}>
+                              Attempt {ai + 1} · {att.date.replace(/,?\s*\d{4}$/, '')} · {att.sc}%
+                            </button>
+                          );
+                        })}
+                      </div>
+                      }
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                         <div style={{ ...TYPE.headingXl, whiteSpace: 'nowrap' }}>{r.sc}%</div>
                         <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
@@ -1294,7 +1321,7 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                           <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>+1</span>
                         </div>
                       </div>
-                      <button onClick={() => setSel(r)} style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+                      <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         Notes <Ico n="arrowR" size={14} stroke={TEXT.brandText} sw={2} />
                       </button>
                     </div>
