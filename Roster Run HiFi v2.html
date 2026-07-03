@@ -1794,13 +1794,15 @@ function DatePickerField({ label, defaultDate }) {
   );
 }
 
-function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand, onScore, onPrompt, onNote, onLevel, inputRef, onKeyDown, onChipEnter, isFirst, inputVariant, asgAvailable }) {
-  const k = s.id + '|' + aid;
+function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand, onScore, onPrompt, onNote, onLevel, inputRef, onKeyDown, onChipEnter, isFirst, inputVariant, asgAvailable, attemptIndex = 0, attemptCount = 1, attemptKey, expandKey, onAddAttempt }) {
+  const k = attemptKey || (s.id + '|' + aid);
+  const expKey = expandKey || s.id;
   const score = scores[k] ?? '';
   const prompt = prompts[k] || '';
   const note = notes[k] || '';
   const isAbs = score === 'Abs';
   const isOnline = !!s.online;
+  const showAttemptTag = attemptCount > 1;
 
   return (
     <div
@@ -1809,7 +1811,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
       style={{ position: 'relative', borderTop: '1px solid rgb(225, 225, 227)', outline: 'none', borderRightColor: "rgb(225, 225, 227)", borderBottomColor: "rgb(225, 225, 227)", borderLeftColor: "rgb(225, 225, 227)" }}>
       {expanded && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#5a58ff', zIndex: 1 }} />}
       <div
-        onClick={() => { onExpand(s.id); if (!isOnline) setTimeout(() => { const inp = document.querySelector(`.rr-score-input[data-sid="${s.id}"]`); if (inp) { inp.focus(); inp.select(); } }, 0); }}
+        onClick={() => { onExpand(expKey); if (!isOnline) setTimeout(() => { const inp = document.querySelector(`.rr-score-input[data-akey="${expKey}"]`); if (inp) { inp.focus(); inp.select(); } }, 0); }}
         style={{ display: 'flex', alignItems: 'center', gap: 14, background: expanded ? '#fafafe' : '#fff', padding: "14px 20px", transition: 'background .15s', cursor: 'pointer' }}>
         <StudentAvatar emoji={s.emoji} size={36} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1820,6 +1822,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
             onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#1d1d1f'; e.currentTarget.style.textDecoration = 'none'; }}
           >{s.name}</a>
+          {showAttemptTag && <RRTag tone="brand">Attempt {attemptIndex + 1}</RRTag>}
           {isOnline ? <RRTag tone="default">Level {s.level}</RRTag> : expanded ? <LevelDropdown studentId={s.id} currentLevel={levels[s.id] ?? s.level} onChange={onLevel} /> : <RRTag tone="default">Level {levels[s.id] ?? s.level}</RRTag>}
           {isOnline && <RRTag tone="success">Online ✓</RRTag>}
         </div>
@@ -1830,7 +1833,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
           className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
           inputMode="numeric"
           value={isAbs ? 'Abs' : score}
-          onFocus={() => onExpand(s.id)}
+          onFocus={() => onExpand(expKey)}
           onChange={(e) => onScore(k, e.target.value.replace(/[^0-9]/g, ''))}
           onKeyDown={(e) => {
             if (e.key === 'Tab') {
@@ -1839,7 +1842,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
               if (chips[0]) chips[0].focus();
             } else {onKeyDown(e, k, s.id);}
           }}
-          data-sid={s.id} />
+          data-sid={s.id} data-akey={expKey} />
 
           }
           <span style={{ ...TYPE.titleRow, color: TEXT.secondary }}>/{s.max}</span>
@@ -1866,6 +1869,15 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
             </label>
           </div>
         </div>
+        {!isOnline && onAddAttempt &&
+        <button onClick={onAddAttempt}
+          style={{ marginTop: 16, width: '100%', border: '1.5px dashed #cfcefb', borderRadius: 10, background: 'transparent', padding: '9px 12px', ...TYPE.label, color: TEXT.brand, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .12s' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5ff'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add another attempt
+        </button>
+        }
       </div>
       }
     </div>);
@@ -1984,7 +1996,15 @@ function RosterRunScreen({ onDone }) {
   const [removedIds, setRemovedIds] = React.useState(() => new Set());
   const [toast, setToast] = React.useState(null);
   const [levels, setLevels] = React.useState({});
+  const [attemptCounts, setAttemptCounts] = React.useState({}); // k -> number of attempt rows (default 1)
   const inputVariant = 'detailed2';
+
+  // Append another attempt row for a student on the current assignment, and open it
+  function addAttempt(k) {
+    const next = (attemptCounts[k] || 1) + 1;
+    setAttemptCounts((p) => ({ ...p, [k]: next }));
+    setExpanded(k + '|a' + (next - 1));
+  }
   const toastTimer = React.useRef(null);
   const inputRefs = React.useRef({});
 
@@ -2237,22 +2257,32 @@ function RosterRunScreen({ onDone }) {
 
             {/* Student rows */}
             <div>
-            {paperStudents.map((s, idx) =>
-              <StudentRow key={s.id} s={s} aid={aid}
-              scores={scores} prompts={prompts} notes={notes} levels={levels}
-              expanded={expanded === s.id}
-              isFirst={idx === 0}
-              inputVariant={inputVariant}
-              asgAvailable={asg ? asg.available : ''}
-              onExpand={setExpanded}
-              onScore={(k, v) => setScores((p) => ({ ...p, [k]: v }))}
-              onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))}
-              onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
-              onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
-              inputRef={(el) => inputRefs.current[s.id] = el}
-              onKeyDown={handleKeyDown}
-              onChipEnter={handleChipEnter} />
-              )}
+            {paperStudents.map((s, idx) => {
+              const k = s.id + '|' + aid;
+              const n = attemptCounts[k] || 1;
+              return Array.from({ length: n }).map((_, i) => {
+                const attemptKey = i === 0 ? k : k + '|a' + i;
+                const expandKey = i === 0 ? s.id : k + '|a' + i;
+                return (
+                  <StudentRow key={expandKey} s={s} aid={aid}
+                  scores={scores} prompts={prompts} notes={notes} levels={levels}
+                  expanded={expanded === expandKey}
+                  isFirst={idx === 0 && i === 0}
+                  attemptIndex={i} attemptCount={n} attemptKey={attemptKey} expandKey={expandKey}
+                  onAddAttempt={() => addAttempt(k)}
+                  inputVariant={inputVariant}
+                  asgAvailable={asg ? asg.available : ''}
+                  onExpand={setExpanded}
+                  onScore={(kk, v) => setScores((p) => ({ ...p, [kk]: v }))}
+                  onPrompt={(kk, v) => setPrompts((p) => ({ ...p, [kk]: v }))}
+                  onNote={(kk, v) => setNotes((p) => ({ ...p, [kk]: v }))}
+                  onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
+                  inputRef={i === 0 ? (el) => inputRefs.current[s.id] = el : () => {}}
+                  onKeyDown={i === 0 ? handleKeyDown : () => {}}
+                  onChipEnter={handleChipEnter} />
+                );
+              });
+            })}
 
             {onlineStudents.length > 0 &&
               <>
@@ -2260,6 +2290,7 @@ function RosterRunScreen({ onDone }) {
                 <StudentRow key={s.id} s={s} aid={aid}
                 scores={scores} prompts={prompts} notes={notes} levels={levels}
                 expanded={expanded === s.id} isFirst={false} onExpand={setExpanded}
+                attemptIndex={0} attemptCount={1} attemptKey={s.id + '|' + aid} expandKey={s.id}
                 onScore={() => {}} onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))} onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
                 onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
                 inputRef={() => {}} onKeyDown={() => {}} onChipEnter={handleChipEnter} />
