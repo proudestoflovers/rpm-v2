@@ -1364,10 +1364,8 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
                         <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span>
-                          {multi && <AttemptDatesBubble group={group} activeId={r.id} onSelect={goToRow} />}
-                        </div>
+                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span></div>
+                        {multi && <div style={{ marginLeft: 'auto' }}><AttemptDatesBubble group={group} activeId={r.id} onSelect={goToRow} /></div>}
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
                         <span style={{ ...TYPE.body }}>Prompt level</span>
