@@ -1227,7 +1227,7 @@ function AttemptDatesBubble({ group, activeId, onSelect }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
       <button onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        style={{ appearance: 'none', border: '1px solid #e1e1e3', background: '#f0f0f2', borderRadius: 100, padding: '2px 8px', cursor: 'pointer', ...TYPE.detailValue, color: TEXT.secondary, whiteSpace: 'nowrap' }}>
+        style={{ appearance: 'none', border: 'none', background: 'none', padding: 0, cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, whiteSpace: 'nowrap' }}>
         +{others.length}
       </button>
       {open &&
@@ -1263,7 +1263,7 @@ function OverflowTag({ items }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
       <button onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        style={{ appearance: 'none', border: '1px solid #e1e1e3', background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', cursor: 'pointer', ...TYPE.detailValue, whiteSpace: 'nowrap' }}>
+        style={{ appearance: 'none', border: 'none', background: 'none', padding: 0, cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, whiteSpace: 'nowrap' }}>
         +{items.length}
       </button>
       {open &&
