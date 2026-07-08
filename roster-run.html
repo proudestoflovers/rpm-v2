@@ -17,6 +17,22 @@
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; width: 0; padding: 0; margin: 0; }
 
+  /* Responsive: assignment sidebar becomes a drawer, grids stack */
+  @media (max-width: 1024px) {
+    [data-rr-drawer-toggle] { display: inline-flex !important; }
+    [data-layout="two-column"] { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 640px) {
+    [data-rr-student-info] { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
+    [data-rr-lesson-header] { flex-direction: column !important; min-height: 0 !important; }
+    [data-rr-lesson-header] > div:first-child { width: 100% !important; height: 120px !important; padding: 16px 16px 0 16px !important; }
+    [data-rr-saved-label] { display: none !important; }
+  }
+  @media (max-width: 480px) {
+    [data-rr-crumb-label] { display: none !important; }
+    [data-rr-drawer-toggle-label] { display: none !important; }
+  }
+
   /* Score input */
   .rr-score-input {
     width: 72px; height: 44px;
@@ -1221,7 +1237,19 @@ function SubjectBadge({ subject = 'math', size = 32 }) {
 }
 
 /* ── Assignment sidebar ───────────────────────────────────────── */
-function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, removedIds }) {
+function useMediaQuery(maxWidth) {
+  const [match, setMatch] = React.useState(() => window.innerWidth <= maxWidth);
+  React.useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${maxWidth}px)`);
+    const onChange = () => setMatch(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [maxWidth]);
+  return match;
+}
+
+function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, removedIds, drawerMode, open }) {
   const [sidebarW, setSidebarW] = React.useState(360);
   const dragging = React.useRef(false);
   const startX = React.useRef(0);
@@ -1320,14 +1348,26 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
   const filtersActive = !!(subjectFilter || dateFilter || studentFilter.length);
 
   return (
-    <div style={{ width: sidebarW, flexShrink: 0, display: 'flex', flexDirection: 'column', position: 'relative', background: '#fff', height: '100%', overflow: 'hidden' }}>
+    <div style={{
+      width: drawerMode ? 'min(320px, 88vw)' : sidebarW,
+      flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#fff', overflow: 'hidden',
+      position: drawerMode ? 'fixed' : 'relative',
+      top: drawerMode ? 0 : undefined, left: drawerMode ? 0 : undefined, bottom: drawerMode ? 0 : undefined,
+      height: drawerMode ? undefined : '100%',
+      zIndex: drawerMode ? 30 : undefined,
+      boxShadow: drawerMode ? '0 8px 30px rgba(0,0,0,0.18)' : undefined,
+      transform: drawerMode ? (open ? 'translateX(0)' : 'translateX(-100%)') : undefined,
+      transition: drawerMode ? 'transform .2s ease' : undefined,
+    }}>
       {/* Drag handle */}
+      {!drawerMode &&
       <div onMouseDown={onDragHandleDown}
       style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 4, cursor: 'col-resize', zIndex: 10,
         background: 'transparent', transition: 'background .15s' }}
       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(90,88,255,0.25)'}
       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'} />
-      
+      }
+
       {/* Right border */}
       <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 1, background: '#e1e1e3', pointerEvents: 'none' }} />
       <div style={{ padding: '16px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -1792,19 +1832,21 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
         onClick={() => { onExpand(expKey); if (!isOnline) setTimeout(() => { const inp = document.querySelector(`.rr-score-input[data-akey="${expKey}"]`); if (inp) { inp.focus(); inp.select(); } }, 0); }}
         style={{ display: 'flex', alignItems: 'center', gap: 14, background: expanded ? '#fafafe' : '#fff', padding: "14px 20px", transition: 'background .15s', cursor: 'pointer' }}>
         <StudentAvatar emoji={s.emoji} size={36} />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div data-rr-student-info style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <a
             href={`student-profile.html?name=${encodeURIComponent(s.name)}&emoji=${encodeURIComponent(s.emoji || '')}&level=${s.level}&grade=${encodeURIComponent('Grade 1')}`}
             onClick={e => e.stopPropagation()}
-            style={{ ...TYPE.titleRow, textDecoration: 'none', transition: 'color .1s' }}
+            style={{ ...TYPE.headingMd, textDecoration: 'none', transition: 'color .1s', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
             onMouseEnter={e => { e.currentTarget.style.color = '#5a58ff'; e.currentTarget.style.textDecoration = 'underline'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#1d1d1f'; e.currentTarget.style.textDecoration = 'none'; }}
           >{s.name}</a>
-          {showAttemptTag && <RRTag tone="brand">Attempt {attemptIndex + 1}</RRTag>}
-          {isOnline ? <RRTag tone="default">Level {s.level}</RRTag> : expanded ? <LevelDropdown studentId={s.id} currentLevel={levels[s.id] ?? s.level} onChange={onLevel} /> : <RRTag tone="default">Level {levels[s.id] ?? s.level}</RRTag>}
-          {isOnline && <RRTag tone="success">Online ✓</RRTag>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', flexShrink: 0 }}>
+            {isOnline ? <span style={{ ...TYPE.body }}>Level {s.level}</span> : expanded ? <LevelDropdown studentId={s.id} currentLevel={levels[s.id] ?? s.level} onChange={onLevel} /> : <span style={{ ...TYPE.body }}>Level {levels[s.id] ?? s.level}</span>}
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {showAttemptTag && <RRTag tone="brand">Attempt {attemptIndex + 1}</RRTag>}
+          {isOnline && <RRTag tone="success">Online</RRTag>}
           {isOnline ?
           <span style={{ ...TYPE.headingXl, color: TEXT.secondary }}>{score}</span> :
           <input ref={inputRef}
@@ -1829,7 +1871,7 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
 
       {expanded &&
       <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #efefef', background: '#fafafe' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+        <div data-layout="two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
           {/* Left column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <DatePickerField label="Date completed" defaultDate={asgAvailable} />
@@ -1975,6 +2017,8 @@ function RosterRunScreen({ onDone }) {
   const [toast, setToast] = React.useState(null);
   const [levels, setLevels] = React.useState({});
   const [attemptCounts, setAttemptCounts] = React.useState({}); // k -> number of attempt rows (default 1)
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const drawerMode = useMediaQuery(1024);
   const inputVariant = 'detailed2';
 
   // Append another attempt row for a student on the current assignment, and open it
@@ -1993,7 +2037,7 @@ function RosterRunScreen({ onDone }) {
   const onlineStudentsRef = React.useRef([]);
 
   function selectAssignment(newAid) {
-    setAid(newAid);setExpanded(null);setFilter('');
+    setAid(newAid);setExpanded(null);setFilter('');setDrawerOpen(false);
   }
 
   // Remove the currently shown assignment from this view (non-destructive, undoable)
@@ -2075,6 +2119,11 @@ function RosterRunScreen({ onDone }) {
     if (idx < ASSIGNMENTS.length - 1) selectRef.current(ASSIGNMENTS[idx + 1].id);
   }
 
+  function goPrevAssignment() {
+    const idx = ASSIGNMENTS.findIndex((a) => a.id === aidRef.current);
+    if (idx > 0) selectRef.current(ASSIGNMENTS[idx - 1].id);
+  }
+
   function handleChipEnter(sid) {
     const paper = paperStudentsRef.current;
     const online = onlineStudentsRef.current;
@@ -2091,6 +2140,9 @@ function RosterRunScreen({ onDone }) {
   }
 
   const asg = ASSIGNMENTS.find((a) => a.id === aid);
+  const currentIdx = ASSIGNMENTS.findIndex((a) => a.id === aid);
+  const canGoPrev = currentIdx > 0;
+  const canGoNext = currentIdx >= 0 && currentIdx < ASSIGNMENTS.length - 1;
   const paperStudents = React.useMemo(() => studentsFor(aid), [aid]);
   const onlineStudents = React.useMemo(
     () => onlineStudentsFor(aid, paperStudents).map((s) => ({ ...s, online: true })),
@@ -2145,28 +2197,66 @@ function RosterRunScreen({ onDone }) {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
       {/* Top bar */}
       <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, ...TYPE.detailValue, color: TEXT.secondary, padding: '4px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, ...TYPE.detailValue, color: TEXT.secondary, padding: '4px 0', flexShrink: 0 }}>
             <RRIcon name="chevLeft" size={16} />Students
           </button>
-          <RRIcon name="chevRight" size={14} color="#c0c0c2" />
-          <span style={{ ...TYPE.titleRow }}>Offline scores</span>
+          <span data-rr-crumb-label style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <RRIcon name="chevRight" size={14} color="#c0c0c2" />
+            <span style={{ ...TYPE.titleRow }}>Offline scores</span>
+          </span>
         </div>
 
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ ...TYPE.detailValue, color: TEXT.success, display: 'flex', alignItems: 'center', gap: 5 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <span data-rr-saved-label style={{ ...TYPE.detailValue, color: TEXT.success, display: 'flex', alignItems: 'center', gap: 5 }}>
             <RRIcon name="check" size={14} color="#016a36" />All changes saved
           </span>
           <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
         </div>
       </header>
 
+      {/* Assignment nav row — shown only in drawer mode (≤1024px) */}
+      {drawerMode &&
+      <div style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '8px 32px', height: 48, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Drawer toggle with assignment name */}
+        <button data-rr-drawer-toggle onClick={() => setDrawerOpen(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1.5px solid #e1e1e3',
+            borderRadius: 10, background: '#fff', cursor: 'pointer', padding: '5px 10px', minWidth: 0,
+            ...TYPE.detailValue, color: TEXT.primary, flex: 1, minWidth: 0 }}>
+          <RRIcon name="chevRight" size={14} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {asg?.name || 'Assignment'}
+          </span>
+        </button>
+
+        {/* Prev / next buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          <button onClick={goPrevAssignment} disabled={!canGoPrev} title="Previous assignment"
+            style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1.5px solid #e1e1e3', borderRadius: 8, background: '#fff',
+              cursor: canGoPrev ? 'pointer' : 'default', opacity: canGoPrev ? 1 : 0.4 }}>
+            <RRIcon name="chevLeft" size={15} />
+          </button>
+          <button onClick={goNextAssignment} disabled={!canGoNext} title="Next assignment"
+            style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1.5px solid #e1e1e3', borderRadius: 8, background: '#fff',
+              cursor: canGoNext ? 'pointer' : 'default', opacity: canGoNext ? 1 : 0.4 }}>
+            <RRIcon name="chevRight" size={15} />
+          </button>
+        </div>
+      </div>
+      }
+
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {drawerMode && drawerOpen &&
+          <div onClick={() => setDrawerOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 25 }} />
+        }
         <AssignmentSidebar selected={aid} scores={scores}
         onSelect={selectAssignment}
-        filter={filter} onFilter={setFilter} removedIds={removedIds} />
+        filter={filter} onFilter={setFilter} removedIds={removedIds}
+        drawerMode={drawerMode} open={drawerMode ? drawerOpen : true} />
 
         {/* Scoring panel */}
         <div style={{ flex: 1, overflowY: 'auto', background: '#f4f4f6', padding: "16px 24px 24px" }}>
@@ -2177,7 +2267,7 @@ function RosterRunScreen({ onDone }) {
               const subjectColor = (SUBJECT_CFG[meta.subject] || SUBJECT_CFG.math).color;
               const topic = getTopicName(asg?.name);
               return (
-                <div style={{ display: 'flex', overflow: 'hidden', minHeight: 140, borderBottom: '1px solid #e1e1e3' }}>
+                <div data-rr-lesson-header style={{ display: 'flex', overflow: 'hidden', minHeight: 140, borderBottom: '1px solid #e1e1e3' }}>
                 {/* Thumbnail placeholder */}
                 <div style={{
                     width: 160, flexShrink: 0,
