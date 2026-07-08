@@ -1518,15 +1518,13 @@ const PROMPT_LEVEL_PRESETS = [
 
 /* Generic tag-select field: chips with a grouped dropdown + custom entry.
    Mirrors the Accommodations UI; reused for Prompt level. */
-function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLabel = 'Add', recentItems = [] }) {
+function TagSelectField({ label, presets, recentItems = [] }) {
   const [selected, setSelected] = React.useState([]);
   const [open, setOpen] = React.useState(false);
-  const [customInput, setCustomInput] = React.useState('');
   const [pos, setPos] = React.useState(null);
   const wrapRef = React.useRef(null);
   const triggerRef = React.useRef(null);
   const dropdownRef = React.useRef(null);
-  const customRef = React.useRef(null);
 
   function computePos() {
     if (!triggerRef.current) return;
@@ -1575,14 +1573,6 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
 
   function toggle(item) {
     setSelected(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item]);
-  }
-
-  function addCustom() {
-    const val = customInput.trim();
-    if (!val || selected.includes(val)) return;
-    setSelected(prev => [...prev, val]);
-    setCustomInput('');
-    if (customRef.current) customRef.current.focus();
   }
 
   const groups = [...new Set(presets.map(p => p.group))];
@@ -1637,16 +1627,6 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
                 </button>
               ))}
             </div>
-            {/* Custom input — pinned outside the scrollable area, always visible */}
-            <div style={{ flex: '0 0 auto', borderTop: '1px solid #f0f0f2', padding: '8px 10px', display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input ref={customRef} value={customInput} onChange={e => setCustomInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
-                placeholder={customPlaceholder}
-                style={{ flex: 1, border: 'none', outline: 'none', ...TYPE.body, color: TEXT.primary, background: 'transparent' }} />
-              {customInput.trim() && (
-                <button onClick={addCustom} style={{ border: 'none', background: '#5a58ff', borderRadius: 99, padding: '4px 12px', ...TYPE.label, color: TEXT.onDark, cursor: 'pointer', whiteSpace: 'nowrap' }}>Add</button>
-              )}
-            </div>
           </div>,
           document.body
         )}
@@ -1657,11 +1637,11 @@ function TagSelectField({ label, presets, customPlaceholder = 'Custom…', addLa
 
 function AccommodationsField({ studentId }) {
   const recentItems = STUDENT_RECENT_ACCOMMODATIONS[studentId] || [];
-  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} customPlaceholder="Custom accommodation…" recentItems={recentItems} />;
+  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} recentItems={recentItems} />;
 }
 
 function PromptLevelField() {
-  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} customPlaceholder="Custom prompt…" />;
+  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} />;
 }
 
 function DatePickerField({ label, defaultDate }) {

@@ -737,6 +737,7 @@ const ICO = {
   arrowR: ['M5 12h14', 'M12 5l7 7-7 7'],
   arrowUp: ['M12 19V5', 'M5 12l7-7 7 7'],
   arrowDown: ['M12 5v14', 'M19 12l-7 7-7-7'],
+  arrowUpR: ['M5 19L19 5', 'M19 5L13 5L19 11'],
   pencil: ['M12 20h9', 'M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'],
   bars: ['M18 20V10', 'M12 20V4', 'M6 20v-6'],
   book: ['M4 19.5A2.5 2.5 0 0 1 6.5 17H20', 'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'],
@@ -1113,7 +1114,17 @@ function AssignmentListRow({ row, selected, onSelect }) {
 }
 
 /* ── NotesModal ──────────────────────────────────────────────────────── */
-function NotesModal({ isOpen, onClose }) {
+function NotesModal({ isOpen, onClose, notes }) {
+  const [editedNotes, setEditedNotes] = React.useState(notes);
+  const [hasChanges, setHasChanges] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setEditedNotes(notes);
+      setHasChanges(false);
+    }
+  }, [isOpen, notes]);
+
   React.useEffect(() => {
     if (!isOpen) return;
     const handleBackdropClick = (e) => {
@@ -1123,18 +1134,43 @@ function NotesModal({ isOpen, onClose }) {
     return () => document.removeEventListener('mousedown', handleBackdropClick);
   }, [isOpen, onClose]);
 
+  const handleChange = (e) => {
+    setEditedNotes(e.target.value);
+    setHasChanges(e.target.value !== notes);
+  };
+
+  const handleSave = () => {
+    onClose();
+  };
+
+  const handleDiscard = () => {
+    setEditedNotes(notes);
+    setHasChanges(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 500, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 500, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ ...TYPE.headingMd, marginBottom: 16 }}>Notes</div>
-        <p style={{ ...TYPE.body, marginBottom: 24 }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </p>
-        <button onClick={onClose} style={{ height: 44, borderRadius: 100, background: '#141415', fontFamily: "'Figtree',sans-serif", ...TYPE.titleRow, color: TEXT.onDark, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', width: '100%' }}>
-          Close
-        </button>
+        <textarea value={editedNotes || ''} onChange={handleChange} style={{ flex: 1, minHeight: 150, padding: 12, border: '1px solid #e1e1e3', borderRadius: 10, fontFamily: "'Figtree',sans-serif", ...TYPE.body, resize: 'none', marginBottom: 16, outline: 'none' }} onFocus={(e) => { e.target.style.borderColor = '#5a58ff'; e.target.style.boxShadow = '0 0 0 3px rgba(90,88,255,0.1)'; }} onBlur={(e) => { e.target.style.borderColor = '#e1e1e3'; e.target.style.boxShadow = 'none'; }} />
+        <div style={{ position: 'relative', height: 32 }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', alignItems: 'center', opacity: hasChanges ? 0 : 1, transform: hasChanges ? 'translateY(-4px)' : 'translateY(0)', transition: 'opacity .18s ease, transform .18s ease', pointerEvents: hasChanges ? 'none' : 'auto' }}>
+            <button onClick={onClose} style={{ height: 32, padding: '0 14px', borderRadius: 100, background: '#f4f4f6', fontFamily: "'Figtree',sans-serif", ...TYPE.label, fontSize: 13, color: '#1d1d1f', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              Close
+            </button>
+          </div>
+          <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', gap: 8, alignItems: 'center', opacity: hasChanges ? 1 : 0, transform: hasChanges ? 'translateY(0)' : 'translateY(4px)', transition: 'opacity .18s ease, transform .18s ease', pointerEvents: hasChanges ? 'auto' : 'none' }}>
+            <button onClick={handleDiscard} style={{ height: 32, padding: '0 14px', borderRadius: 100, background: '#f4f4f6', fontFamily: "'Figtree',sans-serif", ...TYPE.label, fontSize: 13, color: '#1d1d1f', border: '1px solid #e1e1e3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              Discard
+            </button>
+            <button onClick={handleSave} style={{ height: 32, padding: '0 14px', borderRadius: 100, background: '#141415', fontFamily: "'Figtree',sans-serif", ...TYPE.label, fontSize: 13, color: TEXT.onDark, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              Save
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1169,9 +1205,9 @@ function InlineDetail({ row, onClose, onPrev, onNext }) {
             <div style={{ flexShrink: 0 }}><BandPill band={row.band} sm={true} /></div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
+            <div><span style={{ ...TYPE.body }}>Date available</span> <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
             <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
-            <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{row.date}</span></div>
+            <div><span style={{ ...TYPE.body }}>Date completed</span> <span style={{ ...TYPE.titleRow }}>{row.date}</span></div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
             <span style={{ ...TYPE.body }}>Prompt level</span>
@@ -1231,7 +1267,7 @@ function AttemptDatesBubble({ group, activeId, onSelect }) {
         +{others.length}
       </button>
       {open &&
-      <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 160, overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 160, overflow: 'hidden' }}>
         {others.map((att) => (
           <button key={att.id} onClick={() => { onSelect(att.id); setOpen(false); }}
             style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: '8px 12px', cursor: 'pointer', ...TYPE.detailValue, whiteSpace: 'nowrap' }}
@@ -1267,19 +1303,240 @@ function OverflowTag({ items }) {
         +{items.length}
       </button>
       {open &&
-      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 150, overflow: 'hidden', padding: '4px 0' }}>
-        {items.map((item) => (
-          <div key={item} style={{ ...TYPE.detailValue, padding: '8px 12px', whiteSpace: 'nowrap' }}>{item}</div>
-        ))}
+      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, background: '#fff', border: '1px solid #e8e8ea', borderRadius: 10, boxShadow: '0 6px 22px rgba(0,0,0,.12)', zIndex: 60, minWidth: 150, overflow: 'hidden', padding: '8px 12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {items.map((item) => (
+            <span key={item} style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 99, padding: '2px 8px 2px 10px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3', width: 'fit-content' }}>{item}</span>
+          ))}
+        </div>
       </div>
       }
     </div>);
 
 }
 
+/* ── Pill — small read-only gray chip used for prompt level / accommodations ── */
+function Pill({ children }) {
+  return (
+    <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 99, padding: '2px 8px 2px 10px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>
+      {children}
+    </span>
+  );
+}
+
+/* ── PillOverflowRow — renders every item as a Pill when they all fit the
+   available width; otherwise shows as many as fit plus a "+N" OverflowTag
+   for the rest. Measures via an offscreen copy so it adapts to container width. ── */
+function PillOverflowRow({ items }) {
+  const containerRef = React.useRef(null);
+  const measureRef = React.useRef(null);
+  const [visibleCount, setVisibleCount] = React.useState(items.length);
+
+  React.useLayoutEffect(() => {
+    function recompute() {
+      const container = containerRef.current;
+      const measure = measureRef.current;
+      if (!container || !measure) return;
+      const containerWidth = container.offsetWidth;
+      const gap = 6;
+      const overflowTagWidth = 28;
+      const widths = Array.from(measure.children).map((el) => el.offsetWidth);
+
+      let count = widths.length;
+      let total = widths.reduce((sum, w, i) => sum + w + (i > 0 ? gap : 0), 0);
+      if (total > containerWidth) {
+        total = 0;
+        count = 0;
+        for (let i = 0; i < widths.length; i++) {
+          const next = (count === 0 ? widths[i] : total + gap + widths[i]) + (i < widths.length - 1 ? gap + overflowTagWidth : 0);
+          if (next <= containerWidth) {
+            total = count === 0 ? widths[i] : total + gap + widths[i];
+            count = i + 1;
+          } else break;
+        }
+      }
+      setVisibleCount(count);
+    }
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [items]);
+
+  const visible = items.slice(0, visibleCount);
+  const overflow = items.slice(visibleCount);
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+      <div ref={measureRef} style={{ position: 'absolute', visibility: 'hidden', pointerEvents: 'none', top: -9999, left: -9999, display: 'flex', gap: 6, whiteSpace: 'nowrap' }}>
+        {items.map((item) => <Pill key={item}>{item}</Pill>)}
+      </div>
+      {visible.map((item) => <Pill key={item}>{item}</Pill>)}
+      {overflow.length > 0 && <OverflowTag items={overflow} />}
+    </div>
+  );
+}
+
+/* ── TagSelectField — chips with a grouped dropdown + custom entry.
+   Mirrors the field used on the offline scoring screen (Roster Run) for
+   Prompt level / Accommodations, seeded here with the row's existing values. ── */
+const ACCOMMODATION_PRESETS = [
+  { label: 'Extended time',           group: 'Time & Setting' },
+  { label: 'Separate setting',        group: 'Time & Setting' },
+  { label: 'Small group',             group: 'Time & Setting' },
+  { label: 'Preferential seating',    group: 'Time & Setting' },
+  { label: 'Frequent breaks',         group: 'Time & Setting' },
+  { label: 'Read aloud',              group: 'Presentation' },
+  { label: 'Large print',             group: 'Presentation' },
+  { label: 'Simplified instructions', group: 'Presentation' },
+  { label: 'Braille',                 group: 'Presentation' },
+  { label: 'Scribe',                  group: 'Response' },
+  { label: 'Verbal responses',        group: 'Response' },
+  { label: 'Calculator',              group: 'Response' },
+  { label: 'Manipulatives',           group: 'Response' },
+  { label: 'Word bank',               group: 'Supports' },
+  { label: 'Graphic organizer',       group: 'Supports' },
+  { label: 'Chunked tasks',           group: 'Supports' },
+];
+
+const PROMPT_LEVEL_PRESETS = [
+  { label: 'Independent',   group: 'Prompt level' },
+  { label: 'Verbal',        group: 'Prompt level' },
+  { label: 'Gestural',      group: 'Prompt level' },
+  { label: 'Model',         group: 'Prompt level' },
+  { label: 'Physical',      group: 'Prompt level' },
+  { label: 'Hand-over-hand', group: 'Prompt level' },
+];
+
+function TagSelectField({ label, presets, recentItems = [], defaultSelected = [], hideLabel = false }) {
+  const [selected, setSelected] = React.useState(defaultSelected);
+  const [open, setOpen] = React.useState(false);
+  const [pos, setPos] = React.useState(null);
+  const wrapRef = React.useRef(null);
+  const triggerRef = React.useRef(null);
+  const dropdownRef = React.useRef(null);
+
+  function computePos() {
+    if (!triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    const margin = 8;
+    const preferredMaxHeight = 320;
+    const spaceBelow = window.innerHeight - r.bottom - margin;
+    const spaceAbove = r.top - margin;
+    const openUpward = spaceBelow < preferredMaxHeight && spaceAbove > spaceBelow;
+    const available = openUpward ? spaceAbove : spaceBelow;
+    const maxHeight = Math.min(preferredMaxHeight, Math.max(120, available));
+    const width = r.width;
+    let left = r.left;
+    if (left + width > window.innerWidth - margin) left = window.innerWidth - margin - width;
+    if (left < margin) left = margin;
+    setPos({
+      left,
+      width,
+      maxHeight,
+      ...(openUpward
+        ? { bottom: window.innerHeight - r.top + 6 }
+        : { top: r.bottom + 6 }),
+    });
+  }
+
+  React.useEffect(() => {
+    if (!open) return;
+    computePos();
+    function close(e) {
+      if (wrapRef.current && wrapRef.current.contains(e.target)) return;
+      if (dropdownRef.current && dropdownRef.current.contains(e.target)) return;
+      setOpen(false);
+    }
+    function onReposition() { computePos(); }
+    document.addEventListener('mousedown', close);
+    window.addEventListener('scroll', onReposition, true);
+    window.addEventListener('resize', onReposition);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      window.removeEventListener('scroll', onReposition, true);
+      window.removeEventListener('resize', onReposition);
+    };
+  }, [open]);
+
+  function remove(item) { setSelected((prev) => prev.filter((x) => x !== item)); }
+
+  function toggle(item) {
+    setSelected((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
+  }
+
+  const available = presets.filter((p) => !selected.includes(p.label));
+  const recentAvailable = recentItems.filter((item) => !selected.includes(item));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {!hideLabel && <span style={{ ...TYPE.titleRow }}>{label}</span>}
+      <div ref={wrapRef} style={{ position: 'relative' }}>
+        <div ref={triggerRef} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '7px 12px', minHeight: 40, cursor: 'pointer' }}
+          onClick={() => setOpen(true)}>
+          {selected.map((item) => (
+            <span key={item} style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eaeaff', border: '1px solid #c8c6ff', borderRadius: 100, padding: '3px 8px 3px 10px', color: TEXT.brandText, whiteSpace: 'nowrap' }}>
+              {item}
+              <button onClick={(e) => { e.stopPropagation(); remove(item); }}
+                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#7b78ee', lineHeight: 1 }}>
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              </button>
+            </span>
+          ))}
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', color: TEXT.muted, pointerEvents: 'none' }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><polyline points="6 9 12 15 18 9" /></svg>
+          </span>
+        </div>
+
+        {open && pos && ReactDOM.createPortal(
+          <div ref={dropdownRef} style={{ position: 'fixed', left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxHeight, display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 200, overflow: 'hidden' }}>
+            <div style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', padding: '8px 0' }}>
+              {recentAvailable.length > 0 &&
+              <div style={{ borderBottom: '1px solid #f0f0f2', marginBottom: 4, paddingBottom: 4 }}>
+                <div style={{ padding: '4px 14px 2px', ...TYPE.label, color: TEXT.muted }}>Used previously</div>
+                {recentAvailable.map((item) => (
+                  <button key={'recent-' + item} onClick={() => toggle(item)}
+                    style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left', gap: 8 }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                    <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#9a9a9c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    {item}
+                  </button>
+                ))}
+              </div>
+              }
+              {available.map((p) => (
+                <button key={p.label} onClick={() => toggle(p.label)}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 14px', border: 'none', background: 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left', gap: 8 }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PromptLevelField({ defaultSelected, hideLabel }) {
+  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} />;
+}
+
+function AccommodationsField({ defaultSelected, hideLabel }) {
+  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} />;
+}
+
 /* ── Unit card (accordion) ──────────────────────────────────────────── */
 function UnitCard({ subj, unit, rows, defaultOpen }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
+  const [editingPrompt, setEditingPrompt] = React.useState(false);
+  const [editingAccommodations, setEditingAccommodations] = React.useState(false);
+  const [editingNotes, setEditingNotes] = React.useState(false);
+  const [notesText, setNotesText] = React.useState('Student worked carefully and showed good understanding of number recognition. Minor errors on the extension questions. Recommend continued practice with larger numbers.');
   const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
   const doneRows = rows.filter((r) => r.st === 'done');
   // Group by assignment name only to compute attempt siblings/avg — each attempt still renders as its own row
@@ -1355,36 +1612,57 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                 </button>
                 {isExpanded && r.band && (
                   <div style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                         <div style={{ ...TYPE.headingXl, whiteSpace: 'nowrap' }}>{r.sc}%</div>
                         <div style={{ flex: 1 }}><AnnotatedBar sc={r.sc} band={r.band} subj={r.subj} /></div>
                         <div style={{ flexShrink: 0 }}><BandPill band={r.band} sm={true} /></div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div><span style={{ ...TYPE.body }}>Date available</span> • <span style={{ ...TYPE.titleRow }}>Dec 1, 2025</span></div>
+                        <div><span style={{ ...TYPE.body }}>Available</span> <span style={{ ...TYPE.titleRow, display: 'inline-block', whiteSpace: 'nowrap' }}>Dec 1, 2025</span></div>
                         <Ico n="arrowR" size={14} stroke={TEXT.muted} sw={2} />
-                        <div><span style={{ ...TYPE.body }}>Date completed</span> • <span style={{ ...TYPE.titleRow }}>{r.date}</span></div>
+                        <div><span style={{ ...TYPE.body }}>Completed</span> <span style={{ ...TYPE.titleRow, display: 'inline-block', whiteSpace: 'nowrap' }}>{r.date}</span></div>
                         {multi && <div style={{ marginLeft: 'auto' }}><AttemptDatesBubble group={group} activeId={r.id} onSelect={goToRow} /></div>}
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ ...TYPE.body }}>Prompt level</span>
-                        <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>Verbal</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <span style={{ ...TYPE.body }}>Accommodations</span>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>Small group</span>
-                          <span style={{ ...TYPE.detailValue, display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f0f0f2', borderRadius: 100, padding: '4px 12px', whiteSpace: 'nowrap', border: '1px solid #e1e1e3' }}>Word bank</span>
-                          <OverflowTag items={['Extended time']} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ ...TYPE.body }}>Prompt level</span>
+                          <button onClick={() => setEditingPrompt((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                          </button>
                         </div>
+                        {editingPrompt
+                          ? <PromptLevelField defaultSelected={['Verbal']} hideLabel />
+                          : <PillOverflowRow items={['Verbal']} />
+                        }
                       </div>
-                      <button style={{ appearance: 'none', background: 'none', border: 'none', cursor: 'pointer', ...TYPE.label, color: TEXT.brandText, padding: 0, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 2, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        Notes <Ico n="arrowR" size={14} stroke={TEXT.brandText} sw={2} />
-                      </button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ ...TYPE.body }}>Accommodations</span>
+                          <button onClick={() => setEditingAccommodations((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                          </button>
+                        </div>
+                        {editingAccommodations
+                          ? <AccommodationsField defaultSelected={['Small group', 'Word bank', 'Extended time']} hideLabel />
+                          : <PillOverflowRow items={['Small group', 'Word bank', 'Extended time']} />
+                        }
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ ...TYPE.body }}>Notes</span>
+                          <button onClick={() => setEditingNotes((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                          </button>
+                        </div>
+                        {editingNotes
+                          ? <textarea value={notesText} onChange={(e) => setNotesText(e.target.value)} style={{ minHeight: 80, padding: 10, border: '1px solid #e1e1e3', borderRadius: 10, fontFamily: "'Figtree',sans-serif", ...TYPE.body, resize: 'none', outline: 'none' }} onFocus={(e) => { e.target.style.borderColor = '#5a58ff'; e.target.style.boxShadow = '0 0 0 3px rgba(90,88,255,0.1)'; }} onBlur={(e) => { e.target.style.borderColor = '#e1e1e3'; e.target.style.boxShadow = 'none'; }} />
+                          : <div style={{ ...TYPE.body, whiteSpace: 'pre-wrap' }}>{notesText}</div>
+                        }
+                      </div>
                     </div>
                     <div style={{ borderLeft: '1px solid #f0f0f2' }} />
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 12 }}>
                       <NextStepSection row={r} />
                     </div>
                   </div>
