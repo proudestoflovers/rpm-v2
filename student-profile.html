@@ -8,12 +8,28 @@
 <link rel="stylesheet" href="eds.css" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body, #root { height: 100%; overflow: hidden; }
-  body { font-family: 'Figtree', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; background: #f4f4f6; }
+  html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+  body { font-family: 'Figtree', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; background: #f4f4f6; display: flex; flex-direction: column; }
+  #root { flex: 1; display: flex; flex-direction: column; }
   button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d0d0d2; border-radius: 99px; }
+  @media (max-width: 1024px) {
+    [data-layout="two-column"] { flex-direction: column !important; }
+    [data-layout="two-column"] > div:nth-child(2) { display: none; }
+    [data-layout="two-column"] > div:nth-child(3) { padding-left: 0 !important; padding-right: 0 !important; padding-top: 20px !important; border-top: 1px solid #e8e8ea !important; }
+  }
+  /* Assignment row responsive: hide data points at narrower widths */
+  @media (max-width: 1023px) {
+    [data-attempts] { display: none; }
+  }
+  @media (max-width: 767px) {
+    [data-level] { display: none; }
+  }
+  @media (max-width: 639px) {
+    [data-date] { display: none; }
+  }
 </style>
 </head>
 <body style="font-size: 10px">
@@ -1000,15 +1016,15 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
   const avgBand = BAND[avgKey];
 
   function goBack() {
-    window.location.href = 'roster-run.html';
+    window.location.href = './roster-run.html';
   }
 
   return (
     <div style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: `0 ${32 * densityMult}px`, flexShrink: 0 }}>
       {collapsed ?
       /* Compact — breadcrumb + avatar + name condensed to one line */
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, height: 58, opacity: collapsed ? 1 : 0, transform: collapsed ? 'translateY(0)' : 'translateY(-20px)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.secondary, cursor: 'pointer', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, height: 58, opacity: collapsed ? 1 : 0, transform: collapsed ? 'translateY(0)' : 'translateY(-20px)', transition: 'opacity .26s, transform .26s', pointerEvents: collapsed ? 'auto' : 'none' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.secondary, cursor: 'pointer', flexShrink: 0, border: 'none', background: 'none' }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#6d6d6f" />
           All students
         </button>
@@ -1025,8 +1041,8 @@ function Header({ student, rows, onView, collapsed, densityMult, accentColor, bo
       </div> :
 
       /* Expanded — breadcrumb on its own line, full-size avatar + name lockup with chart floated right */
-      <div style={{ paddingTop: 14, marginBottom: 18, opacity: collapsed ? 0 : 1, transform: collapsed ? 'translateY(20px)' : 'translateY(0)', transition: 'opacity .26s, transform .26s' }}>
-        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.metaGray, marginBottom: 16, cursor: 'pointer' }}>
+      <div style={{ paddingTop: 14, marginBottom: 18, opacity: collapsed ? 0 : 1, transform: collapsed ? 'translateY(20px)' : 'translateY(0)', transition: 'opacity .26s, transform .26s', pointerEvents: collapsed ? 'none' : 'auto' }}>
+        <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 5, ...TYPE.label, color: TEXT.metaGray, marginBottom: 16, cursor: 'pointer', border: 'none', background: 'none' }}>
           <Ico n="chevLeft" size={15} sw={2.5} stroke="#49494b" />
           All students
         </button>
@@ -1556,9 +1572,9 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} style={{ width: '100%', background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(29,29,31,.04)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit}</span>
-          <span style={{ ...TYPE.headingMd }}>{title}</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'nowrap', minWidth: 0 }}>
+          <span style={{ ...TYPE.headingMd, color: cfg.color, whiteSpace: 'nowrap' }}>{unit}</span>
+          <span style={{ ...TYPE.headingMd, minWidth: 0 }}>{title}</span>
         </div>
         <span style={{ flex: 1 }} />
         {avg !== null &&
@@ -1572,23 +1588,21 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8ea', borderRadius: 16, boxShadow: '0 1px 4px rgba(29,29,31,.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       {/* Card header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '22px 24px 18px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ ...TYPE.headingMd, color: cfg.color }}>{unit}</span>
-          <span style={{ ...TYPE.headingMd }}>{title}</span>
+      <div style={{ position: 'relative', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', columnGap: 16, rowGap: 8, padding: '22px 24px 18px', paddingRight: '70px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flex: '1 1 auto', minWidth: 0 }}>
+          <span style={{ ...TYPE.headingMd, color: cfg.color, whiteSpace: 'nowrap', flexShrink: 0 }}>{unit}</span>
+          <span style={{ ...TYPE.headingMd, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{title}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30, flexShrink: 0 }}>
-          {avg !== null &&
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-              <div style={{ ...TYPE.headingXl }}>{avg}%</div>
-              <BandPill band={uniqueNames.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
-              <InfoTip text={`Average over ${uniqueNames.length} activities`} />
-            </div>
-          }
-          <button onClick={() => setOpen(false)} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <Chevron open={true} />
-          </button>
-        </div>
+        {avg !== null &&
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flex: '0 0 auto' }}>
+            <div style={{ ...TYPE.headingXl }}>{avg}%</div>
+            <BandPill band={uniqueNames.length ? avg >= 80 ? 'prof' : avg >= 55 ? 'i' : avg >= 33 ? 'e' : 'p' : null} sm={true} />
+            <InfoTip text={`Average over ${uniqueNames.length} activities`} />
+          </div>
+        }
+        <button onClick={() => setOpen(false)} style={{ position: 'absolute', top: 18, right: 24, width: 34, height: 34, borderRadius: '50%', border: '1px solid #e1e1e3', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <Chevron open={true} />
+        </button>
       </div>
       {/* Body: full-width accordion */}
       <div style={{ flex: 1, minHeight: 0, padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
@@ -1604,14 +1618,14 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                     <span style={{ ...TYPE.titleRow, fontWeight: isExpanded ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
-                    {multi && <span style={{ ...TYPE.body, color: TEXT.muted, whiteSpace: 'nowrap' }}>· {group.length} attempts</span>}
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
-                    <span style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
+                    {multi && <span data-attempts style={{ ...TYPE.body, color: TEXT.muted, whiteSpace: 'nowrap' }}>· {group.length} attempts</span>}
+                    <span data-level style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 64, textAlign: 'right' }}>Level {r.lv}</span>
+                    <span data-date style={{ ...TYPE.body, whiteSpace: 'nowrap', width: 96, textAlign: 'right' }}>{r.date}</span>
                     <Chevron open={isExpanded} />
                   </span>
                 </button>
                 {isExpanded && r.band && (
-                  <div style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
+                  <div data-layout="two-column" style={{ display: 'flex', gap: 20, padding: '24px 24px 28px', maxWidth: '1440px', margin: '0 auto' }}>
                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 12 }}>
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                         <div style={{ ...TYPE.headingXl, whiteSpace: 'nowrap' }}>{r.sc}%</div>
