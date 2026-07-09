@@ -1409,7 +1409,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
         <div style={{ background: '#f9f9fb', border: '1px solid #e8e8ea', borderRadius: 10, display: 'flex', flexDirection: 'column', gap: "16px", padding: "16px 12px 20px" }}>
             {/* Header row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-              <span style={{ ...TYPE.titleRow }}>Filters</span>
+              <span style={{ ...TYPE.headingMd }}>Filters</span>
               <button onClick={() => {setSubjectFilter('');setDateRange({ key: '', from: null, to: null });setStudentFilter([]);setStudentDropOpen(false);}}
             style={{ height: 28, padding: '0 12px', borderRadius: 99, background: '#fff', ...TYPE.titleRow, cursor: 'pointer', transition: 'background .1s', visibility: filtersActive ? 'visible' : 'hidden', border: "1.5px solid rgb(225, 225, 227)" }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
