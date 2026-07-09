@@ -2367,7 +2367,7 @@ function RosterRunScreen({ onCancel, onSave }) {
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(29,29,31,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
         <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: 360, boxShadow: '0 12px 40px rgba(0,0,0,0.2)' }}>
           <div style={{ ...TYPE.headingMd, marginBottom: 8 }}>Discard changes?</div>
-          <div style={{ ...TYPE.body, marginBottom: 20 }}>You have unsaved changes on this assignment. If you cancel now, they’ll be lost.</div>
+          <div style={{ ...TYPE.body, marginBottom: 20 }}>Unsaved changes will be lost if you cancel.</div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             <RRButton variant="ghost" size="md" onClick={() => setShowDiscardConfirm(false)}>Keep editing</RRButton>
             <RRButton variant="primary" size="md" onClick={discardAndExit}>Discard changes</RRButton>
