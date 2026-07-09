@@ -1069,6 +1069,195 @@ function useMediaQuery(maxWidth) {
   return match;
 }
 
+/* ── Date range filter — hybrid preset-list + calendar picker (matches student-profile.html) ── */
+const DATE_PRESETS = [
+  { key: '', label: 'All time' },
+  { key: 'd7', label: 'Last 7 days' },
+  { key: 'd30', label: 'Last 30 days' },
+  { key: 'd90', label: 'Last 90 days' },
+  { key: 'custom', label: 'Custom' },
+];
+
+function presetRange(sel, today) {
+  if (!sel) return null;
+  const { key, from, to } = sel;
+  if (key === 'd7' || key === 'd30' || key === 'd90') {
+    const days = { d7: 7, d30: 30, d90: 90 }[key];
+    const f = new Date(today); f.setDate(f.getDate() - days);
+    return { from: f, to: today };
+  }
+  if (key === 'custom' && from && to) return { from, to };
+  return null; // '' — no filter
+}
+
+function formatShort(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function dateRangeLabel(sel) {
+  const preset = DATE_PRESETS.find((p) => p.key === sel.key);
+  if (sel.key === 'custom') return sel.from && sel.to ? `${formatShort(sel.from)} – ${formatShort(sel.to)}` : 'Custom';
+  return preset ? preset.label : 'All time';
+}
+
+function sameDay(a, b) { return a && b && a.toDateString() === b.toDateString(); }
+
+/* ── Shared month-calendar grid — used by both DateRangeFilter and DatePickerField
+   so every calendar in the app has identical geometry (width, day labels, spacing).
+   Callers own their own per-day selection styling via renderDay. ── */
+function MonthCalendarGrid({ viewMonth, onPrevMonth, onNextMonth, renderDay }) {
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+  const firstDow = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay();
+  const leadBlanks = (firstDow + 6) % 7; // Monday-first
+  const cells = [...Array(leadBlanks).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  return (
+    <div style={{ width: 300, padding: 16, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <button onClick={onPrevMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
+          <RRIcon name="chevLeft" size={16} color={TEXT.secondary} sw={2} />
+        </button>
+        <span style={{ ...TYPE.titleRow }}>{viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+        <button onClick={onNextMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
+          <RRIcon name="chevRight" size={16} color={TEXT.secondary} sw={2} />
+        </button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
+          <div key={d} style={{ ...TYPE.body, color: TEXT.muted, textAlign: 'center', fontSize: 12 }}>{d}</div>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+        {cells.map((day, i) => (
+          <React.Fragment key={i}>
+            {day ? renderDay(day, new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day)) : <div />}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DateRangeFilter({ value, onChange, today }) {
+  const [open, setOpen] = React.useState(false);
+  const [draftKey, setDraftKey] = React.useState(value.key);
+  const [draftFrom, setDraftFrom] = React.useState(value.from || null);
+  const [draftTo, setDraftTo] = React.useState(value.to || null);
+  const [viewMonth, setViewMonth] = React.useState(() => new Date(value.from || today));
+  const [pos, setPos] = React.useState(null);
+  const triggerRef = React.useRef(null);
+  const dropdownRef = React.useRef(null);
+
+  // Rendered via a portal (below) rather than inline, because this trigger sits inside the
+  // narrow, overflow:hidden AssignmentSidebar — an inline absolutely-positioned panel would
+  // get clipped at the sidebar's edge.
+  function computePos() {
+    if (!triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    const panelWidth = 460;
+    const margin = 8;
+    let left = r.left;
+    if (left + panelWidth > window.innerWidth - margin) left = window.innerWidth - margin - panelWidth;
+    if (left < margin) left = margin;
+    setPos({ left, top: r.bottom + 6 });
+  }
+
+  React.useEffect(() => {
+    if (!open) return;
+    setDraftKey(value.key); setDraftFrom(value.from || null); setDraftTo(value.to || null);
+    computePos();
+    function close(e) {
+      if (triggerRef.current && triggerRef.current.contains(e.target)) return;
+      if (dropdownRef.current && dropdownRef.current.contains(e.target)) return;
+      setOpen(false);
+    }
+    function onReposition() { computePos(); }
+    document.addEventListener('mousedown', close);
+    window.addEventListener('scroll', onReposition, true);
+    window.addEventListener('resize', onReposition);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      window.removeEventListener('scroll', onReposition, true);
+      window.removeEventListener('resize', onReposition);
+    };
+  }, [open]);
+
+  function pickPreset(key) {
+    setDraftKey(key);
+    if (key !== 'custom') { setDraftFrom(null); setDraftTo(null); }
+  }
+
+  function pickDay(day) {
+    const clicked = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    setDraftKey('custom');
+    if (!draftFrom || (draftFrom && draftTo)) { setDraftFrom(clicked); setDraftTo(null); }
+    else if (clicked < draftFrom) { setDraftTo(draftFrom); setDraftFrom(clicked); }
+    else { setDraftTo(clicked); }
+  }
+
+  function apply() {
+    onChange({ key: draftKey, from: draftFrom, to: draftTo });
+    setOpen(false);
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <button ref={triggerRef} onClick={() => setOpen((v) => !v)}
+        style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (value.key ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, ...TYPE.label, color: value.key ? TEXT.brandText : TEXT.metaGray, background: value.key ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', position: 'relative', textAlign: 'left', width: '100%' }}>
+        {dateRangeLabel(value)}
+        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={value.key ? '#5a58ff' : '#49494b'} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
+      </button>
+      {open && pos && ReactDOM.createPortal(
+        <div ref={dropdownRef} style={{ position: 'fixed', top: pos.top, left: pos.left, display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 14, boxShadow: '0 4px 16px rgba(29,29,31,0.1)', zIndex: 200, overflow: 'hidden' }}>
+        <div style={{ display: 'flex' }}>
+          {/* Left: preset shortcuts */}
+          <div style={{ width: 160, borderRight: '1px solid #e8e8ea', padding: '8px 0', display: 'flex', flexDirection: 'column' }}>
+            {DATE_PRESETS.map((p) => (
+              <button key={p.key || 'all'} onClick={() => pickPreset(p.key)}
+                style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', background: p.key === draftKey ? '#eaeaff' : 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}
+                onMouseEnter={(e) => { if (p.key !== draftKey) e.currentTarget.style.background = '#f9f9fa'; }}
+                onMouseLeave={(e) => { if (p.key !== draftKey) e.currentTarget.style.background = 'transparent'; }}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {/* Right: month calendar for custom range */}
+          <MonthCalendarGrid
+            viewMonth={viewMonth}
+            onPrevMonth={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))}
+            onNextMonth={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))}
+            renderDay={(day, cellDate) => {
+              const isStart = sameDay(cellDate, draftFrom);
+              const isEnd = sameDay(cellDate, draftTo);
+              const inRange = draftFrom && draftTo && cellDate > draftFrom && cellDate < draftTo;
+              const isToday = sameDay(cellDate, today);
+              return (
+                <button onClick={() => pickDay(day)}
+                  style={{
+                    height: 32, border: 'none', cursor: 'pointer', ...TYPE.body,
+                    background: isStart || isEnd ? '#5a58ff' : inRange ? '#eaeaff' : 'transparent',
+                    color: isStart || isEnd ? '#fff' : TEXT.primary,
+                    borderRadius: isStart ? '50% 0 0 50%' : isEnd ? '0 50% 50% 0' : inRange ? 0 : '50%',
+                    fontWeight: isToday ? 700 : 400,
+                  }}>
+                  {day}
+                </button>
+              );
+            }}
+          />
+        </div>
+        <div style={{ borderTop: '1px solid #e8e8ea', padding: 12 }}>
+          <button onClick={apply}
+            style={{ width: '100%', height: 44, borderRadius: 100, background: '#141415', border: 'none', ...TYPE.titleRow, color: TEXT.onDark, cursor: 'pointer' }}>
+            Apply
+          </button>
+        </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
 function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, removedIds, drawerMode, open }) {
   const [sidebarW, setSidebarW] = React.useState(360);
   const dragging = React.useRef(false);
@@ -1116,11 +1305,11 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
   const [visibleCount, setVisibleCount] = React.useState(30);
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [subjectFilter, setSubjectFilter] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('');
+  const [dateRange, setDateRange] = React.useState({ key: '', from: null, to: null });
   const [studentFilter, setStudentFilter] = React.useState([]);
   const [studentDropOpen, setStudentDropOpen] = React.useState(false);
   const studentDropRef = React.useRef(null);
-  React.useEffect(() => {setVisibleCount(30);}, [filter, subjectFilter, dateFilter, studentFilter]);
+  React.useEffect(() => {setVisibleCount(30);}, [filter, subjectFilter, dateRange, studentFilter]);
   React.useEffect(() => {
     if (!studentDropOpen) return;
     function onOutside(e) {if (studentDropRef.current && !studentDropRef.current.contains(e.target)) setStudentDropOpen(false);}
@@ -1147,15 +1336,14 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
     return new Date(m > 6 ? 2025 : 2026, m - 1, d);
   }
   const TODAY = new Date(2026, 5, 12);
+  const dateRangeResolved = presetRange(dateRange, TODAY);
   const filtered = ASSIGNMENTS.filter((a) => {
     if (removedIds && removedIds.has(a.id)) return false;
     if (filter && !a.name.toLowerCase().includes(filter.toLowerCase())) return false;
     if (subjectFilter) {const m = getAssignmentMeta(a.name);if (m.subject !== subjectFilter) return false;}
-    if (dateFilter) {
+    if (dateRangeResolved) {
       const avail = parseAvail(a.available);
-      const days = { d7: 7, d30: 30, d90: 90 }[dateFilter];
-      const cutoff = new Date(TODAY);cutoff.setDate(cutoff.getDate() - days);
-      if (avail < cutoff || avail > TODAY) return false;
+      if (avail < dateRangeResolved.from || avail > dateRangeResolved.to) return false;
     }
     if (studentFilter.length > 0) {
       const sids = new Set(studentsFor(a.id).map((s) => s.id));
@@ -1165,7 +1353,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
   });
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
-  const filtersActive = !!(subjectFilter || dateFilter || studentFilter.length);
+  const filtersActive = !!(subjectFilter || dateRange.key || studentFilter.length);
 
   return (
     <div style={{
@@ -1222,7 +1410,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             {/* Header row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <span style={{ ...TYPE.titleRow }}>Filters</span>
-              <button onClick={() => {setSubjectFilter('');setDateFilter('');setStudentFilter([]);setStudentDropOpen(false);}}
+              <button onClick={() => {setSubjectFilter('');setDateRange({ key: '', from: null, to: null });setStudentFilter([]);setStudentDropOpen(false);}}
             style={{ height: 28, padding: '0 12px', borderRadius: 99, background: '#fff', ...TYPE.titleRow, cursor: 'pointer', transition: 'background .1s', visibility: filtersActive ? 'visible' : 'hidden', border: "1.5px solid rgb(225, 225, 227)" }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
@@ -1247,16 +1435,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             {/* Date available */}
             <div>
               <div style={{ ...TYPE.body, marginBottom: 7 }}>Date available</div>
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
-              style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (dateFilter ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, ...TYPE.label, color: dateFilter ? TEXT.brandText : TEXT.metaGray, background: dateFilter ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}>
-                  <option value="">All time</option>
-                  <option value="d7">Last 7 days</option>
-                  <option value="d30">Last 30 days</option>
-                  <option value="d90">Last 90 days</option>
-                </select>
-                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={dateFilter ? '#5a58ff' : '#49494b'} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
-              </div>
+              <DateRangeFilter value={dateRange} onChange={setDateRange} today={TODAY} />
             </div>
             {/* Assigned to */}
             <div>
@@ -1530,36 +1709,11 @@ function DatePickerField({ label, defaultDate }) {
     return () => document.removeEventListener('mousedown', close);
   }, [open]);
 
-  function getDaysInMonth(date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  }
-
-  function getFirstDayOfMonth(date) {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  }
-
   function pickDate(day) {
     const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     setSelected(newDate);
     setOpen(false);
   }
-
-  function prevMonth() {
-    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1));
-  }
-
-  function nextMonth() {
-    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1));
-  }
-
-  const daysInMonth = getDaysInMonth(viewMonth);
-  const firstDay = getFirstDayOfMonth(viewMonth);
-  const days = [];
-  for (let i = 0; i < firstDay; i++) days.push(null);
-  for (let i = 1; i <= daysInMonth; i++) days.push(i);
-
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const monthYear = `${monthNames[viewMonth.getMonth()]} ${viewMonth.getFullYear()}`;
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1574,52 +1728,28 @@ function DatePickerField({ label, defaultDate }) {
       </div>
 
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 50, padding: 12, minWidth: 240 }}>
-          {/* Month/year header with nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <button onClick={prevMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <span style={{ ...TYPE.titleRow }}>{monthYear}</span>
-            <button onClick={nextMonth} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: '#9a9a9c' }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-
-          {/* Day labels */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8, textAlign: 'center' }}>
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-              <div key={d} style={{ ...TYPE.label, color: TEXT.muted, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{d}</div>
-            ))}
-          </div>
-
-          {/* Days grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
-            {days.map((day, i) => {
-              const isSelected = day && selected.getDate() === day && selected.getMonth() === viewMonth.getMonth() && selected.getFullYear() === viewMonth.getFullYear();
+        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 14, boxShadow: '0 4px 16px rgba(29,29,31,0.1)', zIndex: 50, overflow: 'hidden' }}>
+          <MonthCalendarGrid
+            viewMonth={viewMonth}
+            onPrevMonth={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))}
+            onNextMonth={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))}
+            renderDay={(day, cellDate) => {
+              const isSelected = sameDay(cellDate, selected);
               return (
-                <button key={i} onClick={() => day && pickDate(day)}
-                  disabled={!day}
+                <button onClick={() => pickDate(day)}
                   style={{
-                    ...(isSelected ? TYPE.titleRow : TYPE.body),
-                    border: isSelected ? '1.5px solid #5a58ff' : '1px solid transparent',
-                    background: isSelected ? '#eaeaff' : 'transparent',
-                    color: isSelected ? TEXT.brandText : day ? TEXT.primary : TEXT.disabled,
-                    borderRadius: 6,
-                    padding: '6px 0',
-                    cursor: day ? 'pointer' : 'default',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all .12s'
+                    height: 32, border: 'none', cursor: 'pointer', ...TYPE.body,
+                    background: isSelected ? '#5a58ff' : 'transparent',
+                    color: isSelected ? '#fff' : TEXT.primary,
+                    borderRadius: '50%',
                   }}
-                  onMouseEnter={e => { if (day && !isSelected) e.currentTarget.style.background = '#f4f4f6'; }}
-                  onMouseLeave={e => { if (day && !isSelected) e.currentTarget.style.background = 'transparent'; }}>
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = '#f4f4f6'; }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
                   {day}
                 </button>
               );
-            })}
-          </div>
+            }}
+          />
         </div>
       )}
     </div>
