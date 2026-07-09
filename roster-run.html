@@ -1806,34 +1806,35 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
             {isOnline ? <span style={{ ...TYPE.body }}>Level {s.level}</span> : expanded ? <LevelDropdown studentId={s.id} currentLevel={levels[s.id] ?? s.level} onChange={onLevel} /> : <span style={{ ...TYPE.body }}>Level {levels[s.id] ?? s.level}</span>}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           {showAttemptTag && <RRTag tone="brand">Attempt {attemptIndex + 1}</RRTag>}
           {isOnline && <RRTag tone="success">Online</RRTag>}
           {isOnline ?
           <span style={{ ...TYPE.headingXl, color: TEXT.secondary, width: 72, textAlign: 'center', flexShrink: 0 }}>{score}</span> :
-          <input ref={inputRef}
-          className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
-          inputMode="numeric"
-          value={isAbs ? 'Abs' : score}
-          style={overMax ? { borderColor: TEXT.trendDown } : undefined}
-          onFocus={() => onExpand(expKey)}
-          onChange={(e) => onScore(k, e.target.value.replace(/[^0-9]/g, ''))}
-          onKeyDown={(e) => {
-            if (e.key === 'Tab') {
-              e.preventDefault();
-              const chips = document.querySelectorAll(`.rr-prompt-chip[data-sid="${s.id}"]`);
-              if (chips[0]) chips[0].focus();
-            } else {onKeyDown(e, k, s.id);}
-          }}
-          data-sid={s.id} data-akey={expKey} />
-
-          }
-          <span style={{ ...TYPE.titleRow, color: overMax ? TEXT.trendDown : TEXT.secondary }}>/{s.max}</span>
-          {overMax &&
-          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6 }}>
-            <Pill tone="warning" size="sm">Max score is {s.max}</Pill>
+          <div style={{ position: 'relative' }}>
+            <input ref={inputRef}
+            className={'rr-score-input' + (isAbs ? ' rr-abs' : '')}
+            inputMode="numeric"
+            value={isAbs ? 'Abs' : score}
+            style={overMax ? { borderColor: TEXT.trendDown } : undefined}
+            onFocus={() => onExpand(expKey)}
+            onChange={(e) => onScore(k, e.target.value.replace(/[^0-9]/g, ''))}
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault();
+                const chips = document.querySelectorAll(`.rr-prompt-chip[data-sid="${s.id}"]`);
+                if (chips[0]) chips[0].focus();
+              } else {onKeyDown(e, k, s.id);}
+            }}
+            data-sid={s.id} data-akey={expKey} />
+            {overMax &&
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 6, ...TYPE.body, fontSize: 12, color: TEXT.trendDown, whiteSpace: 'nowrap' }}>
+              Max score is {s.max}
+            </div>
+            }
           </div>
           }
+          <span style={{ ...TYPE.titleRow, color: overMax ? TEXT.trendDown : TEXT.secondary }}>/{s.max}</span>
         </div>
       </div>
 
