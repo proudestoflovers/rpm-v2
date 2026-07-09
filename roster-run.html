@@ -889,12 +889,17 @@ function StudentListRow({ s }) {
         <span style={{ ...TYPE.body, color: TEXT.muted, flexShrink: 0 }}>{s.date}</span>
       </div>
 
-      {/* Consolidated score: % + band-colored meter + band + trend */}
-      <div data-rr-row-score style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <span style={{ ...TYPE.titleRow, color: band.fg, width: 40, textAlign: 'right', flexShrink: 0 }}>{s.pct}%</span>
-        <Meter pct={s.pct} fill={band.bar} style={{ width: 100, flexShrink: 0 }} />
-        <Pill band={band.code} size="sm">{band.label}</Pill>
-        <TrendIndicator trend={s.trend} />
+      {/* Score card with completion date */}
+      <div data-rr-row-score style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ ...TYPE.body, color: TEXT.secondary, fontSize: 12 }}>Completed: {s.date}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ ...TYPE.titleRow, color: band.fg, flexShrink: 0 }}>{s.pct}%</span>
+          <Meter pct={s.pct} fill={band.bar} style={{ flex: 1, minWidth: 0 }} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Pill band={band.code} size="sm">{band.label}</Pill>
+          <TrendIndicator trend={s.trend} />
+        </div>
       </div>
     </div>
   );
