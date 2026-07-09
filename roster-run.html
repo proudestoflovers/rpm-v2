@@ -1008,7 +1008,7 @@ function StudentsScreen({ onAddScores, showSavedToast, onDismissSavedToast }) {
 
       {showSavedToast &&
       <div style={{ position: 'absolute', left: '50%', bottom: 28, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, background: '#1d1d1f', padding: '12px 16px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', ...TYPE.body, color: TEXT.onDark, zIndex: 50 }}>
-        <span>Changes saved</span>
+        <span>Score added</span>
         <button onClick={onDismissSavedToast}
           style={{ border: 'none', background: 'transparent', ...TYPE.titleRow, color: '#a9a7ff', cursor: 'pointer', padding: 0 }}>
           Undo
