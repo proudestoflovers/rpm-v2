@@ -1418,7 +1418,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             </div>
             {/* Subject */}
             <div>
-              <div style={{ ...TYPE.body, marginBottom: 7 }}>Subject</div>
+              <div style={{ ...TYPE.label, marginBottom: 7 }}>Subject</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: "8px" }}>
                 {[['math', 'Math'], ['ela', 'ELA'], ['sci', 'Science'], ['ss', 'Social studies']].map(([val, label]) => {
                 const on = subjectFilter === val;
@@ -1434,12 +1434,12 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
             </div>
             {/* Date available */}
             <div>
-              <div style={{ ...TYPE.body, marginBottom: 7 }}>Date available</div>
+              <div style={{ ...TYPE.label, marginBottom: 7 }}>Date available</div>
               <DateRangeFilter value={dateRange} onChange={setDateRange} today={TODAY} />
             </div>
             {/* Assigned to */}
             <div>
-              <div style={{ ...TYPE.body, marginBottom: 7 }}>Assigned to</div>
+              <div style={{ ...TYPE.label, marginBottom: 7 }}>Assigned to</div>
               <div ref={studentDropRef} style={{ position: 'relative' }}>
                 <button onClick={() => setStudentDropOpen((v) => !v)}
               style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', ...TYPE.label, color: studentFilter.length ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
