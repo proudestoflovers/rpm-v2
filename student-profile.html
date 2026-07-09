@@ -1394,8 +1394,11 @@ const PROMPT_LEVEL_PRESETS = [
   { label: 'Hand-over-hand', group: 'Prompt level' },
 ];
 
-function TagSelectField({ label, presets, recentItems = [], defaultSelected = [], hideLabel = false }) {
-  const [selected, setSelected] = React.useState(defaultSelected);
+function TagSelectField({ label, presets, recentItems = [], defaultSelected = [], hideLabel = false, value, onChange }) {
+  const controlled = value !== undefined;
+  const [internal, setInternal] = React.useState(defaultSelected);
+  const selected = controlled ? value : internal;
+  const commit = (next) => { controlled ? onChange(next) : setInternal(next); };
   const [open, setOpen] = React.useState(false);
   const [pos, setPos] = React.useState(null);
   const wrapRef = React.useRef(null);
@@ -1445,10 +1448,10 @@ function TagSelectField({ label, presets, recentItems = [], defaultSelected = []
     };
   }, [open]);
 
-  function remove(item) { setSelected((prev) => prev.filter((x) => x !== item)); }
+  function remove(item) { commit(selected.filter((x) => x !== item)); }
 
   function toggle(item) {
-    setSelected((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
+    commit(selected.includes(item) ? selected.filter((x) => x !== item) : [...selected, item]);
   }
 
   const available = presets.filter((p) => !selected.includes(p.label));
@@ -1502,12 +1505,33 @@ function TagSelectField({ label, presets, recentItems = [], defaultSelected = []
   );
 }
 
-function PromptLevelField({ defaultSelected, hideLabel }) {
-  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} />;
+function PromptLevelField({ defaultSelected, hideLabel, value, onChange }) {
+  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} value={value} onChange={onChange} />;
 }
 
-function AccommodationsField({ defaultSelected, hideLabel }) {
-  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} />;
+function AccommodationsField({ defaultSelected, hideLabel, value, onChange }) {
+  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} defaultSelected={defaultSelected} hideLabel={hideLabel} value={value} onChange={onChange} />;
+}
+
+/* ── EditControls — save (primary/check) / cancel (secondary/cross) buttons ── */
+function EditControls({ onSave, onCancel }) {
+  const base = { appearance: 'none', width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'background .12s' };
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <button title="Save" onClick={onSave}
+        style={{ ...base, background: '#141415', border: 'none' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#262627'}
+        onMouseLeave={(e) => e.currentTarget.style.background = '#141415'}>
+        <Ico n="check" size={14} stroke={TEXT.onDark} sw={2.5} />
+      </button>
+      <button title="Cancel" onClick={onCancel}
+        style={{ ...base, background: '#fff', border: '1.5px solid #e1e1e3' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#f4f4f6'}
+        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}>
+        <Ico n="x" size={14} stroke={TEXT.muted} sw={2.5} />
+      </button>
+    </div>
+  );
 }
 
 /* ── Unit card (accordion) ──────────────────────────────────────────── */
@@ -1516,7 +1540,13 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
   const [editingPrompt, setEditingPrompt] = React.useState(false);
   const [editingAccommodations, setEditingAccommodations] = React.useState(false);
   const [editingNotes, setEditingNotes] = React.useState(false);
+  // Committed values shown in view mode; drafts hold in-progress edits (discarded on cancel).
+  const [promptItems, setPromptItems] = React.useState(['Verbal']);
+  const [accommodationItems, setAccommodationItems] = React.useState(['Small group', 'Word bank', 'Extended time']);
   const [notesText, setNotesText] = React.useState('Student worked carefully and showed good understanding of number recognition. Minor errors on the extension questions. Recommend continued practice with larger numbers.');
+  const [promptDraft, setPromptDraft] = React.useState(promptItems);
+  const [accommodationDraft, setAccommodationDraft] = React.useState(accommodationItems);
+  const [notesDraft, setNotesDraft] = React.useState(notesText);
   const cfg = SUBJ_CFG[subj] || SUBJ_CFG.Math;
   const doneRows = rows.filter((r) => r.st === 'done');
   // Group by assignment name only to compute attempt siblings/avg — each attempt still renders as its own row
@@ -1603,38 +1633,47 @@ function UnitCard({ subj, unit, rows, defaultOpen }) {
                         {multi && <div style={{ marginLeft: 'auto' }}><AttemptDatesBubble group={group} activeId={r.id} onSelect={goToRow} /></div>}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'space-between', minHeight: 26 }}>
                           <span style={{ ...TYPE.body }}>Prompt level</span>
-                          <button onClick={() => setEditingPrompt((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
-                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
-                          </button>
+                          {editingPrompt
+                            ? <EditControls onSave={() => { setPromptItems(promptDraft); setEditingPrompt(false); }} onCancel={() => setEditingPrompt(false)} />
+                            : <button onClick={() => { setPromptDraft(promptItems); setEditingPrompt(true); }} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                                <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                              </button>
+                          }
                         </div>
                         {editingPrompt
-                          ? <PromptLevelField defaultSelected={['Verbal']} hideLabel />
-                          : <PillOverflowRow items={['Verbal']} />
+                          ? <PromptLevelField value={promptDraft} onChange={setPromptDraft} hideLabel />
+                          : <PillOverflowRow items={promptItems} />
                         }
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'space-between', minHeight: 26 }}>
                           <span style={{ ...TYPE.body }}>Accommodations</span>
-                          <button onClick={() => setEditingAccommodations((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
-                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
-                          </button>
+                          {editingAccommodations
+                            ? <EditControls onSave={() => { setAccommodationItems(accommodationDraft); setEditingAccommodations(false); }} onCancel={() => setEditingAccommodations(false)} />
+                            : <button onClick={() => { setAccommodationDraft(accommodationItems); setEditingAccommodations(true); }} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                                <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                              </button>
+                          }
                         </div>
                         {editingAccommodations
-                          ? <AccommodationsField defaultSelected={['Small group', 'Word bank', 'Extended time']} hideLabel />
-                          : <PillOverflowRow items={['Small group', 'Word bank', 'Extended time']} />
+                          ? <AccommodationsField value={accommodationDraft} onChange={setAccommodationDraft} hideLabel />
+                          : <PillOverflowRow items={accommodationItems} />
                         }
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ea', paddingTop: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'space-between', minHeight: 26 }}>
                           <span style={{ ...TYPE.body }}>Notes</span>
-                          <button onClick={() => setEditingNotes((v) => !v)} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
-                            <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
-                          </button>
+                          {editingNotes
+                            ? <EditControls onSave={() => { setNotesText(notesDraft); setEditingNotes(false); }} onCancel={() => setEditingNotes(false)} />
+                            : <button onClick={() => { setNotesDraft(notesText); setEditingNotes(true); }} style={{ appearance: 'none', border: 'none', background: 'none', padding: 2, cursor: 'pointer', display: 'flex', color: TEXT.muted }}>
+                                <Ico n="pencil" size={13} stroke={TEXT.muted} sw={2} />
+                              </button>
+                          }
                         </div>
                         {editingNotes
-                          ? <textarea value={notesText} onChange={(e) => setNotesText(e.target.value)} style={{ minHeight: 80, padding: 10, border: '1px solid #e1e1e3', borderRadius: 10, fontFamily: "'Figtree',sans-serif", ...TYPE.body, resize: 'none', outline: 'none' }} onFocus={(e) => { e.target.style.borderColor = '#5a58ff'; e.target.style.boxShadow = '0 0 0 3px rgba(90,88,255,0.1)'; }} onBlur={(e) => { e.target.style.borderColor = '#e1e1e3'; e.target.style.boxShadow = 'none'; }} />
+                          ? <textarea value={notesDraft} onChange={(e) => setNotesDraft(e.target.value)} style={{ minHeight: 80, padding: 10, border: '1px solid #e1e1e3', borderRadius: 10, fontFamily: "'Figtree',sans-serif", ...TYPE.body, resize: 'none', outline: 'none' }} onFocus={(e) => { e.target.style.borderColor = '#5a58ff'; e.target.style.boxShadow = '0 0 0 3px rgba(90,88,255,0.1)'; }} onBlur={(e) => { e.target.style.borderColor = '#e1e1e3'; e.target.style.boxShadow = 'none'; }} />
                           : <div style={{ ...TYPE.body, whiteSpace: 'pre-wrap' }}>{notesText}</div>
                         }
                       </div>
