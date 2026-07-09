@@ -21,12 +21,9 @@
   @media (max-width: 1024px) {
     [data-rr-drawer-toggle] { display: inline-flex !important; }
     [data-layout="two-column"] { grid-template-columns: 1fr !important; }
-    [data-rr-student-row] { grid-template-columns: 220px 1fr auto !important; }
-    [data-rr-row-latest] { display: none !important; }
   }
   @media (max-width: 640px) {
-    [data-rr-student-row] { grid-template-columns: 1fr auto !important; row-gap: 10px !important; }
-    [data-rr-row-score] { grid-column: 1 / -1 !important; order: 3; }
+    [data-rr-student-row] { grid-template-columns: 1fr !important; row-gap: 10px !important; }
     [data-rr-student-info] { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
     [data-rr-lesson-header] { flex-direction: column !important; min-height: 0 !important; }
     [data-rr-lesson-header] > div:first-child { width: 100% !important; height: 120px !important; padding: 16px 16px 0 16px !important; }
@@ -884,10 +881,13 @@ function StudentListRow({ s }) {
 
       {/* Score card with completion date */}
       <div data-rr-row-score style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {/* Latest result inside card */}
+        {/* Latest result inside card with subject icon */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={24} />
-          <span style={{ ...TYPE.titleRow, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.latest}</span>
+          <div style={{ display: 'flex', gap: 4, minWidth: 0, alignItems: 'center', flex: 1 }}>
+            <span style={{ ...TYPE.titleRow, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.latest}</span>
+            <span style={{ ...TYPE.body, color: TEXT.secondary, flexShrink: 0 }}>Level {s.level}</span>
+          </div>
         </div>
 
         <div style={{ ...TYPE.body, display: 'flex', gap: 2 }}>
@@ -901,8 +901,11 @@ function StudentListRow({ s }) {
         </div>
       </div>
 
-      {/* Trend indicator outside card */}
-      <TrendIndicator trend={s.trend} />
+      {/* Subject icon + trend for this subject, next to the score card */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={28} />
+        <TrendIndicator trend={s.trend} />
+      </div>
     </div>
   );
 }
