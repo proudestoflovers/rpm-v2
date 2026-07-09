@@ -866,7 +866,7 @@ function StudentListRow({ s }) {
         boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)',
         padding: '14px 18px',
         display: 'grid',
-        gridTemplateColumns: '220px minmax(0,1fr) 380px',
+        gridTemplateColumns: '220px minmax(0,1fr) 380px auto',
         alignItems: 'center',
         gap: 16,
         cursor: 'pointer',
@@ -891,16 +891,19 @@ function StudentListRow({ s }) {
 
       {/* Score card with completion date */}
       <div data-rr-row-score style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ ...TYPE.body, color: TEXT.secondary, fontSize: 12 }}>Completed: {s.date}</div>
+        <div style={{ ...TYPE.body, display: 'flex', gap: 2 }}>
+          <span style={{ color: TEXT.secondary }}>Completed</span>
+          <span style={{ ...TYPE.label }}>{s.date}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ ...TYPE.titleRow, color: band.fg, flexShrink: 0 }}>{s.pct}%</span>
           <Meter pct={s.pct} fill={band.bar} style={{ flex: 1, minWidth: 0 }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Pill band={band.code} size="sm">{band.label}</Pill>
-          <TrendIndicator trend={s.trend} />
-        </div>
+        <Pill band={band.code} size="sm">{band.label}</Pill>
       </div>
+
+      {/* Trend indicator outside card */}
+      <TrendIndicator trend={s.trend} />
     </div>
   );
 }
