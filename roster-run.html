@@ -26,7 +26,6 @@
     [data-rr-student-info] { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
     [data-rr-lesson-header] { flex-direction: column !important; min-height: 0 !important; }
     [data-rr-lesson-header] > div:first-child { width: 100% !important; height: 120px !important; padding: 16px 16px 0 16px !important; }
-    [data-rr-saved-label] { display: none !important; }
   }
   @media (max-width: 480px) {
     [data-rr-crumb-label] { display: none !important; }
@@ -950,9 +949,15 @@ function StudentCard({ s }) {
 }
 
 // ─── StudentsScreen ───────────────────────────────────────────────────────────
-function StudentsScreen({ onAddScores }) {
+function StudentsScreen({ onAddScores, showSavedToast, onDismissSavedToast }) {
+  React.useEffect(() => {
+    if (!showSavedToast) return;
+    const t = setTimeout(() => onDismissSavedToast(), 6000);
+    return () => clearTimeout(t);
+  }, [showSavedToast]);
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f4f4f6', overflow: 'hidden' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f4f4f6', overflow: 'hidden', position: 'relative' }}>
 
       <header style={{
         height: 60, flexShrink: 0,
@@ -1000,6 +1005,16 @@ function StudentsScreen({ onAddScores }) {
             .map(s => <StudentCard key={s.id} s={s} />)}
         </div>
       </div>
+
+      {showSavedToast &&
+      <div style={{ position: 'absolute', left: '50%', bottom: 28, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 16, background: '#1d1d1f', padding: '12px 16px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', ...TYPE.body, color: TEXT.onDark, zIndex: 50 }}>
+        <span>Changes saved</span>
+        <button onClick={onDismissSavedToast}
+          style={{ border: 'none', background: 'transparent', ...TYPE.titleRow, color: '#a9a7ff', cursor: 'pointer', padding: 0 }}>
+          Undo
+        </button>
+      </div>
+      }
     </div>
   );
 }
@@ -1557,7 +1572,7 @@ const PROMPT_LEVEL_PRESETS = [
 
 /* Generic tag-select field: chips with a grouped dropdown + custom entry.
    Mirrors the Accommodations UI; reused for Prompt level. */
-function TagSelectField({ label, presets, recentItems = [] }) {
+function TagSelectField({ label, presets, recentItems = [], onDirty }) {
   const [selected, setSelected] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [pos, setPos] = React.useState(null);
@@ -1608,10 +1623,11 @@ function TagSelectField({ label, presets, recentItems = [] }) {
     };
   }, [open]);
 
-  function remove(item) { setSelected(prev => prev.filter(x => x !== item)); }
+  function remove(item) { setSelected(prev => prev.filter(x => x !== item)); onDirty && onDirty(); }
 
   function toggle(item) {
     setSelected(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item]);
+    onDirty && onDirty();
   }
 
   const groups = [...new Set(presets.map(p => p.group))];
@@ -1668,16 +1684,16 @@ function TagSelectField({ label, presets, recentItems = [] }) {
   );
 }
 
-function AccommodationsField({ studentId }) {
+function AccommodationsField({ studentId, onDirty }) {
   const recentItems = STUDENT_RECENT_ACCOMMODATIONS[studentId] || [];
-  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} recentItems={recentItems} />;
+  return <TagSelectField label="Accommodations" presets={ACCOMMODATION_PRESETS} recentItems={recentItems} onDirty={onDirty} />;
 }
 
-function PromptLevelField() {
-  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} />;
+function PromptLevelField({ onDirty }) {
+  return <TagSelectField label="Prompt level" presets={PROMPT_LEVEL_PRESETS} onDirty={onDirty} />;
 }
 
-function DatePickerField({ label, defaultDate }) {
+function DatePickerField({ label, defaultDate, onDirty }) {
   function parseAvailable(str) {
     if (!str) return new Date();
     const months = { Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6, Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12 };
@@ -1713,6 +1729,7 @@ function DatePickerField({ label, defaultDate }) {
     const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     setSelected(newDate);
     setOpen(false);
+    onDirty && onDirty();
   }
 
   return (
@@ -1756,7 +1773,7 @@ function DatePickerField({ label, defaultDate }) {
   );
 }
 
-function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand, onScore, onPrompt, onNote, onLevel, inputRef, onKeyDown, onChipEnter, isFirst, inputVariant, asgAvailable, attemptIndex = 0, attemptCount = 1, attemptKey, expandKey, onAddAttempt }) {
+function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand, onScore, onPrompt, onNote, onLevel, inputRef, onKeyDown, onChipEnter, isFirst, inputVariant, asgAvailable, attemptIndex = 0, attemptCount = 1, attemptKey, expandKey, onAddAttempt, onDirty }) {
   const k = attemptKey || (s.id + '|' + aid);
   const expKey = expandKey || s.id;
   const score = scores[k] ?? '';
@@ -1818,9 +1835,9 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
         <div data-layout="two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
           {/* Left column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <DatePickerField label="Date completed" defaultDate={asgAvailable} />
-            <PromptLevelField />
-            <AccommodationsField studentId={s.id} />
+            <DatePickerField label="Date completed" defaultDate={asgAvailable} onDirty={onDirty} />
+            <PromptLevelField onDirty={onDirty} />
+            <AccommodationsField studentId={s.id} onDirty={onDirty} />
           </div>
           {/* Right column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
@@ -1829,7 +1846,8 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
               <textarea placeholder="Add observational notes…"
                 style={{ flex: 1, border: '1.5px solid #e1e1e3', borderRadius: 10, background: '#fff', padding: '8px 12px', ...TYPE.body, color: TEXT.primary, outline: 'none', resize: 'none', transition: 'border-color .12s' }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#5a58ff'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#e1e1e3'} />
+                onBlur={(e) => e.currentTarget.style.borderColor = '#e1e1e3'}
+                onChange={onDirty} />
             </label>
           </div>
         </div>
@@ -1950,7 +1968,7 @@ function DismissButton({ onClick }) {
     </div>);
 }
 
-function RosterRunScreen({ onDone }) {
+function RosterRunScreen({ onCancel, onSave }) {
   const [aid, setAid] = React.useState(ASSIGNMENTS[0].id);
   const [scores, setScores] = React.useState({});
   const [prompts, setPrompts] = React.useState({});
@@ -1962,8 +1980,22 @@ function RosterRunScreen({ onDone }) {
   const [levels, setLevels] = React.useState({});
   const [attemptCounts, setAttemptCounts] = React.useState({}); // k -> number of attempt rows (default 1)
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [dirty, setDirty] = React.useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = React.useState(false);
   const drawerMode = useMediaQuery(1024);
   const inputVariant = 'detailed2';
+
+  function markDirty() { setDirty(true); }
+
+  function handleCancel() {
+    if (dirty) setShowDiscardConfirm(true);
+    else onCancel();
+  }
+
+  function discardAndExit() {
+    setShowDiscardConfirm(false);
+    onCancel();
+  }
 
   // Append another attempt row for a student on the current assignment, and open it
   function addAttempt(k) {
@@ -2142,7 +2174,7 @@ function RosterRunScreen({ onDone }) {
       {/* Top bar */}
       <header style={{ background: '#fff', borderBottom: '1px solid #e1e1e3', padding: '0 32px', height: 60, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
-          <button onClick={onDone} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, ...TYPE.detailValue, color: TEXT.secondary, padding: '4px 0', flexShrink: 0 }}>
+          <button onClick={handleCancel} style={{ border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, ...TYPE.detailValue, color: TEXT.secondary, padding: '4px 0', flexShrink: 0 }}>
             <RRIcon name="chevLeft" size={16} />Students
           </button>
           <span data-rr-crumb-label style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
@@ -2152,10 +2184,8 @@ function RosterRunScreen({ onDone }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <span data-rr-saved-label style={{ ...TYPE.detailValue, color: TEXT.success, display: 'flex', alignItems: 'center', gap: 5 }}>
-            <RRIcon name="check" size={14} color="#016a36" />All changes saved
-          </span>
-          <RRButton variant="brand" size="md" onClick={onDone}>Done</RRButton>
+          <RRButton variant="ghost" size="md" onClick={handleCancel}>Cancel</RRButton>
+          <RRButton variant="brand" size="md" onClick={onSave}>Save</RRButton>
         </div>
       </header>
 
@@ -2282,10 +2312,11 @@ function RosterRunScreen({ onDone }) {
                   inputVariant={inputVariant}
                   asgAvailable={asg ? asg.available : ''}
                   onExpand={setExpanded}
-                  onScore={(kk, v) => setScores((p) => ({ ...p, [kk]: v }))}
-                  onPrompt={(kk, v) => setPrompts((p) => ({ ...p, [kk]: v }))}
-                  onNote={(kk, v) => setNotes((p) => ({ ...p, [kk]: v }))}
-                  onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
+                  onScore={(kk, v) => { setScores((p) => ({ ...p, [kk]: v })); markDirty(); }}
+                  onPrompt={(kk, v) => { setPrompts((p) => ({ ...p, [kk]: v })); markDirty(); }}
+                  onNote={(kk, v) => { setNotes((p) => ({ ...p, [kk]: v })); markDirty(); }}
+                  onLevel={(sid, v) => { setLevels((p) => ({ ...p, [sid]: v })); markDirty(); }}
+                  onDirty={markDirty}
                   inputRef={i === 0 ? (el) => inputRefs.current[s.id] = el : () => {}}
                   onKeyDown={i === 0 ? handleKeyDown : () => {}}
                   onChipEnter={handleChipEnter} />
@@ -2300,8 +2331,9 @@ function RosterRunScreen({ onDone }) {
                 scores={scores} prompts={prompts} notes={notes} levels={levels}
                 expanded={expanded === s.id} isFirst={false} onExpand={setExpanded}
                 attemptIndex={0} attemptCount={1} attemptKey={s.id + '|' + aid} expandKey={s.id}
-                onScore={() => {}} onPrompt={(k, v) => setPrompts((p) => ({ ...p, [k]: v }))} onNote={(k, v) => setNotes((p) => ({ ...p, [k]: v }))}
-                onLevel={(sid, v) => setLevels((p) => ({ ...p, [sid]: v }))}
+                onScore={() => {}} onPrompt={(k, v) => { setPrompts((p) => ({ ...p, [k]: v })); markDirty(); }} onNote={(k, v) => { setNotes((p) => ({ ...p, [k]: v })); markDirty(); }}
+                onLevel={(sid, v) => { setLevels((p) => ({ ...p, [sid]: v })); markDirty(); }}
+                onDirty={markDirty}
                 inputRef={() => {}} onKeyDown={() => {}} onChipEnter={handleChipEnter} />
                 )}
               </>
@@ -2329,6 +2361,20 @@ function RosterRunScreen({ onDone }) {
             </button>
           </div>);
       })()}
+
+      {/* Discard-changes confirmation */}
+      {showDiscardConfirm &&
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(29,29,31,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: 360, boxShadow: '0 12px 40px rgba(0,0,0,0.2)' }}>
+          <div style={{ ...TYPE.headingMd, marginBottom: 8 }}>Discard changes?</div>
+          <div style={{ ...TYPE.body, marginBottom: 20 }}>You have unsaved changes on this assignment. If you cancel now, they’ll be lost.</div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <RRButton variant="ghost" size="md" onClick={() => setShowDiscardConfirm(false)}>Keep editing</RRButton>
+            <RRButton variant="primary" size="md" onClick={discardAndExit}>Discard changes</RRButton>
+          </div>
+        </div>
+      </div>
+      }
     </div>);
 
 }
@@ -2336,13 +2382,16 @@ function RosterRunScreen({ onDone }) {
 /* ── Root App ─────────────────────────────────────────────────── */
 function App() {
   const [screen, setScreen] = React.useState('students');
+  const [savedToast, setSavedToast] = React.useState(false);
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: '#f4f4f6' }}>
       <RRAppRail active="users" />
       <div className="rr-screen" key={screen} style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         {screen === 'students' ?
-        <StudentsScreen onAddScores={() => setScreen('roster')} /> :
-        <RosterRunScreen onDone={() => setScreen('students')} />}
+        <StudentsScreen onAddScores={() => setScreen('roster')} showSavedToast={savedToast} onDismissSavedToast={() => setSavedToast(false)} /> :
+        <RosterRunScreen
+          onCancel={() => setScreen('students')}
+          onSave={() => { setScreen('students'); setSavedToast(true); }} />}
       </div>
     </div>);
 
