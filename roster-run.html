@@ -897,8 +897,8 @@ function StudentListRow({ s }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ ...TYPE.titleRow, color: TEXT.primary, flexShrink: 0 }}>{s.pct}%</span>
           <Meter pct={s.pct} fill={band.bar} style={{ flex: 1, minWidth: 0 }} />
+          <Pill band={band.code} size="sm" style={{ width: 'fit-content', flexShrink: 0 }}>{band.label}</Pill>
         </div>
-        <Pill band={band.code} size="sm" style={{ width: 'fit-content' }}>{band.label}</Pill>
       </div>
 
       {/* Trend indicator outside card */}
