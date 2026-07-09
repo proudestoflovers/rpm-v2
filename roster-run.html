@@ -849,7 +849,7 @@ function openProfile(s) {
   window.location.href = 'student-profile.html?' + p.toString();
 }
 
-function StudentListRow({ s, onAddScore }) {
+function StudentListRow({ s }) {
   const [hov, setHov] = React.useState(false);
   const band = bandOf(s.band) || BAND.i;
 
@@ -866,7 +866,7 @@ function StudentListRow({ s, onAddScore }) {
         boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)',
         padding: '14px 18px',
         display: 'grid',
-        gridTemplateColumns: '220px minmax(0,1fr) 380px auto',
+        gridTemplateColumns: '220px minmax(0,1fr) 380px',
         alignItems: 'center',
         gap: 16,
         cursor: 'pointer',
@@ -896,11 +896,6 @@ function StudentListRow({ s, onAddScore }) {
         <Pill band={band.code} size="sm">{band.label}</Pill>
         <TrendIndicator trend={s.trend} />
       </div>
-
-      {/* Quick action */}
-      <RRButton variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); onAddScore(); }} style={{ justifySelf: 'end' }}>
-        Add score
-      </RRButton>
     </div>
   );
 }
@@ -959,7 +954,7 @@ function StudentsScreen({ onAddScores, showSavedToast, onDismissSavedToast }) {
         <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[...STUDENTS_SCREEN_DATA]
             .sort((a, b) => (bandOf(a.band)?.rank ?? 9) - (bandOf(b.band)?.rank ?? 9))
-            .map(s => <StudentListRow key={s.id} s={s} onAddScore={onAddScores} />)}
+            .map(s => <StudentListRow key={s.id} s={s} />)}
         </div>
       </div>
 
