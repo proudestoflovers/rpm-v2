@@ -877,7 +877,7 @@ function StudentListRow({ s }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <StudentAvatar emoji={s.emoji} size={40} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ ...TYPE.titleRow, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
+          <div style={{ ...TYPE.headingMd, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
           <div style={{ ...TYPE.body, color: TEXT.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.grade} · Level {s.level}</div>
         </div>
       </div>
