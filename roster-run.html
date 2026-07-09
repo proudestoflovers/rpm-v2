@@ -719,12 +719,12 @@ Object.assign(window, {
 /* rr-students.jsx — Students grid, component-based */
 
 const STUDENTS_SCREEN_DATA = [
-  { id:'s1', name:'Mia Brown',      grade:'Grade 1', emoji:'👩🏾', level:2, latest:'Counting & Numbers to 10', date:'Jun 28', pct:92, band:'Proficient',    trend:'up',     nextStep:'Ready to advance — move to Addition to 5.' },
-  { id:'s2', name:'Leo Smith',      grade:'Grade 1', emoji:'🧑🏽', level:1, latest:'Addition to 5',            date:'Jun 27', pct:61, band:'Instructional', trend:'steady', nextStep:'Keep practicing — repeat with new examples.' },
-  { id:'s3', name:'Sophia Millet',  grade:'Grade 1', emoji:'👩🏽', level:1, latest:'Number Sense',             date:'Jun 26', pct:45, band:'Emerging',      trend:'down',   nextStep:'Reteach using manipulatives, then re-assess.' },
-  { id:'s4', name:'Chloe McKim',    grade:'Grade 1', emoji:'👱🏻‍♀️', level:2, latest:'Shapes & Patterns',        date:'Jun 25', pct:50, band:'Emerging',      trend:'up',     nextStep:'Reteach the key concept with visual support.' },
-  { id:'s5', name:'Noah Stevenson', grade:'Grade 1', emoji:'👦🏼', level:3, latest:'Number Bonds to 10',       date:'Jun 21', pct:28, band:'Pre-emerging',  trend:'down',   nextStep:'Try a lower level — drop to Number Bonds to 5.' },
-  { id:'s6', name:'Elijah Wright',  grade:'Grade 1', emoji:'👦🏿', level:2, latest:'Counting & Numbers to 10', date:'Jun 28', pct:78, band:'Instructional', trend:'up',     nextStep:'Keep practicing — close to mastery.' },
+  { id:'s1', name:'Mia Brown',      grade:'Grade 1', emoji:'👩🏾', level:2, latest:'Counting & Numbers to 10', date:'Jun 28', pct:92, band:'Proficient',    trend:'up',     subjectTrends:{math:'up', ela:'up', sci:'steady', ss:'up'}, inProgress:2, completed:12, nextStep:'Ready to advance — move to Addition to 5.' },
+  { id:'s2', name:'Leo Smith',      grade:'Grade 1', emoji:'🧑🏽', level:1, latest:'Addition to 5',            date:'Jun 27', pct:61, band:'Instructional', trend:'steady', subjectTrends:{math:'steady', ela:'down', sci:'up', ss:'steady'}, inProgress:3, completed:8, nextStep:'Keep practicing — repeat with new examples.' },
+  { id:'s3', name:'Sophia Millet',  grade:'Grade 1', emoji:'👩🏽', level:1, latest:'Number Sense',             date:'Jun 26', pct:45, band:'Emerging',      trend:'down',   subjectTrends:{math:'down', ela:'steady', sci:'down', ss:'down'}, inProgress:4, completed:6, nextStep:'Reteach using manipulatives, then re-assess.' },
+  { id:'s4', name:'Chloe McKim',    grade:'Grade 1', emoji:'👱🏻‍♀️', level:2, latest:'Shapes & Patterns',        date:'Jun 25', pct:50, band:'Emerging',      trend:'up',     subjectTrends:{math:'up', ela:'up', sci:'down', ss:'up'}, inProgress:1, completed:10, nextStep:'Reteach the key concept with visual support.' },
+  { id:'s5', name:'Noah Stevenson', grade:'Grade 1', emoji:'👦🏼', level:3, latest:'Number Bonds to 10',       date:'Jun 21', pct:28, band:'Pre-emerging',  trend:'down',   subjectTrends:{math:'down', ela:'down', sci:'steady', ss:'down'}, inProgress:5, completed:5, nextStep:'Try a lower level — drop to Number Bonds to 5.' },
+  { id:'s6', name:'Elijah Wright',  grade:'Grade 1', emoji:'👦🏿', level:2, latest:'Counting & Numbers to 10', date:'Jun 28', pct:78, band:'Instructional', trend:'up',     subjectTrends:{math:'up', ela:'steady', sci:'up', ss:'steady'}, inProgress:2, completed:11, nextStep:'Keep practicing — close to mastery.' },
 ];
 
 // Band → color tint + sort priority (lowest band floats to top for triage)
@@ -813,7 +813,7 @@ function IconNotStarted() {
 }
 
 // ─── Student list row ─────────────────────────────────────────────────────────
-function TrendIndicator({ trend }) {
+function TrendIndicator({ trend, subject }) {
   const map = {
     up:     { color: TEXT.success },
     steady: { color: TEXT.muted },
@@ -828,6 +828,7 @@ function TrendIndicator({ trend }) {
   };
   return (
     <div style={{ display:'flex', alignItems:'center', gap:4, color:t.color }}>
+      {subject && <span style={{ ...TYPE.titleRow, color: TEXT.primary }}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</span>}
       <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         {icons[trend]}
       </svg>
@@ -863,15 +864,15 @@ function StudentListRow({ s }) {
         boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)',
         padding: '14px 18px',
         display: 'grid',
-        gridTemplateColumns: '220px minmax(0,1fr) auto',
-        alignItems: 'center',
-        gap: 16,
+        gridTemplateColumns: '220px 2fr 1fr',
+        alignItems: 'flex-start',
+        gap: 20,
         cursor: 'pointer',
         transition: 'box-shadow .15s',
       }}>
 
       {/* Identity */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, paddingTop: 12 }}>
         <StudentAvatar emoji={s.emoji} size={40} />
         <div style={{ minWidth: 0 }}>
           <div style={{ ...TYPE.headingMd, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
@@ -879,8 +880,13 @@ function StudentListRow({ s }) {
         </div>
       </div>
 
-      {/* Score card with completion date */}
-      <div data-rr-row-score style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* Score card column */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, paddingTop: 10 }}>
+        {/* Header */}
+        <div style={{ ...TYPE.body, color: TEXT.muted }}>Latest assignment</div>
+
+        {/* Score card with completion date */}
+        <div data-rr-row-score style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Latest result inside card with subject icon */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={24} />
@@ -900,11 +906,25 @@ function StudentListRow({ s }) {
           <Pill band={band.code} size="sm" style={{ width: 'fit-content', flexShrink: 0 }}>{band.label}</Pill>
         </div>
       </div>
+      </div>
 
-      {/* Subject icon + trend for this subject, next to the score card */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <SubjectBadge subject={getAssignmentMeta(s.latest).subject} size={28} />
-        <TrendIndicator trend={s.trend} />
+      {/* Four subject trends with dividers */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {['math', 'ela', 'sci', 'ss'].map((subject, idx) => {
+          const displayNames = { math: 'Math', ela: 'ELA', sci: 'Science', ss: 'Social Studies' };
+          return (
+            <div key={subject}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0' }}>
+                <SubjectBadge subject={subject} size={24} />
+                <span style={{ ...TYPE.titleRow, color: TEXT.primary }}>{displayNames[subject]}</span>
+                <div style={{ marginLeft: 'auto' }}>
+                  <TrendIndicator trend={s.subjectTrends?.[subject] || 'steady'} subject={null} />
+                </div>
+              </div>
+              {idx < 3 && <div style={{ height: '1px', background: '#ebebeb' }} />}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
