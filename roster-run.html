@@ -1830,8 +1830,8 @@ function StudentRow({ s, aid, scores, prompts, notes, levels, expanded, onExpand
           }
           <span style={{ ...TYPE.titleRow, color: overMax ? TEXT.trendDown : TEXT.secondary }}>/{s.max}</span>
           {overMax &&
-          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, ...TYPE.body, fontSize: 12, color: TEXT.trendDown, whiteSpace: 'nowrap' }}>
-            Max score is {s.max}
+          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6 }}>
+            <Pill tone="warning" size="sm">Max score is {s.max}</Pill>
           </div>
           }
         </div>
