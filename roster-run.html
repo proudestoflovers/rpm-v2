@@ -1202,7 +1202,7 @@ function DateRangeFilter({ value, onChange, today }) {
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <button ref={triggerRef} onClick={() => setOpen((v) => !v)}
-        style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (value.key ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, ...TYPE.label, color: value.key ? TEXT.brandText : TEXT.metaGray, background: value.key ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', position: 'relative', textAlign: 'left', width: '100%' }}>
+        style={{ height: 38, padding: '0 32px 0 12px', border: '1.5px solid ' + (value.key ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, ...TYPE.body, fontWeight: value.key ? 600 : 400, color: value.key ? TEXT.brandText : TEXT.metaGray, background: value.key ? '#eaeaff' : '#fff', cursor: 'pointer', outline: 'none', position: 'relative', textAlign: 'left', width: '100%' }}>
         {dateRangeLabel(value)}
         <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={value.key ? '#5a58ff' : '#49494b'} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
       </button>
@@ -1425,7 +1425,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
                 const cfg = SUBJECT_CFG[val] || SUBJECT_CFG.math;
                 return (
                   <button key={val} onClick={() => setSubjectFilter(on ? '' : val)}
-                  style={{ padding: '0 13px 0 7px', border: '1.5px solid ' + (on ? '#5a58ff' : '#e1e1e3'), borderRadius: 99, background: on ? '#eaeaff' : '#fff', ...TYPE.label, color: on ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all .1s', height: '38px' }}>
+                  style={{ padding: '0 13px 0 7px', border: '1.5px solid ' + (on ? '#5a58ff' : '#e1e1e3'), borderRadius: 99, background: on ? '#eaeaff' : '#fff', ...TYPE.body, fontWeight: on ? 600 : 400, color: on ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all .1s', height: '38px' }}>
                       <SubjectBadge subject={val} size={24} />{label}
                     </button>);
 
@@ -1442,7 +1442,7 @@ function AssignmentSidebar({ selected, scores, onSelect, filter, onFilter, remov
               <div style={{ ...TYPE.label, marginBottom: 7 }}>Assigned to</div>
               <div ref={studentDropRef} style={{ position: 'relative' }}>
                 <button onClick={() => setStudentDropOpen((v) => !v)}
-              style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', ...TYPE.label, color: studentFilter.length ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+              style={{ height: 38, padding: '0 12px', width: '100%', border: '1.5px solid ' + (studentFilter.length ? '#5a58ff' : '#e1e1e3'), borderRadius: 8, background: studentFilter.length ? '#eaeaff' : '#fff', ...TYPE.body, fontWeight: studentFilter.length ? 600 : 400, color: studentFilter.length ? TEXT.brandText : TEXT.metaGray, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                   <span>{studentFilter.length ? studentFilter.length + ' student' + (studentFilter.length > 1 ? 's' : '') : 'All students'}</span>
                   <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: studentDropOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><polyline points="6 9 12 15 18 9" /></svg>
                 </button>
