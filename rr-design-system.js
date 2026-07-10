@@ -78,6 +78,33 @@ function Pill({
   );
 }
 
+/* ── TrendIndicator ────────────────────────────────────────────────────────
+   Shared trend readout: optional subject name, label, then arrow/dash icon.
+   Classification logic is documented in trend-framework.md. */
+function TrendIndicator({ trend, subject }) {
+  const map = {
+    up:     { color: TEXT.success },
+    steady: { color: TEXT.muted },
+    down:   { color: TEXT.trendDown },
+  };
+  const t = map[trend] || map.steady;
+  const labels = { up:'Improving', steady:'Stable', down:'Declining' };
+  const icons = {
+    up:     <><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></>,
+    steady: <line x1="5" y1="12" x2="19" y2="12" />,
+    down:   <><path d="M12 5v14" /><path d="M19 12l-7 7-7-7" /></>
+  };
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:4, color:t.color }}>
+      {subject && <span style={{ ...TYPE.titleRow, color: TEXT.primary }}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</span>}
+      <span style={{ ...TYPE.label, color: 'inherit' }}>{labels[trend]}</span>
+      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {icons[trend]}
+      </svg>
+    </div>
+  );
+}
+
 /* ── Meter ─────────────────────────────────────────────────────────────────
    The single filled-track bar. Thin, pill-rounded, neutral track; the fill
    colour is caller-supplied (brand purple for completion, band colour for

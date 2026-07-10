@@ -22,8 +22,24 @@
     [data-rr-drawer-toggle] { display: inline-flex !important; }
     [data-layout="two-column"] { grid-template-columns: 1fr !important; }
   }
-  @media (max-width: 640px) {
-    [data-rr-student-row] { grid-template-columns: 1fr !important; row-gap: 10px !important; }
+  @media (max-width: 1200px) {
+    [data-rr-student-row] {
+      grid-template-columns: 2fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      row-gap: 16px !important;
+    }
+    [data-rr-row-identity]  { grid-column: 1 / -1 !important; grid-row: 1 !important; padding-top: 0 !important; }
+    [data-rr-row-scorecol]  { grid-column: 1 !important; grid-row: 2 !important; padding-top: 0 !important; }
+    [data-rr-row-trend]     { grid-column: 2 !important; grid-row: 2 !important; }
+  }
+  @media (max-width: 768px) {
+    [data-rr-student-row] {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto auto auto !important;
+      row-gap: 12px !important;
+    }
+    [data-rr-row-scorecol] { grid-column: 1 !important; grid-row: 2 !important; }
+    [data-rr-row-trend]    { grid-column: 1 !important; grid-row: 3 !important; }
     [data-rr-student-info] { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
     [data-rr-lesson-header] { flex-direction: column !important; min-height: 0 !important; }
     [data-rr-lesson-header] > div:first-child { width: 100% !important; height: 120px !important; padding: 16px 16px 0 16px !important; }
@@ -741,7 +757,7 @@ const TEXT = {
   brand: '#5a58ff',     // fills + icons
   brandText: '#3d33cc', // link/active text on white (contrast-safe)
   success: '#018143',
-  trendDown: '#d15e00', // declining trend indicator (Slipping)
+  trendDown: '#d15e00', // declining trend indicator
   accent: '#a56c00',    // subject accent (amber)
   accentEla: '#7135ac', // subject accent (ELA purple)
   onDark: '#fff'
@@ -813,30 +829,6 @@ function IconNotStarted() {
 }
 
 // ─── Student list row ─────────────────────────────────────────────────────────
-function TrendIndicator({ trend, subject }) {
-  const map = {
-    up:     { color: TEXT.success },
-    steady: { color: TEXT.muted },
-    down:   { color: TEXT.trendDown },
-  };
-  const t = map[trend] || map.steady;
-  const labels = { up:'Improving', steady:'Steady', down:'Slipping' };
-  const icons = {
-    up:     <path d="M 6 14 L 10 9 L 13 12 L 18 6" />,
-    steady: <line x1="6" y1="12" x2="18" y2="12" />,
-    down:   <path d="M 6 6 L 10 11 L 13 8 L 18 14" />
-  };
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:4, color:t.color }}>
-      {subject && <span style={{ ...TYPE.titleRow, color: TEXT.primary }}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</span>}
-      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        {icons[trend]}
-      </svg>
-      <span style={{ ...TYPE.label, color: 'inherit' }}>{labels[trend]}</span>
-    </div>
-  );
-}
-
 function openProfile(s) {
   const p = new URLSearchParams({
     name:  s.name,
@@ -864,7 +856,7 @@ function StudentListRow({ s }) {
         boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)',
         padding: '14px 18px',
         display: 'grid',
-        gridTemplateColumns: '220px 2fr 1fr',
+        gridTemplateColumns: '1fr 2fr 1fr',
         alignItems: 'flex-start',
         gap: 20,
         cursor: 'pointer',
@@ -872,7 +864,7 @@ function StudentListRow({ s }) {
       }}>
 
       {/* Identity */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, paddingTop: 12 }}>
+      <div data-rr-row-identity style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, paddingTop: 12 }}>
         <StudentAvatar emoji={s.emoji} size={40} />
         <div style={{ minWidth: 0 }}>
           <div style={{ ...TYPE.headingMd, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
@@ -881,7 +873,7 @@ function StudentListRow({ s }) {
       </div>
 
       {/* Score card column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, paddingTop: 10 }}>
+      <div data-rr-row-scorecol style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, paddingTop: 10 }}>
         {/* Header */}
         <div style={{ ...TYPE.body, color: TEXT.muted }}>Latest assignment</div>
 
@@ -909,7 +901,7 @@ function StudentListRow({ s }) {
       </div>
 
       {/* Four subject trends with dividers */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div data-rr-row-trend style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         {['math', 'ela', 'sci', 'ss'].map((subject, idx) => {
           const displayNames = { math: 'Math', ela: 'ELA', sci: 'Science', ss: 'Social Studies' };
           return (
@@ -981,7 +973,7 @@ function StudentsScreen({ onAddScores, showSavedToast, onDismissSavedToast }) {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}
       >
-        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div data-rr-student-list style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[...STUDENTS_SCREEN_DATA]
             .sort((a, b) => (bandOf(a.band)?.rank ?? 9) - (bandOf(b.band)?.rank ?? 9))
             .map(s => <StudentListRow key={s.id} s={s} />)}

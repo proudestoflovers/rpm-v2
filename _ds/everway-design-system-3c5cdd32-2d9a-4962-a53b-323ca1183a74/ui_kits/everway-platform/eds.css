@@ -1,0 +1,290 @@
+/* ============================================================================
+   EVERWAY DESIGN SYSTEM — Colors & Type foundation
+   Source of truth: @everway/design-system-tokens (tokenRegistry v2.0.0)
+   Prefix: --eds-*  •  UI font: Figtree  •  Brand: Indigo #5a58ff
+   ----------------------------------------------------------------------------
+   Light is the default. Add [data-eds-theme="dark"] on a wrapper for dark.
+   Components in the real DS REQUIRE data-eds-theme on <html> to resolve vars.
+   ============================================================================ */
+
+/* ---- Fonts -------------------------------------------------------------- */
+/* Figtree @font-face is declared in colors_and_type.css — not repeated here */
+/* Wordmark / product-logo serif. The brand uses "Make Look" (proprietary).
+   "Newsreader" is the nearest free substitute — SUBSTITUTION, see README. */
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap");
+
+/* ============================================================================
+   1. PRIMITIVE & SEMANTIC COLOR TOKENS  (light theme = :root)
+   ============================================================================ */
+:root,
+[data-eds-theme="light"] {
+  /* — Text — */
+  --eds-color-text-primary: #1d1d1f;
+  --eds-color-text-primary-hover: #323234;
+  --eds-color-text-primary-pressed: #49494b;
+  --eds-color-text-secondary: #49494b;
+  --eds-color-text-tertiary: #6d6d6f;
+  --eds-color-text-accent-inverse: #ffffff;
+  --eds-color-text-accent-primary-on-bold: #ffffff;
+  --eds-color-text-accent-secondary-on-bold: #d0ccc8;
+  --eds-color-text-input-error: #b20203;
+  --eds-color-text-link-default: #4c42e4;
+  --eds-color-text-link-hover: #4c42e4;
+  --eds-color-text-link-active: #3d33cc;
+  --eds-color-text-link-visited: #241f7a;
+  --eds-color-text-brand-on-bold: #eaeaff;
+  --eds-color-text-brand-on-subtle: #3d33cc;
+  --eds-color-text-success-on-subtle: #016a36;
+  --eds-color-text-warning-on-subtle: #ad4b00;
+  --eds-color-text-error-on-subtle: #b20203;
+  --eds-color-text-info-on-subtle: #083b8e;
+
+  /* — Surface (large areas: page, modal, sheet, card) — */
+  --eds-color-surface-primary: #ffffff;
+  --eds-color-surface-primary-or-secondary-hover: #f4f4f6;
+  --eds-color-surface-primary-or-secondary-pressed: #e1e1e3;
+  --eds-color-surface-secondary: #f9f9fa;
+  --eds-color-surface-tertiary: #f4f4f6;
+  --eds-color-surface-paper-primary: #fcfaf7;   /* warm canvas for "platform" screens */
+  --eds-color-surface-paper-secondary: #faf6f0;  /* warm raised surface */
+  --eds-color-surface-overlay: #49494b;
+
+  /* — Background (small components: buttons, inputs, tags) — */
+  --eds-color-background-primary: #ffffff;
+  --eds-color-background-primary-hover: #f4f4f6;
+  --eds-color-background-primary-pressed: #e1e1e3;
+  --eds-color-background-secondary: #f9f9fa;
+  --eds-color-background-tertiary: #f4f4f6;
+  --eds-color-background-secondary-or-tertiary-hover: #ececef;
+  --eds-color-background-quaternary: #ececef;
+
+  /* reserved (fixed-meaning component colors) */
+  --eds-color-background-reserved-brand-default: #5a58ff;
+  --eds-color-background-reserved-brand-hover: #4c42e4;
+  --eds-color-background-reserved-brand-pressed: #3d33cc;
+  --eds-color-background-reserved-primary-inverse: #141415;
+  --eds-color-background-reserved-primary-inverse-hover: #262627;
+  --eds-color-background-reserved-primary-inverse-pressed: #323234;
+  --eds-color-background-reserved-error-bold-default: #e0241a;
+  --eds-color-background-reserved-error-bold-hover: #b20203;
+  --eds-color-background-reserved-error-bold-pressed: #8b0102;
+  --eds-color-background-reserved-warning-bold-default: #d15e00;
+  --eds-color-background-reserved-success-bold-default: #018143;
+
+  /* brand / semantic fills */
+  --eds-color-background-brand-bold-default: #3d33cc;
+  --eds-color-background-brand-bold-hover: #4c42e4;
+  --eds-color-background-brand-bold-pressed: #5a58ff;
+  --eds-color-background-brand-subtle-default: #eaeaff;
+  --eds-color-background-brand-subtle-hover: #dcdcfe;
+  --eds-color-background-success-subtle-default: #e3fdea;
+  --eds-color-background-warning-subtle-default: #ffe9c7;
+  --eds-color-background-error-subtle-default: #ffe9e5;
+  --eds-color-background-info-subtle-default: #e7effd;
+  --eds-color-background-accent-neutral-bold-default: #141415; /* tooltip / toast */
+
+  /* — Borders — */
+  --eds-color-border-dark: #323234;       /* secondary button outline */
+  --eds-color-border-primary: #939395;     /* input default */
+  --eds-color-border-primary-hover: #6d6d6f;
+  --eds-color-border-secondary: #e1e1e3;   /* card / divider */
+  --eds-color-border-tertiary: #ececef;
+  --eds-color-border-selected: #5a58ff;
+  --eds-color-border-focus: #5a58ff;
+  --eds-color-border-input-error: #b20203;
+
+  /* — Icon — */
+  --eds-color-icon-default: #1d1d1f;
+  --eds-color-icon-default-on-bold: #ffffff;
+  --eds-color-icon-inverse: #ffffff;
+  --eds-color-icon-input-error: #f14638;
+
+  /* — Shadow rgba (referenced by shadow tokens) — */
+  --eds-color-shadow-sm: rgba(29, 41, 57, 0.03);
+  --eds-color-shadow-md: rgba(0, 0, 0, 0.08);
+  --eds-color-shadow-lg: rgba(29, 41, 57, 0.06);
+
+  /* — Decorative accent families (bold = vivid fill / subtle = tint bg) — */
+  --eds-color-accent-yellow-bold: #b87d00;   --eds-color-accent-yellow-subtle: #fff4c7;   --eds-color-accent-yellow-text: #8a6000;
+  --eds-color-accent-lime-bold: #488000;      --eds-color-accent-lime-subtle: #e7fbda;     --eds-color-accent-lime-text: #3a6900;
+  --eds-color-accent-teal-bold: #027c79;      --eds-color-accent-teal-subtle: #dafbf9;     --eds-color-accent-teal-text: #026663;
+  --eds-color-accent-blue-bold: #0076a8;      --eds-color-accent-blue-subtle: #e6f7fe;     --eds-color-accent-blue-text: #006182;
+  --eds-color-accent-purple-bold: #8e46d5;    --eds-color-accent-purple-subtle: #f4eaff;   --eds-color-accent-purple-text: #7135ac;
+  --eds-color-accent-pink-bold: #c20651;      --eds-color-accent-pink-subtle: #ffe8f1;     --eds-color-accent-pink-text: #c20651;
+
+  /* — Raw brand & product palette (for marketing / illustration) — */
+  --eds-brand-indigo-25: #eaeaff;
+  --eds-brand-indigo-100: #d1d0fb;
+  --eds-brand-indigo-300: #918fff;
+  --eds-brand-indigo-500: #5a58ff;  /* primary brand */
+  --eds-brand-indigo-600: #4c42e4;
+  --eds-brand-indigo-700: #3d33cc;
+  --eds-brand-indigo-900: #241f7a;
+  --eds-product-orange: #ff760f;    /* Unique Learning System */
+  --eds-product-green: #3c9962;     /* uPar */
+  --eds-product-teal: #0dc5b6;      /* Positivity */
+  --eds-product-navy: #172b4d;      /* OrbitNote */
+  --eds-product-blue: #2e90fa;      /* News2you */
+  --eds-product-purple: #7e22ce;    /* L3 Skills */
+
+  /* warm brand gradient (avatar rings, plan badge, active-nav accent) */
+  --eds-brand-gradient: linear-gradient(135deg, #ffd970 0%, #3c9962 38%, #5a58ff 100%); /* @kind color */
+}
+
+/* ============================================================================
+   2. DARK THEME
+   ============================================================================ */
+[data-eds-theme="dark"] {
+  --eds-color-text-primary: #ffffff;
+  --eds-color-text-primary-hover: #f4f4f6;
+  --eds-color-text-primary-pressed: #e1e1e3;
+  --eds-color-text-secondary: #cacacc;
+  --eds-color-text-tertiary: #a2a2a4;
+  --eds-color-text-accent-inverse: #1d1d1f;
+  --eds-color-text-accent-primary-on-bold: #ffffff;
+  --eds-color-text-accent-secondary-on-bold: #d0ccc8;
+  --eds-color-text-brand-on-subtle: #d1d0fb;
+  --eds-color-text-link-default: #918fff;
+
+  --eds-color-surface-primary: #141415;
+  --eds-color-surface-primary-or-secondary-hover: #262627;
+  --eds-color-surface-primary-or-secondary-pressed: #49494b;
+  --eds-color-surface-secondary: #1d1d1f;
+  --eds-color-surface-tertiary: #262627;
+  --eds-color-surface-paper-primary: #1d1d1f;
+  --eds-color-surface-paper-secondary: #464440;
+  --eds-color-surface-overlay: #1d1d1f;
+
+  --eds-color-background-primary: #141415;
+  --eds-color-background-primary-hover: #262627;
+  --eds-color-background-primary-pressed: #323234;
+  --eds-color-background-secondary: #1d1d1f;
+  --eds-color-background-tertiary: #262627;
+  --eds-color-background-secondary-or-tertiary-hover: #323234;
+  --eds-color-background-quaternary: #323234;
+  --eds-color-background-reserved-primary-inverse: #ffffff;
+  --eds-color-background-brand-bold-default: #d1d0fb;
+
+  --eds-color-border-dark: #e0dcd7;
+  --eds-color-border-primary: #a2a2a4;
+  --eds-color-border-primary-hover: #b1b1b3;
+  --eds-color-border-secondary: #49494b;
+  --eds-color-border-tertiary: #6d6d6f;
+  --eds-color-border-selected: #918fff;
+  --eds-color-border-focus: #918fff;
+
+  --eds-color-icon-default: #faf6f0;
+  --eds-color-icon-inverse: #1d1d1f;
+
+  --eds-color-shadow-sm: rgba(0, 0, 0, 0.30);
+  --eds-color-shadow-md: rgba(0, 0, 0, 0.40);
+  --eds-color-shadow-lg: rgba(0, 0, 0, 0.50);
+}
+
+/* ============================================================================
+   3. SPACING · SIZE · RADIUS · SHADOW · OPACITY  (theme-independent)
+   ============================================================================ */
+:root {
+  /* Spacing scale (gaps, padding) */
+  --eds-spacing-4xs: 2px;  --eds-spacing-3xs: 4px;  --eds-spacing-2xs: 6px;
+  --eds-spacing-xs: 8px;   --eds-spacing-sm: 10px;  --eds-spacing-md: 12px;
+  --eds-spacing-lg: 14px;  --eds-spacing-xl: 16px;  --eds-spacing-2xl: 20px;
+  --eds-spacing-3xl: 24px; --eds-spacing-4xl: 32px; --eds-spacing-5xl: 36px;
+  --eds-spacing-6xl: 40px; --eds-spacing-7xl: 48px; --eds-spacing-8xl: 56px;
+  --eds-spacing-9xl: 64px; --eds-spacing-10xl: 80px;
+
+  /* Size scale (control heights / square targets) */
+  --eds-size-2xs: 20px; --eds-size-xs: 24px; --eds-size-sm: 32px;
+  --eds-size-md: 36px;  --eds-size-lg: 44px; --eds-size-xl: 52px;
+
+  /* Radius scale */
+  --eds-radius-2xs: 4px;  --eds-radius-xs: 8px;  --eds-radius-sm: 12px;
+  --eds-radius-md: 16px;  --eds-radius-lg: 18px; --eds-radius-xl: 20px;
+  --eds-radius-2xl: 24px; --eds-radius-pill: 112px;
+
+  /* Elevation — soft, low-contrast, warm-neutral shadows */
+  --eds-shadow-xs: 0 1px 6px 0 var(--eds-color-shadow-sm), 0 1px 6px 0 var(--eds-color-shadow-sm);
+  --eds-shadow-sm: 0 2px 14px 0 var(--eds-color-shadow-sm), 0 2px 14px 0 var(--eds-color-shadow-sm);
+  --eds-shadow-md: 0 4px 24px 0 var(--eds-color-shadow-md), 0 4px 24px 0 var(--eds-color-shadow-md);
+  --eds-shadow-lg: 0 8px 48px 0 var(--eds-color-shadow-lg), 0 8px 48px 0 var(--eds-color-shadow-lg);
+  --eds-shadow-xl: 0 0 24px 0 var(--eds-color-shadow-lg), 0 14px 48px 0 var(--eds-color-shadow-lg);
+  --eds-shadow-2xl: 0 0 24px 0 var(--eds-color-shadow-lg), 0 32px 96px 0 var(--eds-color-shadow-lg);
+
+  /* Opacity */
+  --eds-opacity-disabled: 0.44; /* @kind other */
+  --eds-opacity-placeholder: 0.52; /* @kind other */
+  --eds-opacity-overlay: 0.44; /* @kind other */
+}
+
+/* ============================================================================
+   4. TYPOGRAPHY TOKENS  (font-family / size / weight / line-height / tracking)
+   All families are Figtree. Display & Headline are Bold (700);
+   Title is SemiBold (600) / Bold (700-Strong); Body is Regular (400).
+   ============================================================================ */
+:root {
+  --eds-font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --eds-font-family-wordmark: "Newsreader", "Make Look", Georgia, serif;
+
+  --eds-display-xl: 700 58px/1.103 var(--eds-font-family);
+  --eds-display-lg: 700 46px/1.13 var(--eds-font-family);
+  --eds-display-md: 700 42px/1.19 var(--eds-font-family);
+  --eds-display-sm: 700 36px/1.222 var(--eds-font-family);
+
+  --eds-headline-xl: 700 32px/1.25 var(--eds-font-family);
+  --eds-headline-lg: 700 28px/1.286 var(--eds-font-family);
+  --eds-headline-md: 700 26px/1.308 var(--eds-font-family);
+  --eds-headline-sm: 700 22px/1.364 var(--eds-font-family);
+
+  --eds-title-xl: 600 20px/1.4 var(--eds-font-family);
+  --eds-title-xl-strong: 700 20px/1.4 var(--eds-font-family);
+  --eds-title-lg: 600 18px/1.44 var(--eds-font-family);
+  --eds-title-lg-strong: 700 18px/1.44 var(--eds-font-family);
+  --eds-title-default: 600 16px/1.5 var(--eds-font-family);
+  --eds-title-default-strong: 700 16px/1.5 var(--eds-font-family);
+  --eds-title-sm: 600 14px/1.43 var(--eds-font-family);
+  --eds-title-sm-strong: 700 14px/1.43 var(--eds-font-family);
+
+  --eds-body-lg: 400 18px/1.44 var(--eds-font-family);
+  --eds-body-default: 400 16px/1.5 var(--eds-font-family);
+  --eds-body-sm: 400 14px/1.43 var(--eds-font-family);
+}
+
+/* ============================================================================
+   5. SEMANTIC TYPE CLASSES  — apply directly to elements
+   ============================================================================ */
+.eds-display-xl { font: var(--eds-display-xl); letter-spacing: -0.3%; color: var(--eds-color-text-primary); }
+.eds-display-lg { font: var(--eds-display-lg); color: var(--eds-color-text-primary); }
+.eds-display-md { font: var(--eds-display-md); color: var(--eds-color-text-primary); }
+.eds-display-sm { font: var(--eds-display-sm); color: var(--eds-color-text-primary); }
+
+.eds-headline-xl { font: var(--eds-headline-xl); color: var(--eds-color-text-primary); }
+.eds-headline-lg { font: var(--eds-headline-lg); color: var(--eds-color-text-primary); }
+.eds-headline-md { font: var(--eds-headline-md); color: var(--eds-color-text-primary); }
+.eds-headline-sm { font: var(--eds-headline-sm); color: var(--eds-color-text-primary); }
+
+.eds-title-xl { font: var(--eds-title-xl); letter-spacing: 0.3%; color: var(--eds-color-text-primary); }
+.eds-title-lg { font: var(--eds-title-lg); letter-spacing: 0.3%; color: var(--eds-color-text-primary); }
+.eds-title-default { font: var(--eds-title-default); letter-spacing: 0.4%; color: var(--eds-color-text-primary); }
+.eds-title-sm { font: var(--eds-title-sm); letter-spacing: 0.4%; color: var(--eds-color-text-primary); }
+
+.eds-body-lg { font: var(--eds-body-lg); letter-spacing: 0.3%; color: var(--eds-color-text-secondary); }
+.eds-body-default { font: var(--eds-body-default); letter-spacing: 0.4%; color: var(--eds-color-text-secondary); }
+.eds-body-sm { font: var(--eds-body-sm); letter-spacing: 0.4%; color: var(--eds-color-text-tertiary); }
+
+.eds-wordmark { font-family: var(--eds-font-family-wordmark); font-weight: 500; letter-spacing: -0.01em; }
+
+/* ============================================================================
+   6. CONVENIENCE ALIASES  (terse names for quick prototyping)
+   ============================================================================ */
+:root {
+  --fg1: var(--eds-color-text-primary);
+  --fg2: var(--eds-color-text-secondary);
+  --fg3: var(--eds-color-text-tertiary);
+  --bg-page: var(--eds-color-surface-paper-primary);
+  --bg-surface: var(--eds-color-surface-primary);
+  --bg-raised: var(--eds-color-surface-paper-secondary);
+  --brand: var(--eds-color-background-reserved-brand-default);
+  --border: var(--eds-color-border-secondary);
+  --radius-card: var(--eds-radius-md);
+  --radius-control: var(--eds-radius-pill);
+}
