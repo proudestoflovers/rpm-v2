@@ -53,7 +53,10 @@ Design reference: `RosterRunScreen` and its children in roster-run.html. Shared 
 **Acceptance Criteria:**
 - Given the assignment sidebar, When it renders, Then it shows a "Search assignments" field, a filters button, and the assignment list — each item with subject badge, unit + name, and a completion indicator (green ✓ when every paper student is scored, otherwise "X/Y").
 - Given I type in search, When results update, Then only matching assignments show; given no matches, Then "No results" is displayed.
-- Given the filters panel, When opened, Then I can combine: subject (multi-select chips: Math, ELA, Science, Social studies), date available (range picker), and assigned-to (multi-select of roster students); a "Clear all" action appears whenever any filter is active.
+- Given the filters panel, When opened, Then I can combine: subject (multi-select chips: Math, ELA, Science, Social studies), date available (the shared `DateRangeFilter`, [Shared: components](00-shared-foundations.md#shared-components)), and assigned-to (multi-select of roster students); a "Clear all" action appears whenever any filter is active.
+- Given the "Date available" filter, When I click it, Then a panel opens with preset shortcuts on the left and the shared `MonthCalendarGrid` on the right, rendered so it's never clipped by the sidebar's edge; selecting a preset or a custom start/end date only updates the draft — it is not applied yet.
+- Given a draft selection, When I click "Apply", Then the panel closes, the filter commits, the trigger label updates (e.g. "Mar 15 – Apr 20" for a custom range), and the trigger takes on the active/highlighted style whenever the applied range isn't "All time" — which also counts toward the filters button's active-filter indicator and the "Clear all" visibility.
+- Given the panel is open with an unapplied draft, When I click outside the panel, Then it closes and the draft is discarded — the previously applied range (if any) stays in effect and the assignment list is unaffected.
 - Given more than 30 results, When the list renders, Then 30 show with a "Load more" control.
 - Given a viewport ≤1024px, When the screen renders, Then the sidebar becomes a slide-in drawer with a toggle button showing the current assignment name, per [Shared: Responsive strategy](00-shared-foundations.md#responsive-strategy).
 
@@ -61,10 +64,12 @@ Design reference: `RosterRunScreen` and its children in roster-run.html. Shared 
 - No assignments exist at all: empty state with guidance (distinct from filtered-to-zero "No results").
 - Filters + search combine (AND); count of active filters is visible on the filter button.
 - Search/filter state persists while I move between assignments within the session.
+- Reopening the date panel after a range is already applied: draft state initializes from the applied value, not blank.
 
 **Technical/Design Notes:**
 - Desktop sidebar: 360px default, drag-resizable 200–560px. Drawer: min(320px, 88vw), overlay backdrop, 0.2s slide.
 - Selected assignment gets a left accent bar and tinted background.
+- Uses the shared `DateRangeFilter` component and canonical preset list — do not implement an offline-scores-specific preset set (see [Shared: components](00-shared-foundations.md#shared-components)).
 
 ---
 

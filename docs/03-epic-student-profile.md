@@ -68,17 +68,20 @@ Design reference: student-profile.html. Shared behaviour: [Shared Foundations](0
 **User Story:** As a teacher, I want to filter results to a time window, so that I can look at just this term or the weeks since an intervention started.
 
 **Acceptance Criteria:**
-- Given the Results tab, When it renders, Then a date filter shows "All time" by default with presets: All time, Last 30 days, Last 60 days, 2025–26 school year, and Custom.
-- Given Custom, When selected, Then a calendar with month navigation lets me pick a start and end date; the filter label updates to the chosen range (e.g. "Mar 15 – Apr 20").
+- Given the Results tab, When it renders, Then a date filter (the shared `DateRangeFilter`, [Shared: components](00-shared-foundations.md#shared-components)) shows "All time" by default with the canonical preset list per [Shared: components](00-shared-foundations.md#shared-components).
+- Given the filter, When I click it, Then a panel opens with preset shortcuts on the left and the shared `MonthCalendarGrid` on the right; selecting a preset or a custom start/end date only updates the draft — it is not applied yet.
+- Given a draft selection, When I click "Apply", Then the panel closes, the filter commits, the trigger label updates (e.g. "Mar 15 – Apr 20" for a custom range), and the trigger takes on the active/highlighted style whenever the applied range isn't "All time".
+- Given the panel is open with an unapplied draft, When I click outside the panel, Then it closes and the draft is discarded — the previously applied range (if any) stays in effect.
 - Given an active range, When results render, Then only assignments *completed* within the range appear, and all group averages, trends, and counts recompute over the filtered set.
 
 **Edge Cases:**
 - Range with no completed work: subject sections show an empty message rather than vanishing.
 - End date before start date: prevented by the picker.
 - In-progress/not-started items are unaffected by date filtering (they have no completion date) and remain visible only where a view includes them (PROF-2 Assignments).
+- Reopening the panel after a range is already applied: draft state initializes from the applied value, not blank.
 
 **Technical/Design Notes:**
-- School-year preset bounds: Aug 1 – Jun 30 of the active year; label the year explicitly.
+- Uses the shared `DateRangeFilter` component and canonical preset list — do not implement a profile-specific preset set (see [Shared: components](00-shared-foundations.md#shared-components)).
 
 ---
 

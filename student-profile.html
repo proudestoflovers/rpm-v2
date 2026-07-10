@@ -922,157 +922,6 @@ function ScatterStrip({ rows, onView }) {
 }
 
 /* ── Atoms ───────────────────────────────────────────────────────────── */
-/* ── Date range filter — hybrid preset-list + calendar picker ─────────── */
-const DATE_PRESETS = [
-  { key: 'all', label: 'All time' },
-  { key: 'last30', label: 'Last 30 days' },
-  { key: 'last60', label: 'Last 60 days' },
-  { key: 'schoolYear', label: '2025–26 school year' },
-  { key: 'custom', label: 'Custom' },
-];
-
-function presetRange(sel) {
-  if (!sel) return null;
-  const { key, from, to } = sel;
-  const today = new Date();
-  if (key === 'last30') {
-    const f = new Date(today); f.setDate(f.getDate() - 30);
-    return { from: f, to: today };
-  }
-  if (key === 'last60') {
-    const f = new Date(today); f.setDate(f.getDate() - 60);
-    return { from: f, to: today };
-  }
-  if (key === 'schoolYear') return { from: new Date(2025, 7, 1), to: new Date(2026, 5, 30) };
-  if (key === 'custom' && from && to) return { from, to };
-  return null; // 'all', or incomplete custom
-}
-
-function formatShort(d) {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function dateRangeLabel(sel) {
-  const preset = DATE_PRESETS.find((p) => p.key === sel.key);
-  if (sel.key === 'custom') return sel.from && sel.to ? `${formatShort(sel.from)} – ${formatShort(sel.to)}` : 'Custom';
-  return preset ? preset.label : 'All time';
-}
-
-function sameDay(a, b) { return a && b && a.toDateString() === b.toDateString(); }
-
-function DateRangeFilter({ value, onChange }) {
-  const [open, setOpen] = React.useState(false);
-  const [draftKey, setDraftKey] = React.useState(value.key);
-  const [draftFrom, setDraftFrom] = React.useState(value.from || null);
-  const [draftTo, setDraftTo] = React.useState(value.to || null);
-  const [viewMonth, setViewMonth] = React.useState(() => new Date(value.from || new Date()));
-  const wrapRef = React.useRef(null);
-
-  React.useEffect(() => {
-    if (!open) return;
-    // Reset draft to the last-applied value each time the panel opens.
-    setDraftKey(value.key); setDraftFrom(value.from || null); setDraftTo(value.to || null);
-    function close(e) { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); }
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [open]);
-
-  function pickPreset(key) {
-    setDraftKey(key);
-    if (key !== 'custom') { setDraftFrom(null); setDraftTo(null); }
-  }
-
-  function pickDay(day) {
-    const clicked = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
-    setDraftKey('custom');
-    if (!draftFrom || (draftFrom && draftTo)) { setDraftFrom(clicked); setDraftTo(null); }
-    else if (clicked < draftFrom) { setDraftTo(draftFrom); setDraftFrom(clicked); }
-    else { setDraftTo(clicked); }
-  }
-
-  function apply() {
-    onChange({ key: draftKey, from: draftFrom, to: draftTo });
-    setOpen(false);
-  }
-
-  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
-  const firstDow = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay();
-  const leadBlanks = (firstDow + 6) % 7; // week starts Monday, matching the reference
-  const cells = [...Array(leadBlanks).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
-  const today = new Date();
-
-  return (
-    <div ref={wrapRef} style={{ position: 'relative', display: 'inline-flex' }}>
-      <div onClick={() => setOpen((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e1e1e3', borderRadius: 9, padding: '7px 13px', ...TYPE.detailValue, color: TEXT.metaGray, cursor: 'pointer', userSelect: 'none' }}>
-        {dateRangeLabel(value)} <Ico n="chevDown" size={12} stroke="#9a9a9c" sw={2.5} />
-      </div>
-      {open &&
-        <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 6, display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #e1e1e3', borderRadius: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, overflow: 'hidden' }}>
-        <div style={{ display: 'flex' }}>
-          {/* Left: preset shortcuts */}
-          <div style={{ width: 190, borderRight: '1px solid #e8e8ea', padding: '8px 0', display: 'flex', flexDirection: 'column' }}>
-            {DATE_PRESETS.map((p) => (
-              <button key={p.key} onClick={() => pickPreset(p.key)}
-                style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', background: p.key === draftKey ? '#eaeaff' : 'transparent', ...TYPE.body, color: TEXT.primary, cursor: 'pointer', textAlign: 'left' }}
-                onMouseEnter={(e) => { if (p.key !== draftKey) e.currentTarget.style.background = '#f9f9fa'; }}
-                onMouseLeave={(e) => { if (p.key !== draftKey) e.currentTarget.style.background = 'transparent'; }}>
-                {p.label}
-              </button>
-            ))}
-          </div>
-          {/* Right: month calendar for custom range */}
-          <div style={{ width: 300, padding: 16, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
-                <Ico n="chevLeft" size={16} stroke={TEXT.secondary} sw={2} />
-              </button>
-              <span style={{ ...TYPE.titleRow }}>{viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-              <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
-                <Ico n="chevRight" size={16} stroke={TEXT.secondary} sw={2} />
-              </button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-                <div key={d} style={{ ...TYPE.body, color: TEXT.muted, textAlign: 'center', fontSize: 12 }}>{d}</div>
-              ))}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
-              {cells.map((day, i) => {
-                if (!day) return <div key={i} />;
-                const cellDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
-                const isStart = sameDay(cellDate, draftFrom);
-                const isEnd = sameDay(cellDate, draftTo);
-                const inRange = draftFrom && draftTo && cellDate > draftFrom && cellDate < draftTo;
-                const isToday = sameDay(cellDate, today);
-                return (
-                  <button key={i} onClick={() => pickDay(day)}
-                    style={{
-                      height: 32, border: 'none', cursor: 'pointer', ...TYPE.body,
-                      background: isStart || isEnd ? '#5a58ff' : inRange ? '#eaeaff' : 'transparent',
-                      color: isStart || isEnd ? '#fff' : TEXT.primary,
-                      borderRadius: isStart ? '50% 0 0 50%' : isEnd ? '0 50% 50% 0' : (isStart && isEnd) ? '50%' : inRange ? 0 : '50%',
-                      fontWeight: isToday ? 700 : 400,
-                    }}>
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        <div style={{ borderTop: '1px solid #e8e8ea', padding: 12 }}>
-          <button onClick={apply}
-            style={{ width: '100%', height: 44, borderRadius: 100, background: '#141415', border: 'none', ...TYPE.titleRow, color: TEXT.onDark, cursor: 'pointer' }}>
-            Apply
-          </button>
-        </div>
-        </div>
-      }
-    </div>
-  );
-}
 
 function FilterPill({ label }) {
   return (
@@ -2251,7 +2100,8 @@ function App() {
   // Date range filter (by completed date) — narrows both the Units and Domains
   // views upstream of grouping, so units/domains/subjects with nothing left in
   // range simply never get a key below and disappear on their own.
-  const range = presetRange(dateRange);
+  const TODAY = new Date(2026, 1, 15);
+  const range = presetRange(dateRange, TODAY);
   const filteredRows = !range ? ROWS : ROWS.filter((r) => {
     // Non-done rows have no completed date and never render as list items anyway;
     // drop them while a range is active so a unit/domain left with only in-progress/
@@ -2286,7 +2136,7 @@ function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 * dm, marginBottom: 28 * dm }}>
               <SegmentToggle options={['Units', 'Domains']} active={view} onChange={setView} />
               <FilterPill label="All subjects" />
-              <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              <DateRangeFilter value={dateRange} onChange={setDateRange} today={TODAY} />
             </div>
             {subjOrder.map((s, i) =>
             view === 'Units'

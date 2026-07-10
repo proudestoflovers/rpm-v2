@@ -95,6 +95,21 @@ Behavioural contracts; implementations live in rr-design-system.js unless noted.
 - **SubjectBadge** — circular subject icon per the subjects table; icon ≈ 66% of circle diameter.
 - **TagSelectField** (student-profile.html / offline flow) — multi-select tag input: selected values as removable pills, dropdown grouped by category with a "Used previously" section, repositions to stay in viewport.
 - **InfoTip** — small ⓘ that reveals explanatory copy on hover/focus.
+- **MonthCalendarGrid** — the single month-view calendar grid (Mon-first week, day-of-week header, prev/next month nav) underlying every date picker in the product, so all calendars share identical geometry; callers own per-day styling (selected/in-range/today).
+- **DateRangeFilter** — a trigger button (shows the active range or preset label) opening a panel with preset shortcuts on the left and a `MonthCalendarGrid` on the right for a custom range. **One implementation, one preset list, used everywhere a date range is filtered** — the offline-scores assignment browser (filtering by date available, OFF-3) and the profile results view (filtering by completion date, PROF-4) are the same component with a different field bound to it, not two components.
+- **DatePickerField** — single-date variant of the same pattern: a labelled input showing `mm/dd/yyyy` that opens a `MonthCalendarGrid` below it; used for "Date completed" in offline score entry (OFF-10).
+
+**Canonical `DateRangeFilter` presets** (apply identically on every surface):
+
+| Key | Label | Resolves to |
+|-----|-------|-------------|
+| `all` | All time | No filter |
+| `d30` | Last 30 days | Today − 30 days → today |
+| `d90` | Last 90 days | Today − 90 days → today |
+| `schoolYear` | This school year | Aug 1 – Jun 30 of the active academic year (label the year explicitly, e.g. "2025–26 school year") |
+| `custom` | Custom | User-picked start/end via `MonthCalendarGrid`; label shows as "{start} – {end}" (e.g. "Mar 15 – Apr 20") |
+
+> **Prototype status:** implemented — `DATE_PRESETS`, `presetRange`, `dateRangeLabel`, `sameDay`, `formatShort`, `MonthCalendarGrid`, `DateRangeFilter`, and `DatePickerField` all live once in rr-design-system.js and are used by both roster-run.html and student-profile.html against the table above. There is no longer a separate implementation or preset list per surface.
 
 ---
 
